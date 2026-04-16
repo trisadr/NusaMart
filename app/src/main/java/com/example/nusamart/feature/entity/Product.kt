@@ -56,7 +56,7 @@ val dummyProductList = listOf(
         price = 28000f,
         location = "Bogor",
         imageRes = R.drawable.telur,
-        description = "Telur ayam negeri pilihan kualitas premium. Dikirim langsung dari peternakan setiap pagi sehingga dijamin segar, kuning telur utuh, dan kaya protein.",
+        description = "Telur ayam negeri pilihan kualitas premium. Dikirim langsung dari peternakan oleh ayamnya langsung yang baru bertelur setiap pagi sehingga dijamin segar, kuning telur utuh, dan kaya protein.",
         map = "https://maps.app.goo.gl/TaYArGwxrpCBy1EN9"
     ),
     Product(
