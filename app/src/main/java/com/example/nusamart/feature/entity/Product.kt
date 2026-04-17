@@ -43,7 +43,7 @@ val dummyProductList = listOf(
     ),
     Product(
         id = 4,
-        name = "Tas Anyaman Mini Motif Catur Pink",
+        name = "Keranjang/Tas Anyaman Mini Motif Catur Pink",
         price = 45000f,
         location = "Bali",
         imageRes = R.drawable.tas,
