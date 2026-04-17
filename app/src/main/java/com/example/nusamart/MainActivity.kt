@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-// Pastikan import HomePageScreen-nya benar
 import com.example.nusamart.feature.screen.HomePageScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
