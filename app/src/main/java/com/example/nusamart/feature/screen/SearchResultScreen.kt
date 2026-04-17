@@ -71,8 +71,8 @@ fun SearchResultScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .statusBarsPadding() // Agar tidak tertutup Notch/Status Bar HP
-                        .padding(bottom = 8.dp) // Jarak bawah ke Filter
+                        .statusBarsPadding() 
+                        .padding(bottom = 8.dp) 
                 ) {
                     // search bar
                     Row(
