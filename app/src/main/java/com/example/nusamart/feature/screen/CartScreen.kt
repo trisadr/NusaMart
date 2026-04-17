@@ -1,0 +1,552 @@
+package com.example.nusamart.feature.screen
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+// Data model (dummy)
+data class CartItemUiModel(
+    val id: String,
+    val shopName: String,
+    val productName: String,
+    val priceFormatted: String,
+    val quantity: Int,
+    val isChecked: Boolean,
+)
+
+private val dummyCartItems = listOf(
+    CartItemUiModel(
+        id = "1",
+        shopName = "Toko Elektronik Jaya",
+        productName = "Headphone Bluetooth Nirkabel Premium Bass Booster",
+        priceFormatted = "Rp149.000",
+        quantity = 1,
+        isChecked = true,
+    ),
+    CartItemUiModel(
+        id = "2",
+        shopName = "Toko Elektronik Jaya",
+        productName = "Kabel USB-C Fast Charging 65W 1 Meter",
+        priceFormatted = "Rp35.000",
+        quantity = 2,
+        isChecked = true,
+    ),
+    CartItemUiModel(
+        id = "3",
+        shopName = "Fashion Hits Store",
+        productName = "Kaos Polos Oversize Unisex Cotton Combed 30s",
+        priceFormatted = "Rp89.000",
+        quantity = 1,
+        isChecked = false,
+    ),
+    CartItemUiModel(
+        id = "4",
+        shopName = "Dapur Sehat Official",
+        productName = "Tumbler Stainless Steel 500ml Anti Bocor Vacuum",
+        priceFormatted = "Rp75.000",
+        quantity = 3,
+        isChecked = true,
+    ),
+)
+
+// Screen entry point
+@Composable
+fun CartScreen() {
+    Content()
+}
+
+// Content (stateless)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Content(
+    items: List<CartItemUiModel> = dummyCartItems,
+    isAllChecked: Boolean = false,
+    totalPrice: String = "Rp348.000",
+    totalItems: Int = 3,
+) {
+    Scaffold(
+        topBar = {
+            CartTopBar(itemCount = items.size)
+        },
+        bottomBar = {
+            CartBottomBar(
+                isAllChecked = isAllChecked,
+                totalPrice = totalPrice,
+                totalItems = totalItems,
+            )
+        },
+    ) { innerPadding ->
+        if (items.isEmpty()) {
+            CartEmptyState(modifier = Modifier.padding(innerPadding))
+        } else {
+            CartItemList(
+                items = items,
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
+    }
+}
+
+// Top bar
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CartTopBar(itemCount: Int) {
+    TopAppBar(
+        title = {
+            Text(
+                text = "Keranjang ($itemCount)",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Kembali",
+                )
+            }
+        },
+        actions = {
+            TextButton(onClick = {}) {
+                Text(text = "Kelola")
+            }
+        },
+    )
+}
+
+// List of cart items (grouped by shop)
+@Composable
+private fun CartItemList(
+    items: List<CartItemUiModel>,
+    modifier: Modifier = Modifier,
+) {
+    val grouped = items.groupBy { it.shopName }
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        grouped.forEach { (shopName, shopItems) ->
+            item(key = shopName) {
+                ShopGroup(
+                    shopName = shopName,
+                    items = shopItems,
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+// Shop group card
+@Composable
+private fun ShopGroup(
+    shopName: String,
+    items: List<CartItemUiModel>,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            ShopHeaderRow(shopName = shopName)
+
+            HorizontalDivider(thickness = 0.5.dp)
+
+            items.forEachIndexed { index, item ->
+                CartItemRow(item = item)
+                if (index < items.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShopHeaderRow(shopName: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Checkbox(checked = false, onCheckedChange = {})
+
+        Text(
+            text = shopName,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+// Single cart item row
+@Composable
+private fun CartItemRow(item: CartItemUiModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Checkbox(
+            checked = item.isChecked,
+            onCheckedChange = {},
+            modifier = Modifier.padding(top = 2.dp),
+        )
+
+        // Product image placeholder
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = item.productName,
+                fontSize = 13.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 18.sp,
+            )
+
+            Text(
+                text = item.priceFormatted,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                QuantityStepper(quantity = item.quantity)
+
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Hapus",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Quantity stepper
+@Composable
+private fun QuantityStepper(quantity: Int) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        OutlinedIconButton(
+            onClick = {},
+            modifier = Modifier.size(28.dp),
+            shape = RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp),
+        ) {
+            Text(text = "−", fontSize = 14.sp)
+        }
+
+        Box(
+            modifier = Modifier
+                .width(36.dp)
+                .height(28.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = quantity.toString(),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
+        OutlinedIconButton(
+            onClick = {},
+            modifier = Modifier.size(28.dp),
+            shape = RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp),
+        ) {
+            Text(text = "+", fontSize = 14.sp)
+        }
+    }
+}
+
+// Empty state
+@Composable
+private fun CartEmptyState(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(text = "🛒", fontSize = 64.sp)
+            Text(
+                text = "Keranjangmu masih kosong",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+            )
+            Text(
+                text = "Yuk, mulai belanja sekarang!",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(onClick = {}) {
+                Text(text = "Mulai Belanja")
+            }
+        }
+    }
+}
+
+// Bottom bar
+@Composable
+private fun CartBottomBar(
+    isAllChecked: Boolean,
+    totalPrice: String,
+    totalItems: Int,
+) {
+    Surface(
+        tonalElevation = 8.dp,
+        shadowElevation = 8.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Checkbox(
+                    checked = isAllChecked,
+                    onCheckedChange = {},
+                )
+                Text(
+                    text = "Semua",
+                    fontSize = 13.sp,
+                )
+            }
+
+            Text(
+                text = totalPrice,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Text(
+                    text = "Beli ($totalItems)",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                )
+            }
+        }
+    }
+}
+
+// Loading skeleton
+@Composable
+private fun CartLoadingContent() {
+    Scaffold(
+        topBar = { CartTopBar(itemCount = 0) },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(2) {
+                ShopGroupSkeleton()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShopGroupSkeleton() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                SkeletonBox(width = 20.dp, height = 20.dp)
+                SkeletonBox(width = 140.dp, height = 14.dp)
+            }
+
+            HorizontalDivider(thickness = 0.5.dp)
+
+            repeat(2) { index ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    SkeletonBox(width = 20.dp, height = 20.dp)
+                    SkeletonBox(width = 80.dp, height = 80.dp, cornerRadius = 8)
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        SkeletonBox(width = 180.dp, height = 13.dp)
+                        SkeletonBox(width = 120.dp, height = 13.dp)
+                        SkeletonBox(width = 80.dp, height = 16.dp)
+                        SkeletonBox(width = 90.dp, height = 26.dp)
+                    }
+                }
+                if (index == 0) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SkeletonBox(
+    width: Dp,
+    height: Dp,
+    cornerRadius: Int = 4,
+) {
+    Box(
+        modifier = Modifier
+            .width(width)
+            .height(height)
+            .clip(RoundedCornerShape(cornerRadius.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+    )
+}
+
+// Previews
+// Preview utama
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CartPreview() {
+    MaterialTheme {
+        Content(
+            items = dummyCartItems,
+            isAllChecked = false,
+            totalPrice = "Rp348.000",
+            totalItems = 3,
+        )
+    }
+}
+
+// Preview loading
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CartLoadingPreview() {
+    MaterialTheme {
+        CartLoadingContent()
+    }
+}
+
+// Preview keranjang kosong
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CartEmptyPreview() {
+    MaterialTheme {
+        Content(
+            items = emptyList(),
+            isAllChecked = false,
+            totalPrice = "Rp0",
+            totalItems = 0,
+        )
+    }
+}
