@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -29,11 +30,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,13 +56,16 @@ import com.example.nusamart.ui.theme.NusaMartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentScreen (
+fun PaymentScreen(
     product: Product
 ) {
+    // State untuk menyimpan teks catatan dari pembeli
+    var noteText by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text ("Checkout") },
+                title = { Text("Checkout") },
                 navigationIcon = {
                     IconButton(onClick = { }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
@@ -77,7 +86,7 @@ fun PaymentScreen (
                     Column {
                         Text(text = "Total Tagihan", style = MaterialTheme.typography.labelLarge)
                         Text(
-                            text = "Rp ${product.price.toInt() + 15000}", //misal sudah include ongkir
+                            text = "Rp ${product.price.toInt() + 15000}", // misal sudah include ongkir
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -142,6 +151,44 @@ fun PaymentScreen (
                         )
                     }
                 }
+
+                // --- BAGIAN CATATAN BARU DITAMBAHKAN ---
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = noteText,
+                    onValueChange = { noteText = it },
+                    label = { Text("Pesan untuk penjual (Opsional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+
+            // --- BAGIAN OPSI PENGIRIMAN BARU DITAMBAHKAN ---
+            item {
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Opsi Pengiriman", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    onClick = { /* Pilih Pengiriman */ }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(imageVector = Icons.Default.LocalShipping, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(text = "Reguler (Rp 12.000)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                                Text(text = "Estimasi diterima: 19 - 21 Apr", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
+                        }
+                        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                    }
+                }
             }
 
             item {
@@ -158,9 +205,9 @@ fun PaymentScreen (
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = Icons.Default.AccountBalanceWallet, contentDescription = null)
+                            Icon(imageVector = Icons.Default.AccountBalanceWallet, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = "Transfer Bank (BCA)", style = MaterialTheme.typography.bodyLarge)
+                            Text(text = "Transfer Bank (BCA)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                         }
                         Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                     }

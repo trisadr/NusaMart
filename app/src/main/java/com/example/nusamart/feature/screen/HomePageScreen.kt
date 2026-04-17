@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
 import com.example.nusamart.feature.activity.ProductPageActivity
+import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.example.nusamart.feature.entity.Product
 import com.example.nusamart.feature.entity.dummyProductList
 import com.example.nusamart.ui.theme.NusaMartTheme
@@ -64,6 +65,11 @@ fun HomePageScreen(
                         )
                     }
                 }
+            )
+        },
+        bottomBar = {
+            NusaMartBottomNavigation(
+                selectedMenu = "Beranda"
             )
         }
     ) { innerPadding ->

@@ -1,5 +1,6 @@
 package com.example.nusamart.feature.screen
 
+// Pastikan import tema ini sesuai dengan struktur foldermu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,9 +43,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nusamart.ui.theme.NusaMartTheme
 
 // Data model (dummy)
 data class CartItemUiModel(
@@ -150,7 +152,8 @@ private fun CartTopBar(itemCount: Int) {
         },
         actions = {
             TextButton(onClick = {}) {
-                Text(text = "Kelola")
+                // MENGGUNAKAN WARNA TEMA:
+                Text(text = "Kelola", color = MaterialTheme.colorScheme.primary)
             }
         },
     )
@@ -196,6 +199,7 @@ private fun ShopGroup(
             .padding(horizontal = 12.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) // Menggunakan warna surface tema
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -225,7 +229,11 @@ private fun ShopHeaderRow(shopName: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Checkbox(checked = false, onCheckedChange = {})
+        // Checkbox OTOMATIS menggunakan MaterialTheme.colorScheme.primary
+        Checkbox(
+            checked = false,
+            onCheckedChange = {}
+        )
 
         Text(
             text = shopName,
@@ -248,10 +256,11 @@ private fun CartItemRow(item: CartItemUiModel) {
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        // Checkbox OTOMATIS menggunakan warna primary tema
         Checkbox(
             checked = item.isChecked,
             onCheckedChange = {},
-            modifier = Modifier.padding(top = 2.dp),
+            modifier = Modifier.padding(top = 2.dp)
         )
 
         // Product image placeholder
@@ -259,7 +268,7 @@ private fun CartItemRow(item: CartItemUiModel) {
             modifier = Modifier
                 .size(80.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant), // Menggunakan warna dari tema
         )
 
         Column(
@@ -278,7 +287,7 @@ private fun CartItemRow(item: CartItemUiModel) {
                 text = item.priceFormatted,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary, // MENGGUNAKAN WARNA TEMA
             )
 
             Row(
@@ -320,7 +329,7 @@ private fun QuantityStepper(quantity: Int) {
             modifier = Modifier
                 .width(36.dp)
                 .height(28.dp)
-                .background(MaterialTheme.colorScheme.surface),
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -362,6 +371,7 @@ private fun CartEmptyState(modifier: Modifier = Modifier) {
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // Button OTOMATIS menggunakan warna primary tema
             Button(onClick = {}) {
                 Text(text = "Mulai Belanja")
             }
@@ -379,6 +389,7 @@ private fun CartBottomBar(
     Surface(
         tonalElevation = 8.dp,
         shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surface
     ) {
         Row(
             modifier = Modifier
@@ -391,9 +402,10 @@ private fun CartBottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f),
             ) {
+                // Checkbox OTOMATIS menggunakan warna primary tema
                 Checkbox(
                     checked = isAllChecked,
-                    onCheckedChange = {},
+                    onCheckedChange = {}
                 )
                 Text(
                     text = "Semua",
@@ -405,14 +417,15 @@ private fun CartBottomBar(
                 text = totalPrice,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary, // MENGGUNAKAN WARNA TEMA
             )
 
             Spacer(modifier = Modifier.width(10.dp))
 
+            // Button OTOMATIS menggunakan warna primary tema
             Button(
                 onClick = {},
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = "Beli ($totalItems)",
@@ -424,129 +437,44 @@ private fun CartBottomBar(
     }
 }
 
-// Loading skeleton
-@Composable
-private fun CartLoadingContent() {
-    Scaffold(
-        topBar = { CartTopBar(itemCount = 0) },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(2) {
-                ShopGroupSkeleton()
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShopGroupSkeleton() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                SkeletonBox(width = 20.dp, height = 20.dp)
-                SkeletonBox(width = 140.dp, height = 14.dp)
-            }
-
-            HorizontalDivider(thickness = 0.5.dp)
-
-            repeat(2) { index ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    SkeletonBox(width = 20.dp, height = 20.dp)
-                    SkeletonBox(width = 80.dp, height = 80.dp, cornerRadius = 8)
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        SkeletonBox(width = 180.dp, height = 13.dp)
-                        SkeletonBox(width = 120.dp, height = 13.dp)
-                        SkeletonBox(width = 80.dp, height = 16.dp)
-                        SkeletonBox(width = 90.dp, height = 26.dp)
-                    }
-                }
-                if (index == 0) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SkeletonBox(
-    width: Dp,
-    height: Dp,
-    cornerRadius: Int = 4,
-) {
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(height)
-            .clip(RoundedCornerShape(cornerRadius.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-    )
-}
-
 // Previews
-// Preview utama
+// PENTING: Bungkus preview dengan NusaMartTheme agar warna dari Theme.kt terbaca!
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartPreview() {
-    MaterialTheme {
-        Content(
-            items = dummyCartItems,
-            isAllChecked = false,
-            totalPrice = "Rp348.000",
-            totalItems = 3,
-        )
+    NusaMartTheme(dynamicColor = false) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Content(
+                items = dummyCartItems,
+                isAllChecked = false,
+                totalPrice = "Rp348.000",
+                totalItems = 3,
+            )
+        }
     }
 }
 
-// Preview loading
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CartEmptyPreview() {
+    NusaMartTheme(dynamicColor = false) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Content(
+                items = emptyList(),
+                isAllChecked = false,
+                totalPrice = "Rp0",
+                totalItems = 0,
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartLoadingPreview() {
     MaterialTheme {
-        CartLoadingContent()
-    }
-}
-
-// Preview keranjang kosong
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CartEmptyPreview() {
-    MaterialTheme {
-        Content(
-            items = emptyList(),
-            isAllChecked = false,
-            totalPrice = "Rp0",
-            totalItems = 0,
-        )
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
     }
 }
