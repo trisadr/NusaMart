@@ -1,5 +1,6 @@
 package com.example.nusamart
 
+// Pastikan import HomePageScreen-nya benar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-// Pastikan import HomePageScreen-nya benar
-import com.example.nusamart.feature.screen.HomePageScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,12 +17,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            NusaMartTheme(dynamicColor = false) {  // ← tambah ini
+            NusaMartTheme(dynamicColor = false) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomePageScreen()
+                    //LoginScreen()
+                    //RegisterScreen()
+                    //HomePageScreen()
+                    //NotificationScreen()
+                    //ProfileScreen()
+                    //LandingPage()
                 }
             }
         }
