@@ -19,7 +19,7 @@ data class Order(
     val status: OrderStatus,
     val address: String,
     val trackingNumber: String,
-    val description: String // <--- SEKARANG SUDAH ADA, ERROR BAKAL HILANG
+    val description: String
 )
 
 val dummyOrderList = listOf(
