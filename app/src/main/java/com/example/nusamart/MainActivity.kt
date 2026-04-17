@@ -28,6 +28,8 @@ class MainActivity : ComponentActivity() {
                     //NotificationScreen()
                     //ProfileScreen()
                     //LandingPage()
+                    //OrderDetailScreen("1")
+                    //OrderListScreen()
                 }
             }
         }
