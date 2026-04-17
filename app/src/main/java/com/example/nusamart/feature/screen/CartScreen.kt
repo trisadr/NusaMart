@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.screen
 
-// Pastikan import tema ini sesuai dengan struktur foldermu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -152,7 +151,6 @@ private fun CartTopBar(itemCount: Int) {
         },
         actions = {
             TextButton(onClick = {}) {
-                // MENGGUNAKAN WARNA TEMA:
                 Text(text = "Kelola", color = MaterialTheme.colorScheme.primary)
             }
         },
@@ -199,7 +197,7 @@ private fun ShopGroup(
             .padding(horizontal = 12.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) // Menggunakan warna surface tema
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -229,7 +227,6 @@ private fun ShopHeaderRow(shopName: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Checkbox OTOMATIS menggunakan MaterialTheme.colorScheme.primary
         Checkbox(
             checked = false,
             onCheckedChange = {}
@@ -246,7 +243,6 @@ private fun ShopHeaderRow(shopName: String) {
     }
 }
 
-// Single cart item row
 @Composable
 private fun CartItemRow(item: CartItemUiModel) {
     Row(
@@ -256,19 +252,17 @@ private fun CartItemRow(item: CartItemUiModel) {
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        // Checkbox OTOMATIS menggunakan warna primary tema
         Checkbox(
             checked = item.isChecked,
             onCheckedChange = {},
             modifier = Modifier.padding(top = 2.dp)
         )
 
-        // Product image placeholder
         Box(
             modifier = Modifier
                 .size(80.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant), // Menggunakan warna dari tema
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         )
 
         Column(
@@ -287,7 +281,7 @@ private fun CartItemRow(item: CartItemUiModel) {
                 text = item.priceFormatted,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary, // MENGGUNAKAN WARNA TEMA
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Row(
@@ -371,7 +365,6 @@ private fun CartEmptyState(modifier: Modifier = Modifier) {
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            // Button OTOMATIS menggunakan warna primary tema
             Button(onClick = {}) {
                 Text(text = "Mulai Belanja")
             }
@@ -402,7 +395,6 @@ private fun CartBottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f),
             ) {
-                // Checkbox OTOMATIS menggunakan warna primary tema
                 Checkbox(
                     checked = isAllChecked,
                     onCheckedChange = {}
@@ -417,12 +409,11 @@ private fun CartBottomBar(
                 text = totalPrice,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.primary, // MENGGUNAKAN WARNA TEMA
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // Button OTOMATIS menggunakan warna primary tema
             Button(
                 onClick = {},
                 shape = RoundedCornerShape(8.dp)
@@ -437,8 +428,7 @@ private fun CartBottomBar(
     }
 }
 
-// Previews
-// PENTING: Bungkus preview dengan NusaMartTheme agar warna dari Theme.kt terbaca!
+// Previews utama
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartPreview() {
@@ -454,6 +444,7 @@ fun CartPreview() {
     }
 }
 
+// Preview kondisi Cart kosong
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartEmptyPreview() {
@@ -469,6 +460,7 @@ fun CartEmptyPreview() {
     }
 }
 
+// Preview kondisi loading
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartLoadingPreview() {
