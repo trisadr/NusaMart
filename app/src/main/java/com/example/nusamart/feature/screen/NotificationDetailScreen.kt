@@ -56,7 +56,7 @@ fun NotificationDetailScreen(
         bottomBar = {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 8.dp // Memberi sedikit bayangan di atas tombol
+                shadowElevation = 8.dp 
             ) {
                 Button(
                     onClick = { /* action berpindah ke suatu produk */ },
