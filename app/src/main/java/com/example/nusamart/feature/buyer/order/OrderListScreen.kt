@@ -35,7 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nusamart.model.dummyOrderList
+import com.example.nusamart.entity.Order
+import com.example.nusamart.entity.OrderStatus
+
+//import com.example.nusamart.model.dummyOrderList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,18 +91,18 @@ fun OrderListScreen() {
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = order.status.label,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = primaryOrange,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = order.productName,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = Color(0xFF212121)
-                            )
+//                            Text(
+//                                text = order.status.label,
+//                                style = MaterialTheme.typography.labelSmall,
+//                                color = primaryOrange,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                            Text(
+//                                text = order.productName,
+//                                fontWeight = FontWeight.Bold,
+//                                fontSize = 16.sp,
+//                                color = Color(0xFF212121)
+//                            )
                             Text(
                                 text = "Rp ${order.totalPrice.toInt()}",
                                 color = Color.Gray,
@@ -118,7 +121,28 @@ fun OrderListScreen() {
         }
     }
 }
-
+private val dummyOrderList = listOf(
+    Order(
+        idOrder = "ORDER-001",
+        totalPrice = 75000.0,
+        status = OrderStatus.DIKIRIM,
+        trackingNumber = "NM260329001",
+        description = "Pesanan beras 5kg",
+        orderDate = 1710000000000,
+        arrivedDate = null,
+        idSeller = "SELL-001"
+    ),
+    Order(
+        idOrder = "ORDER-002",
+        totalPrice = 38000.0,
+        status = OrderStatus.SELESAI,
+        trackingNumber = "NM260329002",
+        description = "Pesanan minyak goreng 2L",
+        orderDate = 1710000000000,
+        arrivedDate = null,
+        idSeller = "SELL-002"
+    )
+)
 @Preview(showBackground = true)
 @Composable
 private fun OrderListScreenPreview() {

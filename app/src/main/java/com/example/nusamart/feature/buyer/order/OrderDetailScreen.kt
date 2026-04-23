@@ -35,20 +35,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nusamart.model.dummyOrderList
+import com.example.nusamart.entity.Order
+import com.example.nusamart.entity.OrderStatus
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderDetailScreen(orderId: String?) {
-    val order = dummyOrderList.find { it.id == orderId } ?: return
+fun OrderDetailScreen(
+    orderId: String,
+    onBackClick: () -> Unit = {}
+) {
+    val order = dummyOrderList.firstOrNull { it.idOrder == orderId } ?: return
     val primaryOrange = Color(0xFFFF6D00)
 
+    val statusLabel = when (order.status) {
+        OrderStatus.MENUNGGU -> "Menunggu"
+        OrderStatus.DIPROSES -> "Diproses"
+        OrderStatus.DIKIRIM -> "Dikirim"
+        OrderStatus.SELESAI -> "Selesai"
+        OrderStatus.DIBATALKAN -> "Dibatalkan"
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Rincian Pesanan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { /* logic belum ada */ }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
                 }
@@ -65,7 +77,7 @@ fun OrderDetailScreen(orderId: String?) {
         ) {
             Text(text = "Status Pesanan", color = Color.Gray, style = MaterialTheme.typography.labelMedium)
             Text(
-                text = order.status.label,
+                text = statusLabel,
                 color = primaryOrange,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold
@@ -84,7 +96,7 @@ fun OrderDetailScreen(orderId: String?) {
                     Column {
                         Text("Informasi Pengiriman", fontWeight = FontWeight.Bold)
                         Text("No. Resi: ${order.trackingNumber}", fontSize = 13.sp)
-                        Text("Alamat: ${order.address}", fontSize = 13.sp, color = Color.DarkGray)
+                        //Text("Alamat: ${order.address}", fontSize = 13.sp, color = Color.DarkGray)
                     }
                 }
             }
@@ -96,7 +108,7 @@ fun OrderDetailScreen(orderId: String?) {
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(order.productName, fontWeight = FontWeight.SemiBold)
+//                    Text(order.productName, fontWeight = FontWeight.SemiBold)
                     Text(order.description, fontSize = 12.sp, color = Color.Gray)
                 }
                 Text("Rp ${order.totalPrice.toInt()}", fontWeight = FontWeight.Bold)
@@ -116,8 +128,38 @@ fun OrderDetailScreen(orderId: String?) {
     }
 }
 
+//@Preview(showBackground = true)
+//@Composable
+//private fun OrderDetailScreenPreview() {
+//    OrderDetailScreen(orderId = "ORD-001") //contoh data dummy
+//}
+
+
+private val dummyOrderList = listOf(
+    Order(
+        idOrder = "ORDER-001",
+        totalPrice = 75000.0,
+        status = OrderStatus.DIKIRIM,
+        trackingNumber = "NM260329001",
+        description = "Pesanan beras 5kg",
+        orderDate = 1710000000000,
+        arrivedDate = null,
+        idSeller = "SELL-001"
+    ),
+    Order(
+        idOrder = "ORDER-002",
+        totalPrice = 38000.0,
+        status = OrderStatus.SELESAI,
+        trackingNumber = "NM260329002",
+        description = "Pesanan minyak goreng 2L",
+        orderDate = 1710000000000,
+        arrivedDate = null,
+        idSeller = "SELL-002"
+    )
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun OrderDetailScreenPreview() {
-    OrderDetailScreen(orderId = "ORD-001") //contoh data dummy
+    OrderDetailScreen(orderId = "ORDER-001")
 }

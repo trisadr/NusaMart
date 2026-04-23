@@ -48,7 +48,9 @@ object Routes {
     // Membawa ID Notification dari NotificationScreen
     @Serializable
     data class NotificationDetailRoute(
-        val notificationId: String
+        val title: String,
+        val content: String,
+        val productId: String? = null
     ) : NavKey
 
     // --- Profile ---

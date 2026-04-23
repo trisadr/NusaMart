@@ -93,8 +93,10 @@ private val dummyCartItems = listOf(
 
 // Screen entry point
 @Composable
-fun CartScreen() {
-    Content()
+fun CartScreen(
+    onBackClick: () -> Unit = {}
+) {
+    Content(onBackClick = onBackClick)
 }
 
 // Content (stateless)
@@ -105,10 +107,14 @@ fun Content(
     isAllChecked: Boolean = false,
     totalPrice: String = "Rp348.000",
     totalItems: Int = 3,
+    onBackClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
-            CartTopBar(itemCount = items.size)
+            CartTopBar(
+                itemCount = items.size,
+                onBackClick = onBackClick
+            )
         },
         bottomBar = {
             CartBottomBar(
@@ -132,7 +138,10 @@ fun Content(
 // Top bar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CartTopBar(itemCount: Int) {
+private fun CartTopBar(
+    itemCount: Int,
+    onBackClick: () -> Unit
+) {
     TopAppBar(
         title = {
             Text(
@@ -142,7 +151,7 @@ private fun CartTopBar(itemCount: Int) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Kembali",
@@ -439,6 +448,7 @@ fun CartPreview() {
                 isAllChecked = false,
                 totalPrice = "Rp348.000",
                 totalItems = 3,
+                onBackClick = {}
             )
         }
     }
@@ -455,6 +465,7 @@ fun CartEmptyPreview() {
                 isAllChecked = false,
                 totalPrice = "Rp0",
                 totalItems = 0,
+                onBackClick = {}
             )
         }
     }

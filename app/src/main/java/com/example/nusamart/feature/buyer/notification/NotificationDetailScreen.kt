@@ -30,9 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nusamart.feature.activity.ui.theme.NusaMartTheme
-import com.example.nusamart.feature.entity.Product
-import com.example.nusamart.feature.entity.dummyProductList
+import com.example.nusamart.entity.Product
+import com.example.nusamart.ui.theme.NusaMartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +39,8 @@ fun NotificationDetailScreen(
     title: String = "",
     content: String = "",
     onBackClick: () -> Unit = {},
-    product: Product
+    product: Product,
+    onNavigateToProduct: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -59,7 +59,7 @@ fun NotificationDetailScreen(
                 shadowElevation = 8.dp 
             ) {
                 Button(
-                    onClick = { /* action berpindah ke suatu produk */ },
+                    onClick = {onNavigateToProduct(product.idProduct)},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
@@ -104,7 +104,7 @@ fun NotificationDetailScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Image(
-                painter = painterResource(id = product.imageRes),
+                painter = painterResource(id = product.imageResId),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -117,12 +117,14 @@ fun NotificationDetailScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NotificationDetailPreview () {
+    val dummyProd = Product("PROD-001", "Beras Raja Lele", 75000.0, "", 50, "", 0, "", "", "")
     NusaMartTheme(dynamicColor = false) {
         NotificationDetailScreen(
             "Semua Orang Beli Ini! 😍",
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla commodo sapien sed libero faucibus vehicula. Sed iaculis urna dignissim leo cursus accumsan. Sed interdum leo nec convallis gravida. Fusce a suscipit nibh. Nullam ante ex, maximus quis fringilla ut, ornare at quam. Proin pretium, dui in euismod dapibus, orci risus sollicitudin massa, ac porta augue est non nulla.",
             {},
-            product = dummyProductList[2]
+            product = dummyProd,
+            onNavigateToProduct = {}
         )
     }
 }

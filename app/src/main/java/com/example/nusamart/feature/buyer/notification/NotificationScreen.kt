@@ -53,7 +53,10 @@ import com.example.nusamart.ui.theme.WhiteSurface
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToProduct: (String, String, String) -> Unit,
+    onNavigateToOrder: (String) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -104,7 +107,7 @@ fun NotificationScreen(
                         title = "Keranjang Belanjamu Menunggu!",
                         message = "Hai Mahasigma, produk anyaman bambu yang kamu masukkan ke keranjang belum dicheckout nih. Yuk segera selesaikan sebelum stoknya habis!",
                         date = "17-04-2026 09:00",
-                        onClick = { /* logic belum ada */ }
+                        onClick = onNavigateToCart
                     )
 
                     PromoNotificationItem(
@@ -114,7 +117,13 @@ fun NotificationScreen(
                         message = "Temukan produk kerajinan terlaris buat hiasan rumahmu di sini \uD83D\uDC49",
                         date = "16-04-2026 18:02",
                         showImageGallery = true,
-                        onClick = { /* logic belum ada */ }
+                        onClick = {
+                            onNavigateToProduct(
+                                "PROD-001",
+                                "Produk Ini Lagi Laris, Lho!",
+                                "Temukan produk kerajinan terlaris buat hiasan rumahmu di sini 👉"
+                            )
+                        }
                     )
                 }
             }
@@ -152,7 +161,7 @@ fun NotificationScreen(
                         title = "Pesanan Tiba di Tujuan",
                         message = "Nilai pesanan dan dapatkan koin tambahan untuk belanjamu selanjutnya.",
                         date = "17-04-2026 14:01",
-                        onClick = { /* logic belum ada */ }
+                        onClick = {onNavigateToOrder("ORDER-002")}
                     )
                     HorizontalDivider(color = GrayBackground, thickness = 1.dp, modifier = Modifier.padding(start = 80.dp))
 
@@ -161,7 +170,7 @@ fun NotificationScreen(
                         title = "Pesanan NM260329... telah tiba",
                         message = "Mohon konfirmasi terima pesanan dalam 2x24 jam sebelum dana ditransfer ke Penjual.",
                         date = "16-04-2026 14:01",
-                        onClick = { /* logic belum ada */ }
+                        onClick = {onNavigateToOrder("ORDER-001")}
                     )
                 }
             }
