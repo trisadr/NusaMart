@@ -18,18 +18,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
+import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 import kotlinx.coroutines.delay
 
 @Composable
-fun LandingScreen(
-    onNavigateToLogin: () -> Unit
-) {
-    // Memberikan delay 3 detik (3000 ms) sebelum mengeksekusi navigasi
+fun LandingScreen() {
+    val backStack = LocalBackStack.current
+
     LaunchedEffect(Unit) {
         delay(3000L)
-        onNavigateToLogin()
+        // Hapus landing page dari history
+        backStack.clear()
+        // Pindah ke Login
+        backStack.add(Routes.LoginPageRoute)
     }
 
     Box(
@@ -77,5 +81,5 @@ fun LandingScreen(
 @Composable
 fun LandingScreenPreview() {
     // Menyediakan empty lambda {} hanya untuk kebutuhan preview agar tidak error
-    LandingScreen(onNavigateToLogin = {})
+    LandingScreen()
 }

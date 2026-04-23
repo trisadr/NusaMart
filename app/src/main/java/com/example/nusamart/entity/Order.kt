@@ -1,6 +1,6 @@
 package com.example.nusamart.entity
 
-import com.example.nusamart.model.OrderStatus
+import com.example.nusamart.entity.OrderStatus
 
 enum class OrderStatus {
     MENUNGGU,

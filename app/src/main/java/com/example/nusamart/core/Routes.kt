@@ -31,7 +31,9 @@ object Routes {
     data object HomeRoute : NavKey
 
     @Serializable
-    data object SearchResultRoute : NavKey
+    data class SearchResultRoute(
+        val keyword: String
+    ) : NavKey
 
     // Membawa ID Product dari HomePage
     @Serializable

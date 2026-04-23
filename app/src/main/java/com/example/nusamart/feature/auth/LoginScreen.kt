@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,7 +35,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,53 +51,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nusamart.R
+import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
+import com.example.nusamart.feature.screen.LandingScreen
 import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.BluePrimary
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
-import kotlinx.coroutines.delay
 
 // ==========================================
 // LANDING PAGE (LOADING SCREEN)
 // ==========================================
-@Composable
-fun LandingPageScreen(
-    onNavigateToLogin: () -> Unit
-) {
-    // Memberikan delay 3 detik (3000 ms) sebelum mengeksekusi navigasi
-    LaunchedEffect(Unit) {
-        delay(3000L)
-        onNavigateToLogin()
-    }
-
-    Scaffold(containerColor = WhiteSurface) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(id = R.drawable.nm_logo),
-                    contentDescription = "Logo NusaMart",
-                    modifier = Modifier.size(150.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                CircularProgressIndicator(color = RedPrimary)
-            }
-        }
-    }
-}
 
 // ==========================================
 // LOGIN SCREEN (STATEFUL)
 // ==========================================
 @Composable
-fun LoginScreen(
-    onBackClick: () -> Unit = {},
-    onNavigateToRegister: () -> Unit = {}
-) {
+fun LoginScreen() {
+    val backStack = LocalBackStack.current
+
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -111,11 +81,17 @@ fun LoginScreen(
         onPasswordChange = { password = it },
         isPasswordVisible = isPasswordVisible,
         onPasswordVisibilityChange = { isPasswordVisible = !isPasswordVisible },
-        onLoginClick = { /* TODO: Aksi Login */ },
-        onRegisterClick = onNavigateToRegister,
+        onLoginClick = {backStack.clear()
+            backStack.add(Routes.HomeRoute)},
+        onRegisterClick = {
+            backStack.add(Routes.RegisterRoute)
+        },
         onForgotPasswordClick = { /* TODO: Lupa Password */ },
         onGoogleLoginClick = { /* TODO: Login Google */ },
-        onBackClick = onBackClick
+        onBackClick = {
+            // Kembali ke halaman sebelumnya
+            backStack.removeAt(backStack.lastIndex)
+        }
     )
 }
 
@@ -331,7 +307,7 @@ fun MyOutlinedTextField(
 @Preview(showBackground = true)
 @Composable
 fun LandingPagePreview() {
-    LandingPageScreen(onNavigateToLogin = {})
+    LandingScreen()
 }
 
 @Preview(showBackground = true)

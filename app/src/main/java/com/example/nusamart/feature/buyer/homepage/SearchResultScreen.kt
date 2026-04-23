@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -32,33 +33,72 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.nusamart.feature.entity.dummyProductList
+import com.example.nusamart.R
+import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
+import com.example.nusamart.entity.Product
 import com.example.nusamart.ui.theme.NusaMartTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+// ==========================================
+// 1. STATEFUL SCREEN (Yang dipanggil di ComposeApp)
+// ==========================================
 @Composable
 fun SearchResultScreen(
-    keyword: String,
-    onBackClick: () -> Unit = {}
+    initialKeyword: String
+) {
+    val context = LocalContext.current
+    val backStack = LocalBackStack.current
+    var productList by remember { mutableStateOf<List<Product>>(emptyList()) }
+
+    // Memuat data dari product.json saat layar dibuka
+    LaunchedEffect(Unit) {
+        productList = loadProductsFromJson(context) // Pastikan fungsi ini sudah ada (di Utils atau di file ini)
+    }
+
+    // Memanggil bagian Stateless untuk digambar
+    SearchResultContent(
+        initialKeyword = initialKeyword,
+        productList = productList,
+        onBackClick = { backStack.removeAt(backStack.lastIndex) },
+        onProductClick = { productId ->
+            backStack.add(Routes.ProductPageRoute(productId))
+        }
+    )
+}
+
+// ==========================================
+// 2. STATELESS CONTENT (UI Murni, bebas dari context/navigasi rumit)
+// ==========================================
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchResultContent(
+    initialKeyword: String,
+    productList: List<Product>,
+    onBackClick: () -> Unit,
+    onProductClick: (String) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf("Semua") }
+    var currentQuery by remember { mutableStateOf(initialKeyword) }
 
-    val searchdProduct = remember(keyword, selectedFilter) {
-        val baseList = dummyProductList.filter {
-            it.name.contains(keyword, ignoreCase = true)
+    // Filter data berdasarkan keyword dan filter pilihan
+    val searchedProduct = remember(currentQuery, selectedFilter, productList) {
+        val baseList = productList.filter {
+            it.name.contains(currentQuery, ignoreCase = true)
         }
 
         when (selectedFilter) {
-            "Harga termurah" -> baseList.sortedBy { it.price.toInt() }
-            "Harga termahal" -> baseList.sortedByDescending { it.price.toInt() }
+            "Harga termurah" -> baseList.sortedBy { it.price }
+            "Harga termahal" -> baseList.sortedByDescending { it.price }
             else -> baseList
         }
     }
@@ -71,10 +111,10 @@ fun SearchResultScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .statusBarsPadding() 
-                        .padding(bottom = 8.dp) 
+                        .statusBarsPadding()
+                        .padding(bottom = 8.dp)
                 ) {
-                    // search bar
+                    // Search Bar
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -86,8 +126,8 @@ fun SearchResultScreen(
                         }
 
                         OutlinedTextField(
-                            value = keyword, //menampilkan search result by keyword
-                            onValueChange = { /* jika ingin mencari produk lain (merubah keyword) */ },
+                            value = currentQuery,
+                            onValueChange = { currentQuery = it }, // Real-time update pencarian
                             modifier = Modifier
                                 .weight(1f)
                                 .heightIn(min = 40.dp),
@@ -106,11 +146,13 @@ fun SearchResultScreen(
             }
         }
     ) { innerPadding ->
-        if (searchdProduct.isEmpty()) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding), contentAlignment = Alignment.Center) {
-                Text("Produk '$keyword' tidak ditemukan")
+        if (productList.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator() // Loading jika data JSON sedang diambil
+            }
+        } else if (searchedProduct.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text("Produk '$currentQuery' tidak ditemukan")
             }
         } else {
             LazyVerticalGrid(
@@ -120,14 +162,18 @@ fun SearchResultScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(innerPadding)
             ) {
-                items(searchdProduct) { item ->
-                    ProductGridCard(product = item)
+                items(searchedProduct) { item ->
+                    ProductGridCard(
+                        product = item,
+                        onClick = { onProductClick(item.idProduct) }
+                    )
                 }
             }
         }
     }
 }
 
+// ... (Fungsi FilterProduct biarkan sama seperti kodemu) ...
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterProduct(
@@ -159,11 +205,34 @@ fun FilterProduct(
     }
 }
 
-// PREVIEW
+// ==========================================
+// 3. PREVIEW (Memasukkan Mock Data agar aman)
+// ==========================================
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun SearchResultPreview() {
     NusaMartTheme(dynamicColor = false) {
-        SearchResultScreen("keranjang", {})
+
+        // Buat data tiruan yang strukturnya sama dengan JSON
+        val dummyJsonData = listOf(
+            Product(
+                idProduct = "PROD-1", name = "Beras Makmur", price = 60000.0,
+                description = "Beras kualitas baik", stock = 10, map = "",
+                imageResId = R.drawable.nm_logo, idSeller = "S1", idStore = "T1", location = "Surakarta"
+            ),
+            Product(
+                idProduct = "PROD-2", name = "Keranjang Anyaman", price = 25000.0,
+                description = "Keranjang kuat", stock = 5, map = "",
+                imageResId = R.drawable.nm_logo, idSeller = "S2", idStore = "T2", location = "Sukoharjo"
+            )
+        )
+
+        // Panggil bagian Stateless-nya, bukan Stateful-nya
+        SearchResultContent(
+            initialKeyword = "Keranjang",
+            productList = dummyJsonData,
+            onBackClick = {},
+            onProductClick = {}
+        )
     }
 }
