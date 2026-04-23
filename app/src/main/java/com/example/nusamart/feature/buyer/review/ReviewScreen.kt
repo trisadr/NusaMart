@@ -1,5 +1,6 @@
 package com.example.nusamart.feature.screen
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,25 +33,34 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.nusamart.feature.entity.Product
-import com.example.nusamart.feature.entity.dummyProductList
+import com.example.nusamart.R
+import com.example.nusamart.entity.Product
 import com.example.nusamart.ui.theme.NusaMartTheme
+import org.json.JSONArray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewScreen(
     product: Product
 ) {
+    var selectedRating by remember { mutableStateOf(0) }
+    var reviewText by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,7 +99,8 @@ fun ReviewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(id = product.imageRes),
+                    // Fallback ke keranjang jika imageResId dari JSON tidak valid
+                    painter = painterResource(id = if (product.imageResId != 0) product.imageResId else R.drawable.keranjang),
                     contentDescription = null,
                     modifier = Modifier
                         .size(60.dp)
@@ -116,11 +127,18 @@ fun ReviewScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Row {
                 repeat(5) { index ->
+                    val starValue = index + 1
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
-                        tint = if (index < 0) Color(0xFFFFC107) else Color.LightGray,
-                        modifier = Modifier.size(40.dp).padding(4.dp)
+                        tint = if (starValue <= selectedRating) Color(0xFFFFC107) else Color.LightGray,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(4.dp)
+                            .clickable {
+                                // Update rating saat bintang diklik
+                                selectedRating = starValue
+                            }
                     )
                 }
             }
@@ -170,8 +188,8 @@ fun ReviewScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
-                value = "",
-                onValueChange = { },
+                value = reviewText,
+                onValueChange = { reviewText = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
@@ -184,10 +202,57 @@ fun ReviewScreen(
     }
 }
 
+fun loadProductFromJsonForReview(context: Context): List<Product> {
+    val list = mutableListOf<Product>()
+    try {
+        val inputStream = context.assets.open("product.json")
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+        val jsonArray = JSONArray(jsonString)
+
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            val product = Product(
+                idProduct = obj.getString("idProduct"),
+                name = obj.getString("name"),
+                price = obj.getDouble("price"),
+                description = obj.getString("description"),
+                stock = obj.getInt("stock"),
+                map = obj.getString("map"),
+                imageResId = obj.getInt("imageResId"),
+                idSeller = obj.getString("idSeller"),
+                idStore = obj.getString("idStore"),
+                location = obj.getString("location")
+            )
+            list.add(product)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return list
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ReviewPreview() {
-    val dummyProduct = dummyProductList[0]
+    val context = LocalContext.current
+
+    // Load data dummy dari JSON, ambil item pertama, atau berikan fallback jika JSON gagal dibaca
+    val dummyProduct = try {
+        loadProductFromJsonForReview(context).first()
+    } catch (e: Exception) {
+        Product(
+            idProduct = "PROD-1",
+            name = "Fallback Product",
+            price = 0.0,
+            description = "",
+            stock = 0,
+            map = "",
+            imageResId = R.drawable.keranjang,
+            idSeller = "",
+            idStore = "",
+            location = ""
+        )
+    }
 
     NusaMartTheme(dynamicColor = false) {
         Surface(

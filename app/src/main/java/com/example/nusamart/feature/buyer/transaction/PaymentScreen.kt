@@ -1,5 +1,6 @@
 package com.example.nusamart.feature.screen
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,19 +46,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.nusamart.feature.entity.Product
-import com.example.nusamart.feature.entity.dummyProductList
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.example.nusamart.R
+import com.example.nusamart.core.Routes
+import com.example.nusamart.entity.Product
 import com.example.nusamart.ui.theme.NusaMartTheme
+import org.json.JSONArray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
-    product: Product
+    product: List<Product>,
+    onNavigateToConfirmation: () -> Unit
 ) {
     // State untuk menyimpan teks catatan dari pembeli
     var noteText by remember { mutableStateOf("") }
@@ -86,7 +95,7 @@ fun PaymentScreen(
                     Column {
                         Text(text = "Total Tagihan", style = MaterialTheme.typography.labelLarge)
                         Text(
-                            text = "Rp ${product.price.toInt() + 15000}", // misal sudah include ongkir
+                            text = "Rp ${(product.sumOf { it.price } + 15000).toInt()}", // misal sudah include ongkir
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -134,18 +143,23 @@ fun PaymentScreen(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val firstProduct = product.firstOrNull()
+
                     Image(
-                        painter = painterResource(id = product.imageRes),
+                        painter = painterResource(id = firstProduct?.imageResId ?: R.drawable.keranjang),
                         contentDescription = null,
                         modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = product.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = firstProduct?.name ?: "-",
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(text = "1 Barang", style = MaterialTheme.typography.bodySmall)
                         Text(
-                            text = "Rp ${product.price.toInt()}",
+                            text = "Rp ${firstProduct?.price?.toInt() ?: 0}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -197,7 +211,9 @@ fun PaymentScreen(
                 Text(text = "Metode Pembayaran", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 OutlinedCard(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    onClick = { /* Pilih Metode */ }
+                    onClick = {
+                        onNavigateToConfirmation()
+                    }
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -215,11 +231,13 @@ fun PaymentScreen(
             }
 
             item {
+                val totalPrice = product.sumOf { it.price }
+
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Rincian Pembayaran", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
-                DetailRow(label = "Subtotal untuk Produk", value = "Rp ${product.price.toInt()}")
+                DetailRow(label = "Subtotal untuk Produk", value = "Rp ${totalPrice.toInt()}")
                 DetailRow(label = "Subtotal Pengiriman", value = "Rp 12.000")
                 DetailRow(label = "Biaya Layanan", value = "Rp 3.000")
 
@@ -230,7 +248,7 @@ fun PaymentScreen(
                 ) {
                     Text(text = "Total Pembayaran", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        text = "Rp ${product.price.toInt() + 15000}",
+                        text = "Rp ${(totalPrice + 15000).toInt()}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -243,6 +261,47 @@ fun PaymentScreen(
 }
 
 @Composable
+fun PaymentNavigation(product: List<Product>) {
+
+    val backStack = rememberNavBackStack(Routes.PaymentRoute)
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() }
+    ) { route: NavKey ->
+
+        when (route) {
+            Routes.PaymentRoute -> {
+                NavEntry(route) {
+                    PaymentScreen(
+                        product = product,
+                        onNavigateToConfirmation = {
+                            backStack.add(Routes.PaymentConfirmationRoute)
+                        }
+                    )
+                }
+            }
+
+            Routes.PaymentConfirmationRoute -> {
+                NavEntry(route) {
+                    PaymentConfirmationScreen(
+                        onBack = {
+                            backStack.removeLastOrNull()
+                        }
+                    )
+                }
+            }
+
+            else -> {
+                NavEntry(route) {
+                    Text("Halaman tidak ditemukan")
+                }
+            }
+        }
+    } as (key: NavKey) -> NavEntry<NavKey>
+}
+
+@Composable
 fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -252,20 +311,66 @@ fun DetailRow(label: String, value: String) {
         Text(text = value, style = MaterialTheme.typography.bodyMedium)
     }
 }
+fun loadProductFromJson(context: Context): List<Product> {
+    val list = mutableListOf<Product>()
+
+    try {
+        val inputStream = context.assets.open("product.json")
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+        val jsonArray = JSONArray(jsonString)
+
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            val product = Product(
+                idProduct = obj.getString("idProduct"),
+                name = obj.getString("name"),
+                price = obj.getDouble("price"),
+                description = obj.getString("description"),
+                stock = obj.getInt("stock"),
+                map = obj.getString("map"),
+                imageResId = obj.getInt("imageResId"),
+                idSeller = obj.getString("idSeller"),
+                idStore = obj.getString("idStore"),
+                location = obj.getString("location")
+            )
+            list.add(product)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return list
+}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PaymentScreenPreview() {
-    val dummyProduct = dummyProductList[0]
+    val context = LocalContext.current
+
+    val dummyJsonData = try {
+        loadProductFromJson(context)
+    } catch (e: Exception) {
+        listOf(
+            Product(
+                idProduct = "PROD-1",
+                name = "Fallback Product",
+                price = 0.0,
+                description = "",
+                stock = 0,
+                map = "",
+                imageResId = R.drawable.nm_logo,
+                idSeller = "",
+                idStore = "",
+                location = ""
+            )
+        )
+    }
 
     NusaMartTheme(dynamicColor = false) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            PaymentScreen(
-                product = dummyProduct
-            )
+            PaymentNavigation(product = dummyJsonData)
         }
     }
 }

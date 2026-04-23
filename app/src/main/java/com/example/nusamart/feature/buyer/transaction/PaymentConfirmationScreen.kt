@@ -38,17 +38,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentConfirmationScreen() {
+fun PaymentConfirmationScreen(
+    onBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pilih Metode Pembayaran", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 }
@@ -161,13 +164,14 @@ fun PaymentItem(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PaymentConfirmationScreenPreview() {
+    val backStack = LocalBackStack.current
 
     NusaMartTheme(dynamicColor = false) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            PaymentConfirmationScreen()
+            PaymentConfirmationScreen(onBack = { })
         }
     }
 }
