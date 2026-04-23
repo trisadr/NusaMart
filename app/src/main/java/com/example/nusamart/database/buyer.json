@@ -1,0 +1,18 @@
+[
+  {
+    "email": "buyer.satu@gmail.com",
+    "username": "buyer_01",
+    "password": "hashed_password_123",
+    "address": "Jl. Ir. Sutami No.36, Kentingan, Surakarta",
+    "profilePicResId": 2131230812,
+    "role": false
+  },
+  {
+    "email": "pembeli.dua@yahoo.com",
+    "username": "pembeli_keren",
+    "password": "hashed_password_456",
+    "address": "Jl. Slamet Riyadi No.10, Purwosari, Surakarta",
+    "profilePicResId": 2131230813,
+    "role": false
+  }
+]

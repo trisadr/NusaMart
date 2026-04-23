@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.screen
+package com.example.nusamart.feature.screen // Pastikan package-nya sesuai
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -19,10 +20,18 @@ import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
+import kotlinx.coroutines.delay
 
-@Preview
 @Composable
-fun LandingScreen() {
+fun LandingScreen(
+    onNavigateToLogin: () -> Unit
+) {
+    // Memberikan delay 3 detik (3000 ms) sebelum mengeksekusi navigasi
+    LaunchedEffect(Unit) {
+        delay(3000L)
+        onNavigateToLogin()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,4 +71,11 @@ fun LandingScreen() {
             strokeWidth = 4.dp
         )
     }
+}
+
+@Preview
+@Composable
+fun LandingScreenPreview() {
+    // Menyediakan empty lambda {} hanya untuk kebutuhan preview agar tidak error
+    LandingScreen(onNavigateToLogin = {})
 }

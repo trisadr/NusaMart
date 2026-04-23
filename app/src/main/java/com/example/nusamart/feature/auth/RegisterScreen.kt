@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nusamart.feature.auth.MyOutlinedTextField
 import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.BluePrimary
 import com.example.nusamart.ui.theme.RedPrimary
@@ -149,7 +150,9 @@ fun RegisterScreen(
                 icon = Icons.Default.Lock,
                 isPassword = true,
                 isPasswordVisible = isConfirmPasswordVisible,
-                onPasswordVisibilityChange = { isConfirmPasswordVisible = !isConfirmPasswordVisible }
+                onPasswordVisibilityChange = {
+                    isConfirmPasswordVisible = !isConfirmPasswordVisible
+                }
             )
 
             Spacer(modifier = Modifier.height(40.dp))

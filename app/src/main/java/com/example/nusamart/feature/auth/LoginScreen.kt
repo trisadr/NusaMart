@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.screen
+package com.example.nusamart.feature.auth
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,17 +57,86 @@ import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.BluePrimary
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
+import kotlinx.coroutines.delay
 
-@Preview
-@OptIn(ExperimentalMaterial3Api::class)
+// ==========================================
+// LANDING PAGE (LOADING SCREEN)
+// ==========================================
+@Composable
+fun LandingPageScreen(
+    onNavigateToLogin: () -> Unit
+) {
+    // Memberikan delay 3 detik (3000 ms) sebelum mengeksekusi navigasi
+    LaunchedEffect(Unit) {
+        delay(3000L)
+        onNavigateToLogin()
+    }
+
+    Scaffold(containerColor = WhiteSurface) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = R.drawable.nm_logo),
+                    contentDescription = "Logo NusaMart",
+                    modifier = Modifier.size(150.dp)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                CircularProgressIndicator(color = RedPrimary)
+            }
+        }
+    }
+}
+
+// ==========================================
+// LOGIN SCREEN (STATEFUL)
+// ==========================================
 @Composable
 fun LoginScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {}
 ) {
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
+    LoginScreenContent(
+        emailOrUsername = emailOrUsername,
+        onEmailOrUsernameChange = { emailOrUsername = it },
+        password = password,
+        onPasswordChange = { password = it },
+        isPasswordVisible = isPasswordVisible,
+        onPasswordVisibilityChange = { isPasswordVisible = !isPasswordVisible },
+        onLoginClick = { /* TODO: Aksi Login */ },
+        onRegisterClick = onNavigateToRegister,
+        onForgotPasswordClick = { /* TODO: Lupa Password */ },
+        onGoogleLoginClick = { /* TODO: Login Google */ },
+        onBackClick = onBackClick
+    )
+}
+
+// ==========================================
+// LOGIN SCREEN CONTENT (STATELESS)
+// ==========================================
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreenContent(
+    emailOrUsername: String,
+    onEmailOrUsernameChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    isPasswordVisible: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onGoogleLoginClick: () -> Unit,
+    onBackClick: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -108,7 +179,6 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // Logo NM
                 Image(
                     painter = painterResource(id = R.drawable.nm_logo),
                     contentDescription = "Logo NusaMart",
@@ -117,10 +187,9 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Input
                 MyOutlinedTextField(
                     value = emailOrUsername,
-                    onValueChange = { emailOrUsername = it },
+                    onValueChange = onEmailOrUsernameChange,
                     label = "No. Handphone/Email/Username",
                     icon = Icons.Default.Person
                 )
@@ -129,19 +198,18 @@ fun LoginScreen(
 
                 MyOutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = onPasswordChange,
                     label = "Password",
                     icon = Icons.Default.Lock,
                     isPassword = true,
                     isPasswordVisible = isPasswordVisible,
-                    onPasswordVisibilityChange = { isPasswordVisible = !isPasswordVisible }
+                    onPasswordVisibilityChange = onPasswordVisibilityChange
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Login
                 Button(
-                    onClick = { /* Aksi login di sini */ },
+                    onClick = onLoginClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -158,56 +226,44 @@ fun LoginScreen(
                     )
                 }
 
-                // Daftar n lupa pw
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = { /* Navigasi ke Daftar */ }) {
+                    TextButton(onClick = onRegisterClick) {
                         Text("Daftar", color = BluePrimary, fontSize = 14.sp)
                     }
-                    TextButton(onClick = { /* Navigasi ke Lupa Password */ }) {
+                    TextButton(onClick = onForgotPasswordClick) {
                         Text("Lupa Password?", color = BluePrimary, fontSize = 14.sp)
                     }
                 }
 
-                // Atau
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = Color.LightGray
-                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
                     Text(
                         text = " atau ",
                         color = Color.Gray,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = Color.LightGray
-                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
                 }
 
-                // Login google
                 OutlinedButton(
-                    onClick = { /* Aksi login Google di sini */ },
+                    onClick = onGoogleLoginClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(1.dp, Color.LightGray),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = BlackText
-                    )
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = BlackText)
                 ) {
-                    // Logo google
                     Image(
                         painter = painterResource(id = R.drawable.google_logo),
                         contentDescription = "Logo Google",
@@ -225,7 +281,9 @@ fun LoginScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// ==========================================
+// REUSABLE TEXT FIELD
+// ==========================================
 @Composable
 fun MyOutlinedTextField(
     value: String,
@@ -264,5 +322,32 @@ fun MyOutlinedTextField(
             unfocusedLabelColor = Color.Gray,
             cursorColor = RedPrimary
         )
+    )
+}
+
+// ==========================================
+// PREVIEWS
+// ==========================================
+@Preview(showBackground = true)
+@Composable
+fun LandingPagePreview() {
+    LandingPageScreen(onNavigateToLogin = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreenContent(
+        emailOrUsername = "",
+        onEmailOrUsernameChange = {},
+        password = "",
+        onPasswordChange = {},
+        isPasswordVisible = false,
+        onPasswordVisibilityChange = {},
+        onLoginClick = {},
+        onRegisterClick = {},
+        onForgotPasswordClick = {},
+        onGoogleLoginClick = {},
+        onBackClick = {}
     )
 }
