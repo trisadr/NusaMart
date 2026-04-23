@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.screen
+package com.example.nusamart.feature.buyer.homepage
 
 //import com.example.nusamart.entity.Product // Pastikan import data class Product kamu benar
 import android.content.Context
@@ -46,11 +46,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.entity.Product
+import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -74,15 +76,53 @@ fun HomePageScreen(
 ) {
     val backStack = LocalBackStack.current
     val context = LocalContext.current
-    // State untuk menyimpan daftar produk dari JSON
+
     var productList by remember { mutableStateOf<List<Product>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
 
-    // Memuat data saat halaman pertama kali dibuka
     LaunchedEffect(Unit) {
         productList = loadProductsFromJson(context)
     }
 
+    Content(
+        isLoading = isLoading,
+        productList = productList,
+        searchQuery = searchQuery,
+        onSearchChange = { searchQuery = it },
+        onSearch = {
+            if (searchQuery.isNotBlank()) {
+                backStack.add(Routes.SearchResultRoute(searchQuery))
+            }
+        },
+        onProductClick = { productId ->
+            backStack.add(Routes.ProductPageRoute(productId))
+        },
+        onMenuSelected = { menu ->
+            when (menu) {
+                BottomMenu.HOME -> Unit
+                BottomMenu.NOTIFICATION -> {
+                    backStack.add(Routes.NotificationRoute)
+                }
+                BottomMenu.PROFILE -> {
+                    backStack.add(Routes.ProfileRoute)
+                }
+            }
+        }
+
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Content(
+    isLoading: Boolean,
+    productList: List<Product>,
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onProductClick: (String) -> Unit,
+    onMenuSelected: (BottomMenu) -> Unit
+) {
     Scaffold(
         topBar = {
             Column(
@@ -90,39 +130,44 @@ fun HomePageScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                // Logo
                 Image(
-                    painter = painterResource(id = R.drawable.nusamart), // Ganti jika nama logo beda
+                    painter = painterResource(id = R.drawable.nusamart),
                     contentDescription = "Logo NusaMart",
                     modifier = Modifier.height(32.dp)
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
-                // Search Bar
+
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = onSearchChange,
                     placeholder = { Text("Cari produk lokal...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
-                        onSearch = {
-                            if (searchQuery.isNotBlank()) {
-                                backStack.add(Routes.SearchResultRoute(searchQuery))
-                            }
-                        }
+                        onSearch = { onSearch() }
                     )
                 )
             }
         },
         bottomBar = {
-            NusaMartBottomNavigation(selectedMenu = "Beranda")
+            NusaMartBottomNavigation(
+                selectedMenu = BottomMenu.HOME,
+                onMenuSelected = onMenuSelected
+            )
         }
     ) { innerPadding ->
+
         if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else {
@@ -136,7 +181,7 @@ fun HomePageScreen(
                 items(productList) { produk ->
                     ProductGridCard(
                         product = produk,
-                        onClick = { backStack.add(Routes.ProductPageRoute(produk.idProduct)) } // Meneruskan ID ke callback
+                        onClick = { onProductClick(produk.idProduct) }
                     )
                 }
             }
@@ -145,19 +190,23 @@ fun HomePageScreen(
 }
 
 @Composable
-fun ProductGridCard(product: Product, onClick: () -> Unit) {
+fun ProductGridCard(
+    product: Product,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }, // Menggunakan onClick callback
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column {
-            // Jika imageResId dari JSON error (karena dummy), ganti sementara dengan R.drawable.placeholder
             Image(
-                painter = painterResource(id = R.drawable.nm_logo), // Sementara pakai logo NM jika ID gambar dari JSON rusak
+                painter = painterResource(id = R.drawable.nm_logo),
                 contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,14 +222,18 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
                     text = "Rp ${product.price.toLong()}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
+
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = product.location,
                     style = MaterialTheme.typography.labelSmall,
@@ -189,4 +242,57 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomePagePreview() {
+    Content(
+        isLoading = false,
+        productList = listOf(
+            Product(
+                idProduct = "1",
+                name = "Kopi Gayo Premium",
+                price = 75000.0,
+                description = "Kopi asli Aceh dengan rasa khas",
+                stock = 10,
+                map = "Aceh",
+                imageResId = R.drawable.nm_logo,
+                idSeller = "S1",
+                idStore = "Store1",
+                location = "Aceh"
+            ),
+            Product(
+                idProduct = "2",
+                name = "Batik Tulis",
+                price = 150000.0,
+                description = "Batik handmade khas Jogja",
+                stock = 5,
+                map = "Yogyakarta",
+                imageResId = R.drawable.nm_logo,
+                idSeller = "S2",
+                idStore = "Store2",
+                location = "Yogyakarta"
+            )
+        ),
+        searchQuery = "",
+        onSearchChange = {},
+        onSearch = {},
+        onProductClick = {},
+        onMenuSelected = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomePageLoadingPreview() {
+    Content(
+        isLoading = true,
+        productList = emptyList(),
+        searchQuery = "",
+        onSearchChange = {},
+        onSearch = {},
+        onProductClick = {},
+        onMenuSelected = {}
+    )
 }

@@ -18,10 +18,16 @@ import androidx.compose.ui.unit.dp
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 
+enum class BottomMenu {
+    HOME,
+    NOTIFICATION,
+    PROFILE
+}
+
 @Composable
 fun NusaMartBottomNavigation(
-    selectedMenu: String,
-    onMenuSelected: (String) -> Unit = {}
+    selectedMenu: BottomMenu,
+    onMenuSelected: (BottomMenu) -> Unit
 ) {
     NavigationBar(
         modifier = Modifier.height(65.dp),
@@ -29,12 +35,12 @@ fun NusaMartBottomNavigation(
         tonalElevation = 8.dp,
         windowInsets = WindowInsets(0.dp)
     ) {
-        // Tombol Beranda
+
         NavigationBarItem(
-            icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Beranda") },
+            icon = { Icon(Icons.Default.Home, contentDescription = "Beranda") },
             label = { Text("Beranda") },
-            selected = selectedMenu == "Beranda",
-            onClick = { onMenuSelected("Beranda") },
+            selected = selectedMenu == BottomMenu.HOME,
+            onClick = { onMenuSelected(BottomMenu.HOME) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = RedPrimary,
                 selectedTextColor = RedPrimary,
@@ -44,12 +50,11 @@ fun NusaMartBottomNavigation(
             )
         )
 
-        // Tombol Notifikasi
         NavigationBarItem(
-            icon = { Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifikasi") },
+            icon = { Icon(Icons.Default.Notifications, contentDescription = "Notifikasi") },
             label = { Text("Notifikasi") },
-            selected = selectedMenu == "Notifikasi",
-            onClick = { onMenuSelected("Notifikasi") },
+            selected = selectedMenu == BottomMenu.NOTIFICATION,
+            onClick = { onMenuSelected(BottomMenu.NOTIFICATION) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = RedPrimary,
                 selectedTextColor = RedPrimary,
@@ -59,12 +64,11 @@ fun NusaMartBottomNavigation(
             )
         )
 
-        // Tombol Saya (Profil)
         NavigationBarItem(
-            icon = { Icon(imageVector = Icons.Default.Person, contentDescription = "Saya") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Saya") },
             label = { Text("Saya") },
-            selected = selectedMenu == "Saya",
-            onClick = { onMenuSelected("Saya") },
+            selected = selectedMenu == BottomMenu.PROFILE,
+            onClick = { onMenuSelected(BottomMenu.PROFILE) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = RedPrimary,
                 selectedTextColor = RedPrimary,
