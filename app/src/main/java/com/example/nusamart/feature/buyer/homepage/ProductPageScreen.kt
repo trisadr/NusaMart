@@ -1,4 +1,4 @@
-//package com.example.nusamart.feature.screen
+//package com.example.nusamart.feature.buyer.homepage
 //
 //import android.content.Intent
 //import androidx.compose.foundation.Image
@@ -24,7 +24,7 @@
 //import androidx.compose.ui.text.style.TextDecoration
 //import androidx.compose.ui.tooling.preview.Preview
 //import androidx.compose.ui.unit.dp
-//import com.example.nusamart.feature.entity.Product
+//import com.example.nusamart.entity.Product
 //import com.example.nusamart.ui.theme.NusaMartTheme
 //
 //@OptIn(ExperimentalMaterial3Api::class)

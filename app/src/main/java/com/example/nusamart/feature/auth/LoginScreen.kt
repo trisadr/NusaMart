@@ -1,9 +1,11 @@
 package com.example.nusamart.feature.auth
 
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
@@ -23,12 +24,10 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,22 +53,35 @@ import androidx.compose.ui.unit.sp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
+import com.example.nusamart.entity.Buyer
 import com.example.nusamart.ui.theme.BlackText
-import com.example.nusamart.ui.theme.BluePrimary
 import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
-// ==========================================
-// LANDING PAGE (LOADING SCREEN)
-// ==========================================
+fun loadBuyers(context: Context): List<Buyer> {
+    return try {
+        val jsonString = context.assets.open("buyer.json")
+            .bufferedReader()
+            .use { it.readText() }
 
-// ==========================================
-// LOGIN SCREEN (STATEFUL)
-// ==========================================
+        val type = object : TypeToken<List<Buyer>>() {}.type
+        Gson().fromJson(jsonString, type) ?: emptyList()
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        emptyList()
+    }
+}
+
 @Composable
 fun LoginScreen() {
     val backStack = LocalBackStack.current
+    val context = LocalContext.current
 
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -81,23 +94,69 @@ fun LoginScreen() {
         onPasswordChange = { password = it },
         isPasswordVisible = isPasswordVisible,
         onPasswordVisibilityChange = { isPasswordVisible = !isPasswordVisible },
-        onLoginClick = {backStack.clear()
-            backStack.add(Routes.HomeRoute)},
+
+        onLoginClick = {
+            if (emailOrUsername.isBlank() || password.isBlank()) {
+                Toast.makeText(
+                    context,
+                    "Email/Username dan Password wajib diisi",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                val buyers = loadBuyers(context)
+                if (buyers.isEmpty()) {
+                    Toast.makeText(
+                        context,
+                        "Data buyer tidak ditemukan",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    val matchedBuyer = buyers.find {
+                        (it.email == emailOrUsername || it.username == emailOrUsername)
+                                && it.password == password
+                    }
+                    if (matchedBuyer != null) {
+                        backStack.clear()
+                        backStack.add(Routes.HomeRoute)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Login gagal! Username/email atau password salah",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        },
+
         onRegisterClick = {
             backStack.add(Routes.RegisterRoute)
         },
-        onForgotPasswordClick = { /* TODO: Lupa Password */ },
-        onGoogleLoginClick = { /* TODO: Login Google */ },
+
+        onForgotPasswordClick = {
+            Toast.makeText(context, "Fitur lupa password belum tersedia", Toast.LENGTH_SHORT).show()
+        },
+
+        onGoogleLoginClick = {
+            signInWithGoogle(context)
+        },
+
         onBackClick = {
-            // Kembali ke halaman sebelumnya
             backStack.removeAt(backStack.lastIndex)
         }
     )
 }
 
-// ==========================================
-// LOGIN SCREEN CONTENT (STATELESS)
-// ==========================================
+fun signInWithGoogle(context: Context) {
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .build()
+
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+    val signInIntent: Intent = googleSignInClient.signInIntent
+    context.startActivity(signInIntent)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -126,11 +185,7 @@ private fun Content(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Kembali ke beranda",
-                            tint = BlackText
-                        )
+                        Icon(Icons.Default.ArrowBack, null, tint = BlackText)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -141,125 +196,85 @@ private fun Content(
         containerColor = WhiteSurface
     ) { paddingValues ->
 
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 40.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+
+            Image(
+                painter = painterResource(id = R.drawable.nm_logo),
+                contentDescription = null,
+                modifier = Modifier.size(100.dp)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            MyOutlinedTextField(
+                value = emailOrUsername,
+                onValueChange = onEmailOrUsernameChange,
+                label = "Email/Username",
+                icon = Icons.Default.Person
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            MyOutlinedTextField(
+                value = password,
+                onValueChange = onPasswordChange,
+                label = "Password",
+                icon = Icons.Default.Lock,
+                isPassword = true,
+                isPasswordVisible = isPasswordVisible,
+                onPasswordVisibilityChange = onPasswordVisibilityChange
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = onLoginClick,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = RedPrimary)
             ) {
+                Text("Log In")
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(onClick = onRegisterClick) {
+                    Text("Daftar")
+                }
+
+                TextButton(onClick = onForgotPasswordClick) {
+                    Text("Lupa Password?")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = onGoogleLoginClick,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                border = BorderStroke(1.dp, Color.LightGray)
+            ) {
                 Image(
-                    painter = painterResource(id = R.drawable.nm_logo),
-                    contentDescription = "Logo NusaMart",
-                    modifier = Modifier.size(100.dp)
+                    painter = painterResource(id = R.drawable.google_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
                 )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                MyOutlinedTextField(
-                    value = emailOrUsername,
-                    onValueChange = onEmailOrUsernameChange,
-                    label = "No. Handphone/Email/Username",
-                    icon = Icons.Default.Person
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                MyOutlinedTextField(
-                    value = password,
-                    onValueChange = onPasswordChange,
-                    label = "Password",
-                    icon = Icons.Default.Lock,
-                    isPassword = true,
-                    isPasswordVisible = isPasswordVisible,
-                    onPasswordVisibilityChange = onPasswordVisibilityChange
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = onLoginClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RedPrimary,
-                        contentColor = WhiteSurface
-                    )
-                ) {
-                    Text(
-                        text = "Log In",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = onRegisterClick) {
-                        Text("Daftar", color = BluePrimary, fontSize = 14.sp)
-                    }
-                    TextButton(onClick = onForgotPasswordClick) {
-                        Text("Lupa Password?", color = BluePrimary, fontSize = 14.sp)
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-                    Text(
-                        text = " atau ",
-                        color = Color.Gray,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-                }
-
-                OutlinedButton(
-                    onClick = onGoogleLoginClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color.LightGray),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = BlackText)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.google_logo),
-                        contentDescription = "Logo Google",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Log In dengan Google",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Log In dengan Google")
             }
         }
     }
 }
 
-// ==========================================
-// REUSABLE TEXT FIELD
-// ==========================================
 @Composable
 private fun MyOutlinedTextField(
     value: String,
@@ -274,30 +289,21 @@ private fun MyOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
-        leadingIcon = { Icon(imageVector = icon, contentDescription = null, tint = Color.Gray) },
+        leadingIcon = { Icon(icon, null) },
         trailingIcon = {
             if (isPassword) {
                 IconButton(onClick = onPasswordVisibilityChange) {
                     Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null,
-                        tint = Color.Gray
+                        if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        null
                     )
                 }
             }
         },
-        visualTransformation = if (isPassword && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = BlackText,
-            unfocusedTextColor = BlackText,
-            focusedBorderColor = RedPrimary,
-            unfocusedBorderColor = Color.LightGray,
-            focusedLabelColor = RedPrimary,
-            unfocusedLabelColor = Color.Gray,
-            cursorColor = RedPrimary
-        )
+        visualTransformation = if (isPassword && !isPasswordVisible)
+            PasswordVisualTransformation()
+        else VisualTransformation.None,
+        modifier = Modifier.fillMaxWidth()
     )
 }
 

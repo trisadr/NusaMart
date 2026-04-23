@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,6 +22,7 @@ import com.example.nusamart.ui.theme.WhiteSurface
 enum class BottomMenu {
     HOME,
     NOTIFICATION,
+    CART,
     PROFILE
 }
 
@@ -55,6 +57,20 @@ fun NusaMartBottomNavigation(
             label = { Text("Notifikasi") },
             selected = selectedMenu == BottomMenu.NOTIFICATION,
             onClick = { onMenuSelected(BottomMenu.NOTIFICATION) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = RedPrimary,
+                selectedTextColor = RedPrimary,
+                unselectedIconColor = Color.Gray,
+                unselectedTextColor = Color.Gray,
+                indicatorColor = WhiteSurface
+            )
+        )
+
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Keranjang") },
+            label = { Text("Keranjang") },
+            selected = selectedMenu == BottomMenu.CART,
+            onClick = { onMenuSelected(BottomMenu.CART) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = RedPrimary,
                 selectedTextColor = RedPrimary,

@@ -106,6 +106,10 @@ fun HomePageScreen(
                 BottomMenu.PROFILE -> {
                     backStack.add(Routes.ProfileRoute)
                 }
+                BottomMenu.CART -> {
+                    backStack.add(Routes.CartRoute)
+                }
+
             }
         }
 
