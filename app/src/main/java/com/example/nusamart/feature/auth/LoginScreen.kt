@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.sp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.feature.screen.LandingScreen
 import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.BluePrimary
+import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 
@@ -74,7 +74,7 @@ fun LoginScreen() {
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
-    LoginScreenContent(
+    Content(
         emailOrUsername = emailOrUsername,
         onEmailOrUsernameChange = { emailOrUsername = it },
         password = password,
@@ -100,7 +100,7 @@ fun LoginScreen() {
 // ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreenContent(
+private fun Content(
     emailOrUsername: String,
     onEmailOrUsernameChange: (String) -> Unit,
     password: String,
@@ -261,7 +261,7 @@ fun LoginScreenContent(
 // REUSABLE TEXT FIELD
 // ==========================================
 @Composable
-fun MyOutlinedTextField(
+private fun MyOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -304,26 +304,23 @@ fun MyOutlinedTextField(
 // ==========================================
 // PREVIEWS
 // ==========================================
-@Preview(showBackground = true)
-@Composable
-fun LandingPagePreview() {
-    LandingScreen()
-}
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreenContent(
-        emailOrUsername = "",
-        onEmailOrUsernameChange = {},
-        password = "",
-        onPasswordChange = {},
-        isPasswordVisible = false,
-        onPasswordVisibilityChange = {},
-        onLoginClick = {},
-        onRegisterClick = {},
-        onForgotPasswordClick = {},
-        onGoogleLoginClick = {},
-        onBackClick = {}
-    )
+private fun LoginScreenPreview() {
+    NusaMartTheme() {
+        Content(
+            emailOrUsername = "",
+            onEmailOrUsernameChange = {},
+            password = "",
+            onPasswordChange = {},
+            isPasswordVisible = false,
+            onPasswordVisibilityChange = {},
+            onLoginClick = {},
+            onRegisterClick = {},
+            onForgotPasswordClick = {},
+            onGoogleLoginClick = {},
+            onBackClick = {}
+        )
+    }
 }

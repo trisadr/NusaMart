@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.screen // Pastikan package-nya sesuai
+package com.example.nusamart.feature.landingpage // Pastikan package-nya sesuai
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
+import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 import kotlinx.coroutines.delay
@@ -30,23 +31,24 @@ fun LandingScreen() {
 
     LaunchedEffect(Unit) {
         delay(3000L)
-        // Hapus landing page dari history
         backStack.clear()
-        // Pindah ke Login
         backStack.add(Routes.LoginPageRoute)
     }
 
+    Content()
+}
+
+@Composable
+private fun Content() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(WhiteSurface)
     ) {
-        // Logo + nama
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // logo
             Image(
                 painter = painterResource(id = R.drawable.nm_logo),
                 contentDescription = "Logo NusaMart",
@@ -54,22 +56,12 @@ fun LandingScreen() {
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-//            // Konten nama
-//            Text(
-//                text = "NusaMart",
-//                fontSize = 32.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = RedPrimary,
-//                letterSpacing = 2.sp // jarak antar huruf
-//            )
         }
 
-        // Menunjukkan bahwa aplikasi sedang bersiap
         CircularProgressIndicator(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 64.dp) // Jarak dari ujung bawah HP
+                .padding(bottom = 64.dp)
                 .size(40.dp),
             color = RedPrimary,
             strokeWidth = 4.dp
@@ -77,9 +69,10 @@ fun LandingScreen() {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun LandingScreenPreview() {
-    // Menyediakan empty lambda {} hanya untuk kebutuhan preview agar tidak error
-    LandingScreen()
+private fun LandingPagePreview() {
+    NusaMartTheme() {
+        Content()
+    }
 }
