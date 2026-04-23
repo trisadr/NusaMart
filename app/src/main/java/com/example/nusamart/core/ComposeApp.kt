@@ -1,12 +1,5 @@
 package com.example.nusamart.core
 
-//import com.example.nusamart.feature.screen.CartScreen
-//import com.example.nusamart.feature.screen.HomePageScreen
-//import com.example.nusamart.feature.screen.LandingScreen
-//import com.example.nusamart.feature.screen.OrderDetailScreen
-//import com.example.nusamart.feature.screen.OrderListScreen
-//import com.example.nusamart.feature.screen.RegisterScreen
-//import com.example.nusamart.feature.screen.SearchResultScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -16,6 +9,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nusamart.feature.auth.LoginScreen
 import com.example.nusamart.feature.buyer.homepage.HomePageScreen
+import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
@@ -48,10 +42,9 @@ fun ComposeApp() {
 //                        SearchResultScreen(initialKeyword = route.keyword)
 //                    }
 
-//                    // [DIPERBAIKI] Hapus pemanggilan nama fungsi yang terulang di dalam parameternya
-//                    entry<Routes.ProductPageRoute> { route ->
-//                        ProductPageScreen(productId = route.product)
-//                    }
+                    entry<Routes.ProductPageRoute> { route ->
+                        ProductPageScreen(productId = route.productId)
+                    }
 
                     // --- Notification ---
 //                    entry<Routes.NotificationRoute> { NotificationScreen() }
