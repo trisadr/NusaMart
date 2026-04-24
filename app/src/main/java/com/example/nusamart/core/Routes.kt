@@ -83,7 +83,4 @@ object Routes {
     data class ReviewRoute(
         val orderId: String
     ) : NavKey
-
-    // ================== SELLER ==================
-    // Tambahkan route seller di sini nanti saat screen-nya sudah didefinisikan
 }
