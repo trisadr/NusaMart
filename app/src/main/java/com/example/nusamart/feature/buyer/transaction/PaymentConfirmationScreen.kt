@@ -37,10 +37,6 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
-
 @Composable
 fun PaymentConfirmationScreen(orderId: String) {
     val backStack = LocalBackStack.current
@@ -63,10 +59,6 @@ fun PaymentConfirmationScreen(orderId: String) {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -175,10 +167,6 @@ private fun Content(
         }
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
