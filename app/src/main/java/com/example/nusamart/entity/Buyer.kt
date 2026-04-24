@@ -6,5 +6,5 @@ data class Buyer(
     val password: String,
     val address: String,
     val profilePicResId: Int,
-    val role: Boolean = false // Default ke false (0) untuk Buyer
-) // inhenrintance sementara dihapus
+    val role: Boolean = false // Default ke false (0) 
+) 
