@@ -46,9 +46,6 @@ import com.example.nusamart.entity.Product
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 @Composable
 fun SearchResultScreen(
     initialKeyword: String
@@ -83,9 +80,6 @@ fun SearchResultScreen(
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -207,9 +201,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// FILTER ROW COMPONENT
-// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterRow(
