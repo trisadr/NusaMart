@@ -6,8 +6,8 @@ data class Product(
     val price: Double,
     val description: String,
     val stock: Int,
-    val map: String, // Asumsi ini link map atau koordinat
-    val imageResId: Int, // Int untuk resource ID drawable/res
+    val map: String, 
+    val imageResId: Int, 
     val idSeller: String,
     val idStore: String,
     val location: String
