@@ -67,7 +67,6 @@ import java.io.File
 
 fun loadBuyers(context: Context): List<Buyer> {
     return try {
-        // Cek filesDir dulu (ada akun baru dari register), fallback ke assets
         val buyerFile = File(context.filesDir, "buyer.json")
         val jsonString = if (buyerFile.exists()) {
             buyerFile.readText()
@@ -311,10 +310,6 @@ fun MyOutlinedTextField(
         modifier = Modifier.fillMaxWidth()
     )
 }
-
-// ==========================================
-// PREVIEWS
-// ==========================================
 
 @Preview(showBackground = true)
 @Composable
