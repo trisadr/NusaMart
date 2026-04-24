@@ -73,14 +73,9 @@ import java.text.NumberFormat
 import java.util.Locale
 import java.util.UUID
 
-// Enum untuk mengatur jenis Pop-up yang muncul
 enum class SheetMode {
     NONE, CART, BUY
 }
-
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,12 +119,10 @@ fun ProductPageScreen(productId: String) {
         onDecrease = { if (quantity > 1) quantity-- },
 
         onConfirmCart = {
-            // Cek apakah produk sudah ada di cart
             val currentCart = loadCartItems(context).toMutableList()
             val existing = currentCart.find { it.idProduct == productId }
 
             if (existing != null) {
-                // Update quantity jika sudah ada
                 val updated = currentCart.map {
                     if (it.idProduct == productId)
                         it.copy(quantity = it.quantity + quantity)
@@ -137,7 +130,6 @@ fun ProductPageScreen(productId: String) {
                 }
                 saveCartItems(context, updated)
             } else {
-                // Tambah item baru
                 val newCartItem = Cart(
                     idCart = "CART-${UUID.randomUUID().toString().take(8).uppercase()}",
                     idBuyer = "BUYER-001", // TODO: ganti dengan activeUser?.idBuyer saat sudah ada
@@ -158,7 +150,6 @@ fun ProductPageScreen(productId: String) {
         },
 
         onConfirmBuy = {
-            // Buat order baru langsung dari produk ini
             val newOrderId = "ORD-${UUID.randomUUID().toString().take(8).uppercase()}"
 
             val newOrder = Order(
@@ -216,10 +207,6 @@ fun ProductPageScreen(productId: String) {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -301,7 +288,6 @@ private fun Content(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Foto produk
             val context = LocalContext.current
             val safeResId = remember(product.imageResId) {
                 val resId = product.imageResId
@@ -374,7 +360,6 @@ private fun Content(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray)
 
-                // Info toko
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -400,7 +385,6 @@ private fun Content(
         }
     }
 
-    // Bottom sheet quantity — muncul untuk CART maupun BUY
     if (sheetMode != SheetMode.NONE) {
         ModalBottomSheet(
             onDismissRequest = onDismissSheet,
@@ -412,7 +396,6 @@ private fun Content(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 32.dp)
             ) {
-                // Info produk singkat
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val context = LocalContext.current
                     val safeResId = remember(product.imageResId) {
@@ -450,7 +433,6 @@ private fun Content(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Pemilih jumlah
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -484,7 +466,6 @@ private fun Content(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Total harga sesuai quantity
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
@@ -517,18 +498,10 @@ private fun Content(
     }
 }
 
-// ==========================================
-// HELPER
-// ==========================================
-
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price.toLong())}"
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
