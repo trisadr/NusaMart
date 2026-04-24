@@ -62,14 +62,6 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-// ==========================================
-// HELPER: Baca & Tulis buyer.json dari assets → files
-// ==========================================
-
-/**
- * Membaca buyer.json. Prioritas: internal storage (files/buyer.json).
- * Jika belum ada, fallback ke assets/buyer.json.
- */
 private fun readBuyerJson(context: Context): JSONArray {
     val internalFile = java.io.File(context.filesDir, "buyer.json")
     return try {
@@ -87,33 +79,23 @@ private fun readBuyerJson(context: Context): JSONArray {
     }
 }
 
-/**
- * Menulis JSONArray ke internal storage (files/buyer.json).
- */
 private fun writeBuyerJson(context: Context, array: JSONArray) {
     val internalFile = java.io.File(context.filesDir, "buyer.json")
     internalFile.writeText(array.toString(2))
 }
 
-/**
- * Validasi format email sederhana berbasis pengecekan string.
- * Aturan: harus mengandung tepat satu '@', dan bagian setelah '@' harus mengandung titik.
- */
 private fun isEmailValid(email: String): Boolean {
     val atIndex = email.indexOf('@')
-    if (atIndex <= 0) return false                   // tidak ada '@' atau '@' di awal
-    if (email.lastIndexOf('@') != atIndex) return false // lebih dari satu '@'
+    if (atIndex <= 0) return false
+    if (email.lastIndexOf('@') != atIndex) return false 
     val domain = email.substring(atIndex + 1)
     if (domain.isEmpty()) return false
     val dotIndex = domain.lastIndexOf('.')
-    if (dotIndex <= 0) return false                  // tidak ada '.' di domain
-    if (dotIndex == domain.length - 1) return false  // '.' di akhir domain
+    if (dotIndex <= 0) return false   
+    if (dotIndex == domain.length - 1) return false  
     return true
 }
 
-// ==========================================
-// REGISTER SCREEN (STATEFUL)
-// ==========================================
 @Composable
 fun RegisterScreen() {
     val backStack = LocalBackStack.current
@@ -167,7 +149,6 @@ fun RegisterScreen() {
             backStack.add(Routes.LoginPageRoute)
         },
         onRegisterClick = {
-            // ── 1. Cek semua field wajib diisi ──
             when {
                 username.isBlank() -> {
                     Toast.makeText(context, "Username wajib diisi!", Toast.LENGTH_SHORT).show()
@@ -186,20 +167,17 @@ fun RegisterScreen() {
                     return@Content
                 }
 
-                // ── 2. Validasi format email ──
                 !isEmailValid(email.trim()) -> {
                     Toast.makeText(context, "Format email tidak valid!", Toast.LENGTH_SHORT).show()
                     return@Content
                 }
 
-                // ── 3. Cocokkan password ──
                 password != konfirmasiPassword -> {
                     Toast.makeText(context, "Password dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
                     return@Content
                 }
 
                 else -> {
-                    // ── 4. Cek keunikan username & email di buyer.json ──
                     val buyers = readBuyerJson(context)
                     val usernameLower = username.trim().lowercase()
                     val emailLower = email.trim().lowercase()
@@ -221,14 +199,13 @@ fun RegisterScreen() {
                             Toast.makeText(context, "Email sudah terdaftar!", Toast.LENGTH_SHORT).show()
                         }
                         else -> {
-                            // ── 5. Simpan ke buyer.json (hanya field yang ada di struktur asli) ──
                             val newUser = JSONObject().apply {
                                 put("email", email.trim())
                                 put("username", username.trim())
                                 put("password", password)
-                                put("address", "")          // kosong dulu, bisa diisi di profil
-                                put("profilePicResId", 0)   // default, belum ada foto
-                                put("role", isSeller)       // false = buyer, true = seller
+                                put("address", "")          
+                                put("profilePicResId", 0)
+                                put("role", isSeller)     
                             }
                             buyers.put(newUser)
                             writeBuyerJson(context, buyers)
@@ -243,9 +220,6 @@ fun RegisterScreen() {
     )
 }
 
-// ==========================================
-// REGISTER CONTENT (STATELESS)
-// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -376,11 +350,10 @@ private fun Content(
             }
 
             // --- INPUT FORM ---
-
-            // ── USERNAME ──
+            // Username
             MyOutlinedTextField(
                 value = username,
-                onValueChange = { onUsernameChange(it.trim()) }, // trim spasi otomatis
+                onValueChange = { onUsernameChange(it.trim()) },
                 label = "Username",
                 icon = Icons.Default.AccountCircle
             )
@@ -466,9 +439,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun RegisterScreenPreview() {
