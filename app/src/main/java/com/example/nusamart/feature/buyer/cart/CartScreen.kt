@@ -63,10 +63,6 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.UUID
 
-// ==========================================
-// DATA LOADING & SAVING
-// ==========================================
-
 fun loadCartItems(context: Context): List<Cart> {
     return try {
         val cartFile = File(context.filesDir, "cart.json")
@@ -130,10 +126,6 @@ fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
         e.printStackTrace()
     }
 }
-
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun CartScreen() {
@@ -244,10 +236,6 @@ fun CartScreen() {
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -277,7 +265,6 @@ private fun Content(
         },
         bottomBar = {
             Column {
-                // Checkout bar
                 CartBottomBar(
                     isAllChecked = isAllChecked,
                     totalPrice = totalPrice,
@@ -285,7 +272,6 @@ private fun Content(
                     onAllCheckedChange = onAllCheckedChange,
                     onCheckout = onCheckout
                 )
-                // Bottom navigation
                 NusaMartBottomNavigation(
                     selectedMenu = BottomMenu.CART,
                     onMenuSelected = onMenuSelected
@@ -325,10 +311,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// TOP BAR
-// ==========================================
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CartTopBar(
@@ -350,10 +332,6 @@ private fun CartTopBar(
         }
     )
 }
-
-// ==========================================
-// SHOP GROUP
-// ==========================================
 
 @Composable
 private fun ShopGroup(
@@ -421,10 +399,6 @@ private fun ShopGroup(
         }
     }
 }
-
-// ==========================================
-// CART ITEM ROW
-// ==========================================
 
 @Composable
 private fun CartItemRow(
@@ -501,10 +475,6 @@ private fun CartItemRow(
     }
 }
 
-// ==========================================
-// QUANTITY STEPPER
-// ==========================================
-
 @Composable
 private fun QuantityStepper(
     quantity: Int,
@@ -544,10 +514,6 @@ private fun QuantityStepper(
     }
 }
 
-// ==========================================
-// EMPTY STATE
-// ==========================================
-
 @Composable
 private fun CartEmptyState(
     modifier: Modifier = Modifier,
@@ -578,10 +544,6 @@ private fun CartEmptyState(
         }
     }
 }
-
-// ==========================================
-// BOTTOM BAR (checkout)
-// ==========================================
 
 @Composable
 private fun CartBottomBar(
@@ -636,10 +598,6 @@ private fun CartBottomBar(
         }
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
