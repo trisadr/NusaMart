@@ -36,9 +36,6 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun PaymentSuccessScreen(
@@ -54,8 +51,6 @@ fun PaymentSuccessScreen(
             backStack.add(Routes.OrderDetailRoute(orderId))
         },
         onDoneClick = {
-            // Hapus PaymentSuccessScreen dan PaymentConfirmationScreen dari stack
-            // sehingga kembali ke halaman sebelum payment
             repeat(2) {
                 if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
             }
@@ -63,9 +58,6 @@ fun PaymentSuccessScreen(
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @Composable
 private fun Content(
@@ -204,7 +196,6 @@ private fun Content(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol lihat pesanan — di dalam konten, bukan bottom bar
             OutlinedButton(
                 onClick = onViewOrderClick,
                 modifier = Modifier.fillMaxWidth(),
@@ -216,9 +207,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
