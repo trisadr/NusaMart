@@ -57,7 +57,9 @@ object Routes {
 
     // --- Transaction ---
     @Serializable
-    data object PaymentRoute : NavKey
+    data class PaymentRoute(
+        val orderId: String
+    ) : NavKey
 
     @Serializable
     data object PaymentConfirmationRoute : NavKey

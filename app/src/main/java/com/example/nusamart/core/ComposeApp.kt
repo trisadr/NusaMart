@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nusamart.feature.auth.LoginScreen
 import com.example.nusamart.feature.auth.RegisterScreen
+import com.example.nusamart.feature.buyer.cart.CartScreen
 import com.example.nusamart.feature.buyer.homepage.HomePageScreen
 import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
 import com.example.nusamart.feature.buyer.homepage.SearchResultScreen
@@ -43,7 +44,7 @@ fun ComposeApp() {
                     entry<Routes.LoginPageRoute> { LoginScreen() }
 
                     // ================== BUYER ==================
-//                    entry<Routes.CartRoute> { CartScreen() }
+                    entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
                     entry<Routes.SearchResultRoute> { route ->
