@@ -5,28 +5,23 @@ import kotlinx.serialization.Serializable
 
 object Routes {
 
-    // ================== LANDING PAGE ==================
+    // LANDING PAGE
     @Serializable
     data object LandingPageRoute : NavKey
 
-    // ================== AUTH ==================
+    // AUTH
     @Serializable
     data object RegisterRoute : NavKey
 
     @Serializable
     data object LoginPageRoute : NavKey
 
-    // Catatan: Logout biasanya berupa fungsi/action, bukan screen tersendiri.
-    // Namun jika ada screen khusus untuk proses logout, bisa ditambahkan:
-    // @Serializable data object LogoutRoute : NavKey
-
-    // ================== BUYER ==================
-
-    // --- Keranjang ---
+    // BUYER
+    // Cart
     @Serializable
     data object CartRoute : NavKey
 
-    // --- HomePage ---
+    // HomePage
     @Serializable
     data object HomeRoute : NavKey
 
@@ -35,27 +30,25 @@ object Routes {
         val keyword: String
     ) : NavKey
 
-    // Membawa ID Product dari HomePage
     @Serializable
     data class ProductPageRoute(
         val productId: String
     ) : NavKey
 
-    // --- Notification ---
+    // Notification
     @Serializable
     data object NotificationRoute : NavKey
 
-    // Membawa ID Notification dari NotificationScreen
     @Serializable
     data class NotificationDetailRoute(
         val notificationId: String
     ) : NavKey
 
-    // --- Profile ---
+    // Profile
     @Serializable
     data object ProfileRoute : NavKey
 
-    // --- Transaction ---
+    // Transaction
     @Serializable
     data class PaymentRoute(
         val orderId: String,
@@ -72,22 +65,20 @@ object Routes {
         val paymentCode: String,
         val orderId: String
     ) : NavKey
-    // --- Order ---
+    // Order
     @Serializable
     data object OrderListRoute : NavKey
 
-    // Membawa ID Order dari OrderListScreen
     @Serializable
     data class OrderDetailRoute(
         val orderId: String
     ) : NavKey
 
-    // --- Review ---
+    // Review
     @Serializable
     data class ReviewRoute(
         val orderId: String
     ) : NavKey
 
-    // ================== SELLER ==================
-    // Tambahkan route seller di sini nanti saat screen-nya sudah didefinisikan
+    // SELLER (Belum ada)
 }

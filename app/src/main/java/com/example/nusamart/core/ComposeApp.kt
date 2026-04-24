@@ -30,7 +30,6 @@ fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.LandingPageRoute)
     val activeUserId = "";
 
-    // Menyediakan backStack secara global ke seluruh halaman di bawahnya
     CompositionLocalProvider(LocalBackStack provides backStack) {
         NusaMartTheme {
             NavDisplay(
@@ -41,12 +40,12 @@ fun ComposeApp() {
                 ),
                 entryProvider = entryProvider {
 
-                    // ================== AUTH & LANDING ==================
+                    // Auth & Lending
                     entry<Routes.LandingPageRoute> { LandingScreen() }
                     entry<Routes.RegisterRoute> { RegisterScreen() }
                     entry<Routes.LoginPageRoute> { LoginScreen() }
 
-                    // ================== BUYER ==================
+                    // Buyer
                     entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
@@ -58,15 +57,14 @@ fun ComposeApp() {
                         ProductPageScreen(productId = route.productId)
                     }
 
-                    // --- Notification ---
+                    // Notification
                     entry<Routes.NotificationRoute> { NotificationScreen() }
 
-//                    // Membaca notificationId yang dikirim melalui Routes
                     entry<Routes.NotificationDetailRoute> { route ->
                         NotificationDetailScreen(notificationId = route.notificationId)
                     }
 
-                    // --- Profile ---
+                    // Profile
                     entry<Routes.ProfileRoute> { ProfileScreen() }
 
                     entry<Routes.PaymentRoute> { route ->
@@ -85,15 +83,14 @@ fun ComposeApp() {
                         )
                     }
 
-//                    // --- Order ---
+                    // Order
                     entry<Routes.OrderListRoute> { OrderListScreen() }
 
-                    // Membaca orderId yang dikirim melalui Routes
                     entry<Routes.OrderDetailRoute> { route ->
                         OrderDetailScreen(orderId = route.orderId)
                     }
 
-//                    // --- Review ---
+                    // Review
                     entry<Routes.ReviewRoute> { route ->
                         ReviewScreen(orderId = route.orderId)
                     }
