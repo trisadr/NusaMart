@@ -1,0 +1,10 @@
+{
+  "idOrder": "ORD12345",
+  "totalPrice": 235000,
+  "status": "DIKIRIM",
+  "trackingNumber": "JNE123456789",
+  "description": "Pesanan produk kebutuhan sehari-hari",
+  "orderDate": "2026-04-20",
+  "arrivedDate": null,
+  "idSeller": "SELLER001"
+}

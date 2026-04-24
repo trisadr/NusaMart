@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
+import com.example.nusamart.core.activeUser
 import com.example.nusamart.entity.Buyer
 import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.NusaMartTheme
@@ -116,6 +117,7 @@ fun LoginScreen() {
                                 && it.password == password
                     }
                     if (matchedBuyer != null) {
+                        activeUser = matchedBuyer
                         backStack.clear()
                         backStack.add(Routes.HomeRoute)
                     } else {
@@ -276,7 +278,7 @@ private fun Content(
 }
 
 @Composable
-private fun MyOutlinedTextField(
+fun MyOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,

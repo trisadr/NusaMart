@@ -1,0 +1,26 @@
+[
+  {
+    "idReview": "REV001",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD001",
+    "imageResId": 2131230890,
+    "rating": 5,
+    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
+  },
+  {
+    "idReview": "REV002",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD002",
+    "imageResId": 2131230890,
+    "rating": 5,
+    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
+  },
+  {
+    "idReview": "REV003",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD003",
+    "imageResId": 2131230890,
+    "rating": 5,
+    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
+  }
+]

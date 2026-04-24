@@ -1,0 +1,23 @@
+[
+  {
+    "idOrderItem": "OI001",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD001",
+    "quantity": 2,
+    "priceAtPurchase": 50000
+  },
+  {
+    "idOrderItem": "OI002",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD002",
+    "quantity": 1,
+    "priceAtPurchase": 75000
+  },
+  {
+    "idOrderItem": "OI003",
+    "idOrder": "ORD12345",
+    "idProduct": "PRD003",
+    "quantity": 3,
+    "priceAtPurchase": 20000
+  }
+]

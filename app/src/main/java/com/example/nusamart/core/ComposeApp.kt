@@ -8,17 +8,20 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nusamart.feature.auth.LoginScreen
+import com.example.nusamart.feature.auth.RegisterScreen
 import com.example.nusamart.feature.buyer.homepage.HomePageScreen
 import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
 import com.example.nusamart.feature.buyer.homepage.SearchResultScreen
 import com.example.nusamart.feature.buyer.notification.NotificationDetailScreen
 import com.example.nusamart.feature.buyer.notification.NotificationScreen
+import com.example.nusamart.feature.buyer.review.ReviewScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @Composable
 fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.LandingPageRoute)
+    val activeUserId = "";
 
     // Menyediakan backStack secara global ke seluruh halaman di bawahnya
     CompositionLocalProvider(LocalBackStack provides backStack) {
@@ -33,7 +36,7 @@ fun ComposeApp() {
 
                     // ================== AUTH & LANDING ==================
                     entry<Routes.LandingPageRoute> { LandingScreen() }
-//                    entry<Routes.RegisterRoute> { RegisterScreen() }
+                    entry<Routes.RegisterRoute> { RegisterScreen() }
                     entry<Routes.LoginPageRoute> { LoginScreen() }
 
                     // ================== BUYER ==================
@@ -72,7 +75,9 @@ fun ComposeApp() {
 //                    }
 
 //                    // --- Review ---
-//                    entry<Routes.ReviewRoute> { ReviewScreen() }
+                    entry<Routes.ReviewRoute> { route ->
+                        ReviewScreen(orderId = route.orderId)
+                    }
                 }
             )
         }
