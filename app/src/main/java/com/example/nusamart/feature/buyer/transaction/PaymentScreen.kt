@@ -58,9 +58,6 @@ import com.example.nusamart.feature.buyer.order.loadOrderById
 import com.example.nusamart.feature.buyer.order.loadOrderItemsByOrderId
 import com.example.nusamart.ui.theme.NusaMartTheme
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun PaymentScreen(
@@ -75,7 +72,6 @@ fun PaymentScreen(
     val products = remember { loadProductsFromJson(context) }
     val productMap = remember { products.associateBy { it.idProduct } }
 
-    // noteText tidak di-persist ke order (belum ada fieldnya), cukup state lokal
     var noteText by remember { mutableStateOf("") }
 
     if (order == null) {
@@ -106,16 +102,12 @@ fun PaymentScreen(
             val updatedOrder = order.copy(status = OrderStatus.MENUNGGU)
             saveNewOrder(context, updatedOrder, orderItems)
 
-            // Hapus PaymentScreen dari stack lalu navigasi ke PaymentSuccess
             backStack.removeAt(backStack.lastIndex)
             backStack.add(Routes.PaymentSuccessRoute(paymentCode, orderId))
         }
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -404,9 +396,7 @@ private fun Content(
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
