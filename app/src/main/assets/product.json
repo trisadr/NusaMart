@@ -22,5 +22,17 @@
     "idSeller": "SELL-002",
     "idStore": "STORE-002",
     "location": "Banjarsari, Surakarta"
+  },
+  {
+    "idProduct": "PROD-003",
+    "name": "Minyak Goreng Sunco 2L Palsuuu",
+    "price": 1000.0,
+    "description": "Minyak goreng bening, tidak mudah beku.",
+    "stock": 30,
+    "map": "https://maps.google.com/?q=-7.558,110.831",
+    "imageResId": 2131230816,
+    "idSeller": "SELL-002",
+    "idStore": "STORE-002",
+    "location": "Banjarsari, Surakarta"
   }
 ]

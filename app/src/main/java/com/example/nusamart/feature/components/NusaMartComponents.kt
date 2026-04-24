@@ -28,7 +28,7 @@ enum class BottomMenu {
 
 @Composable
 fun NusaMartBottomNavigation(
-    selectedMenu: BottomMenu,
+    selectedMenu: BottomMenu?,
     onMenuSelected: (BottomMenu) -> Unit
 ) {
     NavigationBar(

@@ -10,6 +10,9 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.nusamart.feature.auth.LoginScreen
 import com.example.nusamart.feature.buyer.homepage.HomePageScreen
 import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
+import com.example.nusamart.feature.buyer.homepage.SearchResultScreen
+import com.example.nusamart.feature.buyer.notification.NotificationDetailScreen
+import com.example.nusamart.feature.buyer.notification.NotificationScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
@@ -37,22 +40,21 @@ fun ComposeApp() {
 //                    entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
-                    // [DIPERBAIKI] Hapus kata "entry" dan kurung kurawal yang dobel
-//                    entry<Routes.SearchResultRoute> { route ->
-//                        SearchResultScreen(initialKeyword = route.keyword)
-//                    }
+                    entry<Routes.SearchResultRoute> { route ->
+                        SearchResultScreen(initialKeyword = route.keyword)
+                    }
 
                     entry<Routes.ProductPageRoute> { route ->
                         ProductPageScreen(productId = route.productId)
                     }
 
                     // --- Notification ---
-//                    entry<Routes.NotificationRoute> { NotificationScreen() }
+                    entry<Routes.NotificationRoute> { NotificationScreen() }
 
 //                    // Membaca notificationId yang dikirim melalui Routes
-//                    entry<Routes.NotificationDetailRoute> { route ->
-//                        NotificationDetailScreen(notificationId = route.notificationId)
-//                    }
+                    entry<Routes.NotificationDetailRoute> { route ->
+                        NotificationDetailScreen(notificationId = route.notificationId)
+                    }
 
                     // --- Profile ---
 //                    entry<Routes.ProfileRoute> { ProfileScreen() }

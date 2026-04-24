@@ -1,0 +1,42 @@
+[
+  {
+    "idNotification": "N001",
+    "idOrder": null,
+    "idStore": null,
+    "title": "Keranjang Belanjamu Menunggu!",
+    "message": "Hai Mahasigma, produk anyaman bambu yang kamu masukkan ke keranjang belum dicheckout nih. Yuk segera selesaikan sebelum stoknya habis!",
+    "date": "17-04-2026 09:00",
+    "type": "promo",
+    "isRead": false
+  },
+  {
+    "idNotification": "N002",
+    "idOrder": "PROD-001",
+    "idStore": "uiia",
+    "title": "Produk Ini Lagi Laris, Lho!",
+    "message": "Temukan produk kerajinan terlaris buat hiasan rumahmu di sini 👉",
+    "date": "16-04-2026 18:02",
+    "type": "promo",
+    "isRead": false
+  },
+  {
+    "idNotification": "N003",
+    "idOrder": "ORDER-002",
+    "idStore": null,
+    "title": "Pesanan Tiba di Tujuan",
+    "message": "Nilai pesanan dan dapatkan koin tambahan untuk belanjamu selanjutnya.",
+    "date": "17-04-2026 14:01",
+    "type": "order",
+    "isRead": false
+  },
+  {
+    "idNotification": "N004",
+    "idOrder": "ORDER-001",
+    "idStore": null,
+    "title": "Pesanan NM260329 telah tiba",
+    "message": "Mohon konfirmasi terima pesanan dalam 2x24 jam sebelum dana ditransfer ke Penjual.",
+    "date": "16-04-2026 14:01",
+    "type": "order",
+    "isRead": true
+  }
+]
