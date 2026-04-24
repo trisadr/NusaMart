@@ -55,10 +55,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 
-// ==========================================
-// DATA LOADING
-// ==========================================
-
 fun loadOrderById(context: Context, orderId: String): Order? {
     return try {
         val orderFile = File(context.filesDir, "order.json")
@@ -93,11 +89,8 @@ fun loadOrderItemsByOrderId(context: Context, orderId: String): List<OrderItem> 
     }
 }
 
-// Cek apakah order sudah pernah direview di filesDir (writable),
-// fallback ke assets jika belum ada di filesDir
 fun isOrderReviewed(context: Context, orderId: String): Boolean {
     return try {
-        // Cek di filesDir dulu (hasil submit review)
         val reviewFile = File(context.filesDir, "review.json")
         val jsonString = if (reviewFile.exists()) {
             reviewFile.readText()
@@ -112,10 +105,6 @@ fun isOrderReviewed(context: Context, orderId: String): Boolean {
         false
     }
 }
-
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun OrderDetailScreen(orderId: String) {
@@ -152,10 +141,6 @@ fun OrderDetailScreen(orderId: String) {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -354,10 +339,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// ORDER ITEM ROW
-// ==========================================
-
 @Composable
 private fun OrderItemRow(
     item: OrderItem,
@@ -388,10 +369,6 @@ private fun OrderItemRow(
         )
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
