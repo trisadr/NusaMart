@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.homepage
 
-//import com.example.nusamart.entity.Product // Pastikan import data class Product kamu benar
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -57,7 +56,6 @@ import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-// Fungsi helper untuk membaca JSON dari Assets
 fun loadProductsFromJson(context: Context): List<Product> {
     return try {
         val jsonString = context.assets.open("product.json").bufferedReader().use { it.readText() }
