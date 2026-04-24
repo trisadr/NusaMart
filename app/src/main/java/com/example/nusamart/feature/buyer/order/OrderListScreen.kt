@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocalMall
@@ -30,6 +31,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -55,6 +57,7 @@ import com.example.nusamart.entity.OrderStatus
 import com.example.nusamart.ui.theme.NusaMartTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.File
 
 // ==========================================
 // DATA LOADING
@@ -62,9 +65,12 @@ import com.google.gson.reflect.TypeToken
 
 fun loadAllOrders(context: Context): List<Order> {
     return try {
-        val jsonString = context.assets.open("order.json")
-            .bufferedReader()
-            .use { it.readText() }
+        val orderFile = File(context.filesDir, "order.json")
+        val jsonString = if (orderFile.exists()) {
+            orderFile.readText()
+        } else {
+            context.assets.open("order.json").bufferedReader().use { it.readText() }
+        }
         val type = object : TypeToken<List<Order>>() {}.type
         Gson().fromJson(jsonString, type) ?: emptyList()
     } catch (e: Exception) {
@@ -86,6 +92,9 @@ fun OrderListScreen() {
 
     Content(
         orders = orders,
+        onBackClick = {
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
+        },
         onOrderClick = { orderId ->
             backStack.add(Routes.OrderDetailRoute(orderId))
         }
@@ -100,11 +109,11 @@ fun OrderListScreen() {
 @Composable
 private fun Content(
     orders: List<Order>,
+    onBackClick: () -> Unit,
     onOrderClick: (String) -> Unit
 ) {
     val primaryOrange = Color(0xFFFF6D00)
 
-    // "Semua" + semua nilai enum OrderStatus
     val filterOptions = listOf("Semua") + OrderStatus.entries.map { it.name }
     var selectedFilter by remember { mutableStateOf("Semua") }
 
@@ -122,6 +131,14 @@ private fun Content(
                         fontWeight = FontWeight.ExtraBold,
                         color = primaryOrange
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali"
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
@@ -208,7 +225,6 @@ private fun OrderListItem(
 ) {
     val lightOrange = Color(0xFFFFF3E0)
 
-    // Warna status badge
     val statusColor = when (order.status) {
         OrderStatus.SELESAI -> Color(0xFF4CAF50)
         OrderStatus.DIKIRIM -> Color(0xFF2196F3)
@@ -245,14 +261,12 @@ private fun OrderListItem(
             Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // Status badge
                 Text(
                     text = order.status.name,
                     style = MaterialTheme.typography.labelSmall,
                     color = statusColor,
                     fontWeight = FontWeight.Bold
                 )
-                // ID Order sebagai judul
                 Text(
                     text = order.idOrder,
                     fontWeight = FontWeight.Bold,
@@ -293,6 +307,7 @@ private fun OrderListScreenPreview() {
     NusaMartTheme(dynamicColor = false) {
         Content(
             orders = dummyOrders,
+            onBackClick = {},
             onOrderClick = {}
         )
     }

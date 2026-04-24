@@ -1,26 +1,18 @@
 [
   {
     "idReview": "REV001",
-    "idOrder": "ORD12345",
-    "idProduct": "PRD001",
+    "idOrder": "ORD001",
+    "idProduct": "PROD-001",
     "imageResId": 2131230890,
     "rating": 5,
-    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
+    "reviewProduct": "Berasnya beneran pulen dan wangi. Pengiriman cepat, mantap!"
   },
   {
     "idReview": "REV002",
-    "idOrder": "ORD12345",
-    "idProduct": "PRD002",
+    "idOrder": "ORD001",
+    "idProduct": "PROD-003",
     "imageResId": 2131230890,
-    "rating": 5,
-    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
-  },
-  {
-    "idReview": "REV003",
-    "idOrder": "ORD12345",
-    "idProduct": "PRD003",
-    "imageResId": 2131230890,
-    "rating": 5,
-    "reviewProduct": "Produknya bagus banget, sesuai ekspektasi!"
+    "rating": 4,
+    "reviewProduct": "Gula sampai dengan aman tidak bocor. Terima kasih seller."
   }
 ]

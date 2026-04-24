@@ -71,9 +71,12 @@ import java.util.UUID
 
 fun loadOrderById(context: Context, orderId: String): Order? {
     return try {
-        val jsonString = context.assets.open("order.json")
-            .bufferedReader()
-            .use { it.readText() }
+        val orderFile = File(context.filesDir, "order.json")
+        val jsonString = if (orderFile.exists()) {
+            orderFile.readText()
+        } else {
+            context.assets.open("order.json").bufferedReader().use { it.readText() }
+        }
         val type = object : TypeToken<List<Order>>() {}.type
         val orders: List<Order> = Gson().fromJson(jsonString, type) ?: emptyList()
         orders.find { it.idOrder == orderId }
@@ -85,9 +88,12 @@ fun loadOrderById(context: Context, orderId: String): Order? {
 
 fun loadOrderItemsByOrderId(context: Context, orderId: String): List<OrderItem> {
     return try {
-        val jsonString = context.assets.open("order_item.json")
-            .bufferedReader()
-            .use { it.readText() }
+        val orderItemFile = File(context.filesDir, "order_item.json")
+        val jsonString = if (orderItemFile.exists()) {
+            orderItemFile.readText()
+        } else {
+            context.assets.open("order_item.json").bufferedReader().use { it.readText() }
+        }
         val type = object : TypeToken<List<OrderItem>>() {}.type
         val items: List<OrderItem> = Gson().fromJson(jsonString, type) ?: emptyList()
         items.filter { it.idOrder == orderId }

@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.profile
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,17 +39,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.core.activeUser
-import com.example.nusamart.entity.Buyer
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.example.nusamart.ui.theme.BlackText
@@ -67,75 +59,62 @@ import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedLight
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-
-// Fungsi helper untuk membaca data JSON dari assets
-fun loadBuyersFromJson(context: Context): List<Buyer> {
-    return try {
-        val jsonString = context.assets.open("buyer.json").bufferedReader().use { it.readText() }
-        val listType = object : TypeToken<List<Buyer>>() {}.type
-        Gson().fromJson(jsonString, listType)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        emptyList()
-    }
-}
 
 // ==========================================
-// 1. STATEFUL SCREEN (Mengatur Data & Navigasi)
+// STATEFUL SCREEN
 // ==========================================
+
 @Composable
 fun ProfileScreen() {
     val backStack = LocalBackStack.current
-    val context = LocalContext.current
 
-    // State untuk menyimpan data user yang sedang login
-    var currentBuyer by remember { mutableStateOf<Buyer?>(null) }
-
-    // Memuat data buyer dari JSON saat halaman dibuka
-    LaunchedEffect(Unit) {
-        val buyers = loadBuyersFromJson(context)
-        if (buyers.isNotEmpty()) {
-            // Untuk simulasi, kita ambil data buyer pertama (index 0) sebagai user yang sedang login
-            currentBuyer = buyers[0]
-        }
-    }
+    // Langsung pakai activeUser, tidak perlu load dari JSON
+    val currentBuyer = activeUser
 
     ProfileContent(
-        username = currentBuyer?.username ?: "Loading...",
-        email = currentBuyer?.email ?: "Loading...",
+        username = currentBuyer?.username ?: "Pengguna",
+        email = currentBuyer?.email ?: "-",
         address = currentBuyer?.address ?: "Alamat belum diatur",
+
         onBackClick = {
-            backStack.removeAt(backStack.lastIndex)
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
         },
+
         onPesananClick = {
-            // Karena OrderListScreen butuh parameter, pastikan Routes kamu sudah disesuaikan
-            // Atau cukup panggil rute OrderListRoute jika kamu belum mengubah Routes.kt
             backStack.add(Routes.OrderListRoute)
         },
+
         onLogoutClick = {
             activeUser = null
-            // Menghapus semua tumpukan halaman agar tidak bisa di-back
             backStack.clear()
-            // Pergi ke halaman Login
             backStack.add(Routes.LoginPageRoute)
+        },
+
+        onMenuSelected = { menu ->
+            when (menu) {
+                BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
+                BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
+                BottomMenu.CART -> backStack.add(Routes.CartRoute)
+                BottomMenu.PROFILE -> Unit
+            }
         }
     )
 }
 
 // ==========================================
-// 2. STATELESS CONTENT (Murni Tampilan UI)
+// STATELESS CONTENT
 // ==========================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileContent(
+private fun ProfileContent(
     username: String,
     email: String,
     address: String,
     onBackClick: () -> Unit,
     onPesananClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onMenuSelected: (BottomMenu) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -164,23 +143,8 @@ fun ProfileContent(
         },
         bottomBar = {
             NusaMartBottomNavigation(
-                // 1. Ganti "Saya" menjadi Enum BottomMenu.PROFILE
                 selectedMenu = BottomMenu.PROFILE,
-
-                // 2. Tambahkan aksi saat menu lain ditekan
-                onMenuSelected = { menu ->
-                    // Jangan lupa tambahkan val backStack = LocalBackStack.current di ProfileContent jika butuh langsung pindah,
-                    // Atau panggil lewat parameter (lebih disarankan untuk Stateless)
-
-                    /* Contoh navigasinya (sesuaikan dengan nama Route-mu):
-                    when (menu) {
-                        BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
-                        BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
-                        BottomMenu.CART -> backStack.add(Routes.CartRoute)
-                        BottomMenu.PROFILE -> { /* Tidak melakukan apa-apa karena sudah di halaman ini */ }
-                    }
-                    */
-                }
+                onMenuSelected = onMenuSelected
             )
         },
         containerColor = GrayBackground
@@ -193,17 +157,14 @@ fun ProfileContent(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // --- HEADER INFO USER ---
+            // Header info user
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(WhiteSurface)
                     .padding(24.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Placeholder Profil Picture
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         modifier = Modifier
                             .size(72.dp)
@@ -220,7 +181,6 @@ fun ProfileContent(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Info Data User Dinamis
                     Column {
                         Text(
                             text = username,
@@ -240,7 +200,7 @@ fun ProfileContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- MENU NAVIGASI 1 ---
+            // Menu grup 1
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,25 +213,24 @@ fun ProfileContent(
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
-                // Menu Alamat - Ditambahkan parameter 'subtitle'
                 ProfileMenuItem(
                     icon = Icons.Default.LocationOn,
                     title = "Alamat Pengiriman",
-                    subtitle = address, // Akan menampilkan teks alamat di bawah judul
-                    onClick = { /* Belum bisa dipencet sesuai permintaan */ }
+                    subtitle = address,
+                    onClick = {}
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
                 ProfileMenuItem(
                     icon = Icons.Default.Payment,
                     title = "Metode Pembayaran",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- MENU NAVIGASI 2 ---
+            // Menu grup 2
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -280,20 +239,20 @@ fun ProfileContent(
                 ProfileMenuItem(
                     icon = Icons.Default.Settings,
                     title = "Pengaturan Akun",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
                 ProfileMenuItem(
                     icon = Icons.AutoMirrored.Filled.HelpOutline,
                     title = "Pusat Bantuan",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- TOMBOL LOGOUT ---
+            // Tombol logout
             OutlinedButton(
                 onClick = onLogoutClick,
                 modifier = Modifier
@@ -325,13 +284,14 @@ fun ProfileContent(
 }
 
 // ==========================================
-// REUSABLE MENU ITEM COMPONENT
+// MENU ITEM COMPONENT
 // ==========================================
+
 @Composable
-fun ProfileMenuItem(
+private fun ProfileMenuItem(
     icon: ImageVector,
     title: String,
-    subtitle: String? = null, // Tambahan opsional untuk teks di bawah judul
+    subtitle: String? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -348,17 +308,12 @@ fun ProfileMenuItem(
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
-
-        // Kita ubah menjadi Column agar bisa menampung Title dan Subtitle (Alamat)
-        Column(
-            modifier = Modifier.weight(1f) // Ambil sisa ruang kosong
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 fontSize = 16.sp,
                 color = BlackText
             )
-            // Jika ada subtitle (seperti alamat pengiriman), tampilkan di sini
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -369,10 +324,9 @@ fun ProfileMenuItem(
                 )
             }
         }
-
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Detail",
+            contentDescription = null,
             tint = Color.LightGray,
             modifier = Modifier.size(24.dp)
         )
@@ -380,11 +334,12 @@ fun ProfileMenuItem(
 }
 
 // ==========================================
-// 3. PREVIEW
+// PREVIEW
 // ==========================================
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProfileScreenPreview() {
+private fun ProfileScreenPreview() {
     NusaMartTheme {
         ProfileContent(
             username = "buyer_01",
@@ -392,7 +347,8 @@ fun ProfileScreenPreview() {
             address = "Jl. Ir. Sutami No.36, Kentingan, Surakarta",
             onBackClick = {},
             onPesananClick = {},
-            onLogoutClick = {}
+            onLogoutClick = {},
+            onMenuSelected = {}
         )
     }
 }

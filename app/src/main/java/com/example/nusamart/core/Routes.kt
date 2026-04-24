@@ -58,12 +58,20 @@ object Routes {
     // --- Transaction ---
     @Serializable
     data class PaymentRoute(
-        val orderId: String
+        val orderId: String,
+        val selectedPaymentMethod: String? = null  // nullable, diisi setelah dari confirmation
     ) : NavKey
 
     @Serializable
-    data object PaymentConfirmationRoute : NavKey
-
+    data class PaymentConfirmationRoute(
+        val orderId: String  // perlu orderId untuk balik ke PaymentRoute dengan method terpilih
+    ) : NavKey
+    // Tambah route baru
+    @Serializable
+    data class PaymentSuccessRoute(
+        val paymentCode: String,
+        val orderId: String
+    ) : NavKey
     // --- Order ---
     @Serializable
     data object OrderListRoute : NavKey

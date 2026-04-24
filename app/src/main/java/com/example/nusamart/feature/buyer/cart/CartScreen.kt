@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +55,8 @@ import com.example.nusamart.entity.OrderItem
 import com.example.nusamart.entity.OrderStatus
 import com.example.nusamart.entity.Product
 import com.example.nusamart.feature.buyer.homepage.loadProductsFromJson
+import com.example.nusamart.feature.components.BottomMenu
+import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.example.nusamart.ui.theme.NusaMartTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -68,7 +69,6 @@ import java.util.UUID
 
 fun loadCartItems(context: Context): List<Cart> {
     return try {
-        // Baca dari filesDir dulu (sudah ada perubahan), fallback ke assets
         val cartFile = File(context.filesDir, "cart.json")
         val jsonString = if (cartFile.exists()) {
             cartFile.readText()
@@ -94,13 +94,11 @@ fun saveCartItems(context: Context, items: List<Cart>) {
 
 fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
     try {
-        // Simpan order
         val orderFile = File(context.filesDir, "order.json")
         val existingOrders: MutableList<Order> = if (orderFile.exists()) {
             val type = object : TypeToken<List<Order>>() {}.type
             Gson().fromJson(orderFile.readText(), type) ?: mutableListOf()
         } else {
-            // Baca dari assets sebagai base
             try {
                 val type = object : TypeToken<List<Order>>() {}.type
                 val json = context.assets.open("order.json").bufferedReader().use { it.readText() }
@@ -112,7 +110,6 @@ fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
         existingOrders.add(order)
         orderFile.writeText(Gson().toJson(existingOrders))
 
-        // Simpan order items
         val orderItemFile = File(context.filesDir, "order_item.json")
         val existingItems: MutableList<OrderItem> = if (orderItemFile.exists()) {
             val type = object : TypeToken<List<OrderItem>>() {}.type
@@ -143,14 +140,12 @@ fun CartScreen() {
     val context = LocalContext.current
     val backStack = LocalBackStack.current
 
-    // Load cart & product dari JSON, simpan sebagai state agar UI reaktif
     val initialCart = remember { loadCartItems(context) }
     val products = remember { loadProductsFromJson(context) }
     val productMap = remember { products.associateBy { it.idProduct } }
 
     var cartItems by remember { mutableStateOf(initialCart) }
 
-    // Hitung total dari item yang dicentang
     val checkedItems = cartItems.filter { it.isChecked }
     val totalPrice = checkedItems.sumOf { cart ->
         val price = productMap[cart.idProduct]?.price ?: 0.0
@@ -199,10 +194,22 @@ fun CartScreen() {
             saveCartItems(context, cartItems)
         },
 
+        onShopNow = {
+            backStack.add(Routes.HomeRoute)
+        },
+
+        onMenuSelected = { menu ->
+            when (menu) {
+                BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
+                BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
+                BottomMenu.CART -> Unit // sudah di halaman cart
+                BottomMenu.PROFILE -> backStack.add(Routes.ProfileRoute)
+            }
+        },
+
         onCheckout = {
             if (checkedItems.isEmpty()) return@Content
 
-            // Buat Order baru
             val newOrderId = "ORD-${UUID.randomUUID().toString().take(8).uppercase()}"
             val sellerId = productMap[checkedItems.first().idProduct]?.idSeller ?: ""
 
@@ -217,7 +224,6 @@ fun CartScreen() {
                 idSeller = sellerId
             )
 
-            // Buat OrderItem untuk tiap cart item yang dicentang
             val newOrderItems = checkedItems.mapIndexed { index, cart ->
                 OrderItem(
                     idOrderItem = "OI-${newOrderId}-${index + 1}",
@@ -228,14 +234,11 @@ fun CartScreen() {
                 )
             }
 
-            // Simpan order & order items ke filesDir
             saveNewOrder(context, newOrder, newOrderItems)
 
-            // Hapus item yang sudah dicheckout dari cart
             cartItems = cartItems.filter { !it.isChecked }
             saveCartItems(context, cartItems)
 
-            // Navigasi ke PaymentScreen dengan orderId
             backStack.add(Routes.PaymentRoute(newOrderId))
         }
     )
@@ -257,7 +260,9 @@ private fun Content(
     onQuantityIncrease: (String) -> Unit,
     onQuantityDecrease: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
-    onCheckout: () -> Unit
+    onCheckout: () -> Unit,
+    onShopNow: () -> Unit,
+    onMenuSelected: (BottomMenu) -> Unit
 ) {
     val checkedCount = cartItems.count { it.isChecked }
     val isAllChecked = cartItems.isNotEmpty() && cartItems.all { it.isChecked }
@@ -271,17 +276,28 @@ private fun Content(
             )
         },
         bottomBar = {
-            CartBottomBar(
-                isAllChecked = isAllChecked,
-                totalPrice = totalPrice,
-                checkedCount = checkedCount,
-                onAllCheckedChange = onAllCheckedChange,
-                onCheckout = onCheckout
-            )
+            Column {
+                // Checkout bar
+                CartBottomBar(
+                    isAllChecked = isAllChecked,
+                    totalPrice = totalPrice,
+                    checkedCount = checkedCount,
+                    onAllCheckedChange = onAllCheckedChange,
+                    onCheckout = onCheckout
+                )
+                // Bottom navigation
+                NusaMartBottomNavigation(
+                    selectedMenu = BottomMenu.CART,
+                    onMenuSelected = onMenuSelected
+                )
+            }
         }
     ) { innerPadding ->
         if (cartItems.isEmpty()) {
-            CartEmptyState(modifier = Modifier.padding(innerPadding))
+            CartEmptyState(
+                modifier = Modifier.padding(innerPadding),
+                onShopClick = onShopNow
+            )
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -360,7 +376,6 @@ private fun ShopGroup(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Header toko
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -433,7 +448,6 @@ private fun CartItemRow(
             modifier = Modifier.padding(top = 2.dp)
         )
 
-        // Gambar produk (placeholder)
         Box(
             modifier = Modifier
                 .size(80.dp)
@@ -535,7 +549,10 @@ private fun QuantityStepper(
 // ==========================================
 
 @Composable
-private fun CartEmptyState(modifier: Modifier = Modifier) {
+private fun CartEmptyState(
+    modifier: Modifier = Modifier,
+    onShopClick: () -> Unit
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -555,7 +572,7 @@ private fun CartEmptyState(modifier: Modifier = Modifier) {
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Button(onClick = {}) {
+            Button(onClick = onShopClick) {
                 Text(text = "Mulai Belanja")
             }
         }
@@ -563,7 +580,7 @@ private fun CartEmptyState(modifier: Modifier = Modifier) {
 }
 
 // ==========================================
-// BOTTOM BAR
+// BOTTOM BAR (checkout)
 // ==========================================
 
 @Composable
@@ -582,7 +599,6 @@ private fun CartBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -650,7 +666,9 @@ private fun CartPreview() {
             onQuantityIncrease = {},
             onQuantityDecrease = {},
             onDeleteItem = {},
-            onCheckout = {}
+            onCheckout = {},
+            onShopNow = {},
+            onMenuSelected = {}
         )
     }
 }
@@ -669,7 +687,9 @@ private fun CartEmptyPreview() {
             onQuantityIncrease = {},
             onQuantityDecrease = {},
             onDeleteItem = {},
-            onCheckout = {}
+            onCheckout = {},
+            onShopNow = {},
+            onMenuSelected = {}
         )
     }
 }

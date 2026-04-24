@@ -3,6 +3,7 @@ package com.example.nusamart.feature.buyer.homepage
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -25,12 +27,14 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,12 +42,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -53,20 +59,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
+import com.example.nusamart.entity.Cart
+import com.example.nusamart.entity.Order
+import com.example.nusamart.entity.OrderItem
+import com.example.nusamart.entity.OrderStatus
 import com.example.nusamart.entity.Product
+import com.example.nusamart.feature.buyer.cart.loadCartItems
+import com.example.nusamart.feature.buyer.cart.saveCartItems
+import com.example.nusamart.feature.buyer.cart.saveNewOrder
 import com.example.nusamart.ui.theme.NusaMartTheme
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.UUID
 
-// ── Stateful ────────────────────────────────────────────────────────────────
+// Enum untuk mengatur jenis Pop-up yang muncul
+enum class SheetMode {
+    NONE, CART, BUY
+}
 
+// ==========================================
+// STATEFUL SCREEN
+// ==========================================
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductPageScreen(productId: String) {
     val context = LocalContext.current
     val backStack = LocalBackStack.current
 
     var product by remember { mutableStateOf<Product?>(null) }
-    var quantity by remember { mutableStateOf(1) }
+    var sheetMode by remember { mutableStateOf(SheetMode.NONE) }
+    var quantity by remember { mutableIntStateOf(1) }
 
     LaunchedEffect(productId) {
         val list = loadProductsFromJson(context)
@@ -80,21 +104,103 @@ fun ProductPageScreen(productId: String) {
         return
     }
 
-    ProductPageContent(
+    Content(
         product = product!!,
+        sheetMode = sheetMode,
         quantity = quantity,
+
+        onCartIconClick = {
+            sheetMode = SheetMode.CART
+            quantity = 1
+        },
+
+        onBuyNowMainClick = {
+            sheetMode = SheetMode.BUY
+            quantity = 1
+        },
+
+        onDismissSheet = { sheetMode = SheetMode.NONE },
         onIncrease = { if (quantity < product!!.stock) quantity++ },
         onDecrease = { if (quantity > 1) quantity-- },
-        onBackClick = {
-            backStack.removeLastOrNull()
+
+        onConfirmCart = {
+            // Cek apakah produk sudah ada di cart
+            val currentCart = loadCartItems(context).toMutableList()
+            val existing = currentCart.find { it.idProduct == productId }
+
+            if (existing != null) {
+                // Update quantity jika sudah ada
+                val updated = currentCart.map {
+                    if (it.idProduct == productId)
+                        it.copy(quantity = it.quantity + quantity)
+                    else it
+                }
+                saveCartItems(context, updated)
+            } else {
+                // Tambah item baru
+                val newCartItem = Cart(
+                    idCart = "CART-${UUID.randomUUID().toString().take(8).uppercase()}",
+                    idBuyer = "BUYER-001", // TODO: ganti dengan activeUser?.idBuyer saat sudah ada
+                    idProduct = productId,
+                    quantity = quantity,
+                    isChecked = true
+                )
+                currentCart.add(newCartItem)
+                saveCartItems(context, currentCart)
+            }
+
+            sheetMode = SheetMode.NONE
+            Toast.makeText(
+                context,
+                "$quantity ${product!!.name} masuk ke keranjang",
+                Toast.LENGTH_SHORT
+            ).show()
         },
+
+        onConfirmBuy = {
+            // Buat order baru langsung dari produk ini
+            val newOrderId = "ORD-${UUID.randomUUID().toString().take(8).uppercase()}"
+
+            val newOrder = Order(
+                idOrder = newOrderId,
+                totalPrice = product!!.price * quantity,
+                status = OrderStatus.MENUNGGU,
+                trackingNumber = "",
+                description = "",
+                orderDate = System.currentTimeMillis(),
+                arrivedDate = null,
+                idSeller = product!!.idSeller
+            )
+
+            val newOrderItem = OrderItem(
+                idOrderItem = "OI-$newOrderId-1",
+                idOrder = newOrderId,
+                idProduct = productId,
+                quantity = quantity,
+                priceAtPurchase = product!!.price
+            )
+
+            saveNewOrder(context, newOrder, listOf(newOrderItem))
+
+            sheetMode = SheetMode.NONE
+            backStack.add(Routes.PaymentRoute(orderId = newOrderId))
+        },
+
+        onBackClick = {
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
+        },
+
         onShareClick = {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "${product!!.name} - ${formatPrice(product!!.price)}")
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Lihat produk ini di NusaMart: ${product!!.name} seharga ${formatPrice(product!!.price)}!"
+                )
             }
             context.startActivity(Intent.createChooser(intent, "Bagikan produk"))
         },
+
         onOpenMap = {
             try {
                 val uri = android.net.Uri.parse(product!!.map)
@@ -104,40 +210,41 @@ fun ProductPageScreen(productId: String) {
                 Toast.makeText(context, "Lokasi tidak tersedia", Toast.LENGTH_SHORT).show()
             }
         },
+
         onChatClick = {
-            // TODO: navigasi ke chat
             Toast.makeText(context, "Fitur chat segera hadir", Toast.LENGTH_SHORT).show()
-        },
-        onAddToCart = {
-            // TODO: tambahkan ke cart via ViewModel/repository
-            Toast.makeText(context, "${product!!.name} ditambahkan ke keranjang", Toast.LENGTH_SHORT).show()
-        },
-        onBuyNow = {
-//            backStack.add(Routes.PaymentRoute(product!!.idProduct, quantity)) // payment sementara belum bisa
         }
     )
 }
 
-// ── Stateless ───────────────────────────────────────────────────────────────
+// ==========================================
+// STATELESS CONTENT
+// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductPageContent(
+private fun Content(
     product: Product,
+    sheetMode: SheetMode,
     quantity: Int,
+    onCartIconClick: () -> Unit,
+    onBuyNowMainClick: () -> Unit,
+    onDismissSheet: () -> Unit,
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
+    onConfirmCart: () -> Unit,
+    onConfirmBuy: () -> Unit,
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
     onOpenMap: () -> Unit,
-    onChatClick: () -> Unit,
-    onAddToCart: () -> Unit,
-    onBuyNow: () -> Unit
+    onChatClick: () -> Unit
 ) {
+    val redColor = Color(0xFFF05555)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detail Produk") },
+                title = { Text("Detail Produk", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
@@ -151,7 +258,10 @@ fun ProductPageContent(
             )
         },
         bottomBar = {
-            BottomAppBar(modifier = Modifier.height(64.dp)) {
+            BottomAppBar(
+                modifier = Modifier.height(72.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -159,17 +269,28 @@ fun ProductPageContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onChatClick) {
-                        Icon(Icons.Default.MailOutline, contentDescription = "Chat Penjual")
+                        Icon(
+                            Icons.Default.MailOutline,
+                            contentDescription = "Chat Penjual",
+                            tint = Color.DarkGray
+                        )
                     }
-                    IconButton(onClick = onAddToCart) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Tambah ke Keranjang")
+                    IconButton(onClick = onCartIconClick) {
+                        Icon(
+                            Icons.Default.ShoppingCart,
+                            contentDescription = "Tambah ke Keranjang",
+                            tint = Color.DarkGray
+                        )
                     }
                     Spacer(Modifier.weight(1f))
                     Button(
-                        onClick = onBuyNow,
-                        modifier = Modifier.padding(end = 8.dp)
+                        onClick = onBuyNowMainClick,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = redColor)
                     ) {
-                        Text("Beli Sekarang")
+                        Text("Beli Sekarang", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }
@@ -180,46 +301,78 @@ fun ProductPageContent(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Foto Produk
+            // Foto produk
+            val context = LocalContext.current
+            val safeResId = remember(product.imageResId) {
+                val resId = product.imageResId
+                try {
+                    if (resId != 0) {
+                        context.resources.getResourceName(resId)
+                        resId
+                    } else null
+                } catch (e: Exception) { null }
+            }
+
             Image(
-                painter = painterResource(product.imageResId),
+                painter = painterResource(safeResId ?: R.drawable.nm_logo),
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
+                    .background(Color.LightGray)
             )
 
             Column(modifier = Modifier.padding(16.dp)) {
-
-                // Harga
                 Text(
                     text = formatPrice(product.price),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = redColor
                 )
 
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(8.dp))
 
-                // Nama produk
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
                 )
 
                 Spacer(Modifier.height(4.dp))
 
-                // Link lokasi
+                Text(
+                    text = "Stok: ${product.stock}",
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
+
+                Spacer(Modifier.height(4.dp))
+
                 Text(
                     text = "Dikirim dari: ${product.location}",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = redColor,
                     fontSize = 13.sp,
                     modifier = Modifier.clickable { onOpenMap() }
                 )
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray)
+
+                Text(
+                    text = "Deskripsi Produk",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = product.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray)
 
                 // Info toko
                 Row(
@@ -235,99 +388,178 @@ fun ProductPageContent(
                             .clip(CircleShape)
                     )
                     Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = product.idStore,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 25.sp
-                        )
-                    }
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                // Pilih jumlah
-                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Jumlah",
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.weight(1f)
+                        text = product.idStore,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
-                    OutlinedIconButton(onClick = onDecrease, enabled = quantity > 1) {
-                        Text("-", fontWeight = FontWeight.Bold)
-                    }
-                    Text(
-                        text = quantity.toString(),
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    )
-                    OutlinedIconButton(onClick = onIncrease, enabled = quantity < product.stock) {
-                        Text("+", fontWeight = FontWeight.Bold)
-                    }
                 }
-
-                Text(
-                    text = "Stok: ${product.stock}",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                // Deskripsi
-                Text(
-                    text = "Deskripsi Produk",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = product.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
 
                 Spacer(Modifier.height(16.dp))
             }
         }
     }
+
+    // Bottom sheet quantity — muncul untuk CART maupun BUY
+    if (sheetMode != SheetMode.NONE) {
+        ModalBottomSheet(
+            onDismissRequest = onDismissSheet,
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                // Info produk singkat
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val context = LocalContext.current
+                    val safeResId = remember(product.imageResId) {
+                        val resId = product.imageResId
+                        try {
+                            if (resId != 0) {
+                                context.resources.getResourceName(resId)
+                                resId
+                            } else null
+                        } catch (e: Exception) { null }
+                    }
+                    Image(
+                        painter = painterResource(safeResId ?: R.drawable.nm_logo),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = formatPrice(product.price),
+                            color = Color(0xFFF05555),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Stok: ${product.stock}",
+                            color = Color.Gray,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Pemilih jumlah
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Jumlah",
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedIconButton(
+                        onClick = onDecrease,
+                        enabled = quantity > 1,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Text("−", fontWeight = FontWeight.Bold)
+                    }
+                    Text(
+                        text = quantity.toString(),
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    OutlinedIconButton(
+                        onClick = onIncrease,
+                        enabled = quantity < product.stock,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Text("+", fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Total harga sesuai quantity
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Total", color = Color.Gray)
+                    Text(
+                        text = formatPrice(product.price * quantity),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF05555)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = if (sheetMode == SheetMode.CART) onConfirmCart else onConfirmBuy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF05555))
+                ) {
+                    Text(
+                        text = if (sheetMode == SheetMode.CART) "Masukkan ke Keranjang" else "Beli Sekarang",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
 }
 
-// ── Helper ───────────────────────────────────────────────────────────────────
+// ==========================================
+// HELPER
+// ==========================================
 
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price.toLong())}"
 }
 
+// ==========================================
+// PREVIEW
+// ==========================================
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProductPagePreview() {
+private fun ProductPagePreview() {
     NusaMartTheme {
-        ProductPageContent(
+        Content(
             product = Product(
-                idProduct = "1",
-                name = "Sepatu Contoh Preview",
-                price = 150000.0,
-                description = "Ini adalah teks deskripsi produk yang cukup panjang untuk melihat tampilannya.",
+                idProduct = "PROD-001",
+                name = "Beras Raja Lele 5kg",
+                price = 75000.0,
+                description = "Beras pulen berkualitas tinggi dari petani lokal.",
                 stock = 10,
                 map = "https://maps.google.com",
                 imageResId = R.drawable.nm_logo,
-                idSeller = "S1",
-                idStore = "Toko Contoh",
-                location = "Kota Jakarta"
+                idSeller = "SELL-001",
+                idStore = "Toko Makmur",
+                location = "Jebres, Surakarta"
             ),
+            sheetMode = SheetMode.NONE,
             quantity = 1,
+            onCartIconClick = {},
+            onBuyNowMainClick = {},
+            onDismissSheet = {},
             onIncrease = {},
             onDecrease = {},
+            onConfirmCart = {},
+            onConfirmBuy = {},
             onBackClick = {},
             onShareClick = {},
             onOpenMap = {},
-            onChatClick = {},
-            onAddToCart = {},
-            onBuyNow = {}
+            onChatClick = {}
         )
     }
 }

@@ -19,6 +19,9 @@ import com.example.nusamart.feature.buyer.order.OrderDetailScreen
 import com.example.nusamart.feature.buyer.order.OrderListScreen
 import com.example.nusamart.feature.buyer.profile.ProfileScreen
 import com.example.nusamart.feature.buyer.review.ReviewScreen
+import com.example.nusamart.feature.buyer.transaction.PaymentConfirmationScreen
+import com.example.nusamart.feature.buyer.transaction.PaymentScreen
+import com.example.nusamart.feature.buyer.transaction.PaymentSuccessScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
@@ -66,9 +69,21 @@ fun ComposeApp() {
                     // --- Profile ---
                     entry<Routes.ProfileRoute> { ProfileScreen() }
 
-//                    // --- Transaction ---
-//                    entry<Routes.PaymentRoute> { PaymentScreen() }
-//                    entry<Routes.PaymentConfirmationRoute> { PaymentConfirmationScreen() }
+                    entry<Routes.PaymentRoute> { route ->
+                        PaymentScreen(
+                            orderId = route.orderId,
+                            selectedPaymentMethod = route.selectedPaymentMethod
+                        )
+                    }
+                    entry<Routes.PaymentConfirmationRoute> { route ->
+                        PaymentConfirmationScreen(orderId = route.orderId)
+                    }
+                    entry<Routes.PaymentSuccessRoute> { route ->
+                        PaymentSuccessScreen(
+                            paymentCode = route.paymentCode,
+                            orderId = route.orderId
+                        )
+                    }
 
 //                    // --- Order ---
                     entry<Routes.OrderListRoute> { OrderListScreen() }

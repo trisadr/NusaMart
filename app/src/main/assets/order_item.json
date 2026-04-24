@@ -9,9 +9,9 @@
   {
     "idOrderItem": "OI002",
     "idOrder": "ORD001",
-    "idProduct": "PROD-002",
+    "idProduct": "PROD-003",
     "quantity": 1,
-    "priceAtPurchase": 38000
+    "priceAtPurchase": 18000
   },
   {
     "idOrderItem": "OI003",
@@ -22,23 +22,23 @@
   },
   {
     "idOrderItem": "OI004",
-    "idOrder": "ORD003",
-    "idProduct": "PROD-003",
-    "quantity": 3,
-    "priceAtPurchase": 1000
+    "idOrder": "ORD002",
+    "idProduct": "PROD-004",
+    "quantity": 1,
+    "priceAtPurchase": 28000
   },
   {
     "idOrderItem": "OI005",
-    "idOrder": "ORD004",
+    "idOrder": "ORD003",
     "idProduct": "PROD-001",
     "quantity": 1,
     "priceAtPurchase": 75000
   },
   {
     "idOrderItem": "OI006",
-    "idOrder": "ORD005",
-    "idProduct": "PROD-003",
+    "idOrder": "ORD004",
+    "idProduct": "PROD-004",
     "quantity": 2,
-    "priceAtPurchase": 1000
+    "priceAtPurchase": 28000
   }
 ]

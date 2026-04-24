@@ -63,16 +63,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.File
 
 fun loadBuyers(context: Context): List<Buyer> {
     return try {
-        val jsonString = context.assets.open("buyer.json")
-            .bufferedReader()
-            .use { it.readText() }
-
+        // Cek filesDir dulu (ada akun baru dari register), fallback ke assets
+        val buyerFile = File(context.filesDir, "buyer.json")
+        val jsonString = if (buyerFile.exists()) {
+            buyerFile.readText()
+        } else {
+            context.assets.open("buyer.json").bufferedReader().use { it.readText() }
+        }
         val type = object : TypeToken<List<Buyer>>() {}.type
         Gson().fromJson(jsonString, type) ?: emptyList()
-
     } catch (e: Exception) {
         e.printStackTrace()
         emptyList()
