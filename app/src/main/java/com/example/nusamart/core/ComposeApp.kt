@@ -14,6 +14,9 @@ import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
 import com.example.nusamart.feature.buyer.homepage.SearchResultScreen
 import com.example.nusamart.feature.buyer.notification.NotificationDetailScreen
 import com.example.nusamart.feature.buyer.notification.NotificationScreen
+import com.example.nusamart.feature.buyer.order.OrderDetailScreen
+import com.example.nusamart.feature.buyer.order.OrderListScreen
+import com.example.nusamart.feature.buyer.profile.ProfileScreen
 import com.example.nusamart.feature.buyer.review.ReviewScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
@@ -60,19 +63,19 @@ fun ComposeApp() {
                     }
 
                     // --- Profile ---
-//                    entry<Routes.ProfileRoute> { ProfileScreen() }
+                    entry<Routes.ProfileRoute> { ProfileScreen() }
 
 //                    // --- Transaction ---
 //                    entry<Routes.PaymentRoute> { PaymentScreen() }
 //                    entry<Routes.PaymentConfirmationRoute> { PaymentConfirmationScreen() }
 
 //                    // --- Order ---
-//                    entry<Routes.OrderListRoute> { OrderListScreen() }
+                    entry<Routes.OrderListRoute> { OrderListScreen() }
 
                     // Membaca orderId yang dikirim melalui Routes
-//                    entry<Routes.OrderDetailRoute> { route ->
-//                        OrderDetailScreen(orderId = route.orderId)
-//                    }
+                    entry<Routes.OrderDetailRoute> { route ->
+                        OrderDetailScreen(orderId = route.orderId)
+                    }
 
 //                    // --- Review ---
                     entry<Routes.ReviewRoute> { route ->

@@ -1,10 +1,52 @@
-{
-  "idOrder": "ORD12345",
-  "totalPrice": 235000,
-  "status": "DIKIRIM",
-  "trackingNumber": "JNE123456789",
-  "description": "Pesanan produk kebutuhan sehari-hari",
-  "orderDate": "2026-04-20",
-  "arrivedDate": null,
-  "idSeller": "SELLER001"
-}
+[
+  {
+    "idOrder": "ORD001",
+    "totalPrice": 235000,
+    "status": "SELESAI",
+    "trackingNumber": "JNE123456789",
+    "description": "Pesanan produk kebutuhan sehari-hari",
+    "orderDate": 1713600000,
+    "arrivedDate": 1713900000,
+    "idSeller": "SELLER001"
+  },
+  {
+    "idOrder": "ORD002",
+    "totalPrice": 150000,
+    "status": "DIKIRIM",
+    "trackingNumber": "SICEPAT987654",
+    "description": "Pesanan kerajinan tangan",
+    "orderDate": 1713700000,
+    "arrivedDate": null,
+    "idSeller": "SELLER002"
+  },
+  {
+    "idOrder": "ORD003",
+    "totalPrice": 80000,
+    "status": "DIPROSES",
+    "trackingNumber": "",
+    "description": "Pesanan makanan khas daerah",
+    "orderDate": 1713800000,
+    "arrivedDate": null,
+    "idSeller": "SELLER001"
+  },
+  {
+    "idOrder": "ORD004",
+    "totalPrice": 320000,
+    "status": "MENUNGGU",
+    "trackingNumber": "",
+    "description": "Pesanan batik tulis",
+    "orderDate": 1713850000,
+    "arrivedDate": null,
+    "idSeller": "SELLER003"
+  },
+  {
+    "idOrder": "ORD005",
+    "totalPrice": 55000,
+    "status": "DIBATALKAN",
+    "trackingNumber": "",
+    "description": "Pesanan dibatalkan oleh pembeli",
+    "orderDate": 1713500000,
+    "arrivedDate": null,
+    "idSeller": "SELLER002"
+  }
+]

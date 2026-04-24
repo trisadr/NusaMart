@@ -310,13 +310,21 @@ private fun ReviewItemSection(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current
+            val safeImageResId = remember(product?.imageResId) {
+                val resId = product?.imageResId ?: 0
+                try {
+                    if (resId != 0) {
+                        context.resources.getResourceName(resId) // throws jika ID tidak valid
+                        resId
+                    } else null
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
             Image(
-                painter = painterResource(
-                    id = if (product?.imageResId != null && product.imageResId != 0)
-                        product.imageResId
-                    else
-                        R.drawable.keranjang
-                ),
+                painter = painterResource(id = safeImageResId ?: R.drawable.nm_logo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(60.dp)
