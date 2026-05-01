@@ -61,7 +61,7 @@ fun ComposeApp() {
                     // --- Notification ---
                     entry<Routes.NotificationRoute> { NotificationScreen() }
 
-//                    // Membaca notificationId yang dikirim melalui Routes
+                    // Membaca notificationId yang dikirim melalui Routes
                     entry<Routes.NotificationDetailRoute> { route ->
                         NotificationDetailScreen(notificationId = route.notificationId)
                     }
@@ -71,12 +71,20 @@ fun ComposeApp() {
 
                     entry<Routes.PaymentRoute> { route ->
                         PaymentScreen(
-                            orderId = route.orderId,
+                            orderId               = route.orderId,
+                            productId             = route.productId,
+                            quantity              = route.quantity,
+                            fromCart              = route.fromCart,
                             selectedPaymentMethod = route.selectedPaymentMethod
                         )
                     }
                     entry<Routes.PaymentConfirmationRoute> { route ->
-                        PaymentConfirmationScreen(orderId = route.orderId)
+                        PaymentConfirmationScreen(
+                            orderId   = route.orderId,
+                            productId = route.productId,
+                            quantity  = route.quantity,
+                            fromCart  = route.fromCart
+                        )
                     }
                     entry<Routes.PaymentSuccessRoute> { route ->
                         PaymentSuccessScreen(
@@ -85,7 +93,7 @@ fun ComposeApp() {
                         )
                     }
 
-//                    // --- Order ---
+                    // --- Order ---
                     entry<Routes.OrderListRoute> { OrderListScreen() }
 
                     // Membaca orderId yang dikirim melalui Routes
@@ -93,7 +101,7 @@ fun ComposeApp() {
                         OrderDetailScreen(orderId = route.orderId)
                     }
 
-//                    // --- Review ---
+                    // --- Review ---
                     entry<Routes.ReviewRoute> { route ->
                         ReviewScreen(orderId = route.orderId)
                     }

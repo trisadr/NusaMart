@@ -52,36 +52,68 @@ import com.example.nusamart.entity.Order
 import com.example.nusamart.entity.OrderItem
 import com.example.nusamart.entity.OrderStatus
 import com.example.nusamart.entity.Product
+import com.example.nusamart.feature.buyer.cart.clearPendingOrder
+import com.example.nusamart.feature.buyer.cart.loadCartItems
+import com.example.nusamart.feature.buyer.cart.loadPendingOrder
+import com.example.nusamart.feature.buyer.cart.saveCartItems
 import com.example.nusamart.feature.buyer.cart.saveNewOrder
 import com.example.nusamart.feature.buyer.homepage.loadProductsFromJson
-import com.example.nusamart.feature.buyer.order.loadOrderById
-import com.example.nusamart.feature.buyer.order.loadOrderItemsByOrderId
 import com.example.nusamart.ui.theme.NusaMartTheme
+import java.util.UUID
 
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 @Composable
 fun PaymentScreen(
-    orderId: String,
+    orderId: String? = null,
+    productId: String? = null,
+    quantity: Int = 1,
+    fromCart: Boolean = true,
     selectedPaymentMethod: String? = null
 ) {
     val context = LocalContext.current
     val backStack = LocalBackStack.current
-
-    val order = remember { loadOrderById(context, orderId) }
-    val orderItems = remember { loadOrderItemsByOrderId(context, orderId) }
     val products = remember { loadProductsFromJson(context) }
     val productMap = remember { products.associateBy { it.idProduct } }
 
-    var noteText by remember { mutableStateOf("") }
+    // Dari CartScreen: baca pending order yang disimpan CartScreen
+    val pendingOrder = remember { if (fromCart) loadPendingOrder(context) else null }
 
-    if (order == null) {
+    // Dari ProductPage: bangun order items sementara dari productId + quantity
+    val directProduct = remember(productId) {
+        if (!fromCart && productId != null) productMap[productId] else null
+    }
+    val directOrderItems: List<OrderItem> = remember(productId, quantity) {
+        if (!fromCart && directProduct != null) {
+            listOf(
+                OrderItem(
+                    idOrderItem = "TEMP-OI",
+                    idOrder = "TEMP",
+                    idProduct = productId!!,
+                    quantity = quantity,
+                    priceAtPurchase = directProduct.price
+                )
+            )
+        } else emptyList()
+    }
+    val activeOrderItems = if (fromCart) {
+        pendingOrder?.orderItems ?: emptyList()
+    } else {
+        directOrderItems
+    }
+    if (fromCart && pendingOrder == null) {
         Text("Order tidak ditemukan")
         return
     }
+    if (!fromCart && directProduct == null) {
+        Text("Produk tidak ditemukan")
+        return
+    }
+
+    var noteText by remember { mutableStateOf("") }
 
     Content(
-        order = order,
-        orderItems = orderItems,
+        orderItems = activeOrderItems,
         productMap = productMap,
         selectedPaymentMethod = selectedPaymentMethod,
         noteText = noteText,
@@ -92,27 +124,66 @@ fun PaymentScreen(
         },
 
         onSelectPaymentMethod = {
-            backStack.add(Routes.PaymentConfirmationRoute(orderId))
+            backStack.add(
+                Routes.PaymentConfirmationRoute(
+                    orderId   = orderId,
+                    productId = productId,
+                    quantity  = quantity,
+                    fromCart  = fromCart
+                )
+            )
         },
 
         onPlaceOrder = {
             if (selectedPaymentMethod == null) return@Content
 
-            val paymentCode = "PAY-${(100000..999999).random()}"
-            val updatedOrder = order.copy(status = OrderStatus.MENUNGGU)
-            saveNewOrder(context, updatedOrder, orderItems)
+            if (fromCart) {
+                saveNewOrder(context, pendingOrder!!.order, pendingOrder.orderItems)
+                val cartIdsToDelete = pendingOrder.cartIdsToDelete.toSet()
+                val currentCart = loadCartItems(context)
+                val updatedCart = currentCart.filter { it.idCart !in cartIdsToDelete }
+                saveCartItems(context, updatedCart)
+                clearPendingOrder(context)
 
-            backStack.removeAt(backStack.lastIndex)
-            backStack.add(Routes.PaymentSuccessRoute(paymentCode, orderId))
+                val paymentCode = "PAY-${(100000..999999).random()}"
+                backStack.removeAt(backStack.lastIndex)
+                backStack.add(Routes.PaymentSuccessRoute(paymentCode, pendingOrder.order.idOrder))
+
+            } else {
+                val newOrderId = "ORD-${UUID.randomUUID().toString().take(8).uppercase()}"
+
+                val newOrder = Order(
+                    idOrder = newOrderId,
+                    totalPrice = directProduct!!.price * quantity,
+                    status = OrderStatus.MENUNGGU,
+                    trackingNumber = "",
+                    description = "",
+                    orderDate = System.currentTimeMillis(),
+                    arrivedDate = null,
+                    idSeller = directProduct.idSeller
+                )
+                val newOrderItem = OrderItem(
+                    idOrderItem = "OI-$newOrderId-1",
+                    idOrder = newOrderId,
+                    idProduct = productId!!,
+                    quantity = quantity,
+                    priceAtPurchase = directProduct.price
+                )
+                saveNewOrder(context, newOrder, listOf(newOrderItem))
+
+                val paymentCode = "PAY-${(100000..999999).random()}"
+                backStack.removeAt(backStack.lastIndex)
+                backStack.add(Routes.PaymentSuccessRoute(paymentCode, newOrderId))
+            }
         }
     )
 }
 
+// ─── Content ──────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    order: Order,
     orderItems: List<OrderItem>,
     productMap: Map<String, Product>,
     selectedPaymentMethod: String?,
@@ -151,10 +222,7 @@ private fun Content(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(
-                            text = "Total Tagihan",
-                            style = MaterialTheme.typography.labelLarge
-                        )
+                        Text(text = "Total Tagihan", style = MaterialTheme.typography.labelLarge)
                         Text(
                             text = "Rp $total",
                             style = MaterialTheme.typography.titleLarge,
@@ -192,9 +260,7 @@ private fun Content(
                 Spacer(modifier = Modifier.height(8.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
@@ -322,10 +388,7 @@ private fun Content(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onSelectPaymentMethod
-                ) {
+                OutlinedCard(modifier = Modifier.fillMaxWidth(), onClick = onSelectPaymentMethod) {
                     Row(
                         modifier = Modifier
                             .padding(16.dp)
@@ -396,21 +459,11 @@ private fun Content(
     }
 }
 
-
+// ─── Preview ──────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun PaymentScreenPreview() {
-    val dummyOrder = Order(
-        idOrder = "ORD001",
-        totalPrice = 188000.0,
-        status = OrderStatus.MENUNGGU,
-        trackingNumber = "",
-        description = "",
-        orderDate = 1713600000L,
-        arrivedDate = null,
-        idSeller = "SELLER001"
-    )
     val dummyItems = listOf(
         OrderItem("OI001", "ORD001", "PROD-001", 2, 75000.0),
         OrderItem("OI002", "ORD001", "PROD-002", 1, 38000.0)
@@ -419,10 +472,8 @@ private fun PaymentScreenPreview() {
         "PROD-001" to Product("PROD-001", "Beras Raja Lele 5kg", 75000.0, "", 50, "", 0, "SELL-001", "STORE-001", "Solo"),
         "PROD-002" to Product("PROD-002", "Minyak Goreng Sunco 2L", 38000.0, "", 30, "", 0, "SELL-002", "STORE-002", "Solo")
     )
-
     NusaMartTheme(dynamicColor = false) {
         Content(
-            order = dummyOrder,
             orderItems = dummyItems,
             productMap = dummyProducts,
             selectedPaymentMethod = "Transfer Bank - BCA",

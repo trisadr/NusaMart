@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -98,19 +99,11 @@ fun HomePageScreen(
         onMenuSelected = { menu ->
             when (menu) {
                 BottomMenu.HOME -> Unit
-                BottomMenu.NOTIFICATION -> {
-                    backStack.add(Routes.NotificationRoute)
-                }
-                BottomMenu.PROFILE -> {
-                    backStack.add(Routes.ProfileRoute)
-                }
-                BottomMenu.CART -> {
-                    backStack.add(Routes.CartRoute)
-                }
-
+                BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
+                BottomMenu.PROFILE -> backStack.add(Routes.ProfileRoute)
+                BottomMenu.CART -> backStack.add(Routes.CartRoute)
             }
         }
-
     )
 }
 
@@ -151,9 +144,7 @@ private fun Content(
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = { onSearch() }
-                    )
+                    keyboardActions = KeyboardActions(onSearch = { onSearch() })
                 )
             }
         },
@@ -164,7 +155,6 @@ private fun Content(
             )
         }
     ) { innerPadding ->
-
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -190,6 +180,8 @@ private fun Content(
         }
     }
 }
+
+// ─── Product Grid Card ────────────────────────────────────────────────────────
 
 @Composable
 fun ProductGridCard(
@@ -218,12 +210,14 @@ fun ProductGridCard(
             )
 
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Box(modifier = Modifier.heightIn(min = 40.dp)) {
+                    Text(
+                        text = product.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -246,6 +240,8 @@ fun ProductGridCard(
     }
 }
 
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
 @Preview(showBackground = true)
 @Composable
 private fun HomePagePreview() {
@@ -266,7 +262,7 @@ private fun HomePagePreview() {
             ),
             Product(
                 idProduct = "2",
-                name = "Batik Tulis",
+                name = "Batik Tulis Halus Khas Yogyakarta",
                 price = 150000.0,
                 description = "Batik handmade khas Jogja",
                 stock = 5,

@@ -65,13 +65,9 @@ import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.entity.Cart
-import com.example.nusamart.entity.Order
-import com.example.nusamart.entity.OrderItem
-import com.example.nusamart.entity.OrderStatus
 import com.example.nusamart.entity.Product
 import com.example.nusamart.feature.buyer.cart.loadCartItems
 import com.example.nusamart.feature.buyer.cart.saveCartItems
-import com.example.nusamart.feature.buyer.cart.saveNewOrder
 import com.example.nusamart.ui.theme.NusaMartTheme
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -117,12 +113,12 @@ fun ProductPageScreen(productId: String) {
 
         onCartIconClick = {
             quantity = 1
-            isCartSheetOpen = true   // buka cart sheet
+            isCartSheetOpen = true
         },
 
         onBuyNowMainClick = {
             quantity = 1
-            isBuySheetOpen = true    // buka buy sheet
+            isBuySheetOpen = true
         },
 
         onIncrease = { if (quantity < product!!.stock) quantity++ },
@@ -158,6 +154,7 @@ fun ProductPageScreen(productId: String) {
         }
     )
 
+    // ─── Cart Bottom Sheet ────────────────────────────────────────────────────
     if (isCartSheetOpen) {
         ProductBottomSheet(
             product = product!!,
@@ -206,6 +203,7 @@ fun ProductPageScreen(productId: String) {
         )
     }
 
+    // ─── Buy Now Bottom Sheet ─────────────────────────────────────────────────
     if (isBuySheetOpen) {
         ProductBottomSheet(
             product = product!!,
@@ -215,34 +213,18 @@ fun ProductPageScreen(productId: String) {
             onIncrease = { if (quantity < product!!.stock) quantity++ },
             onDecrease = { if (quantity > 1) quantity-- },
             onConfirm = {
-                val newOrderId = "ORD-${UUID.randomUUID().toString().take(8).uppercase()}"
-
-                val newOrder = Order(
-                    idOrder = newOrderId,
-                    totalPrice = product!!.price * quantity,
-                    status = OrderStatus.MENUNGGU,
-                    trackingNumber = "",
-                    description = "",
-                    orderDate = System.currentTimeMillis(),
-                    arrivedDate = null,
-                    idSeller = product!!.idSeller
-                )
-
-                val newOrderItem = OrderItem(
-                    idOrderItem = "OI-$newOrderId-1",
-                    idOrder = newOrderId,
-                    idProduct = productId,
-                    quantity = quantity,
-                    priceAtPurchase = product!!.price
-                )
-
-                saveNewOrder(context, newOrder, listOf(newOrderItem))
-
                 scope.launch {
                     if (buySheetState.isVisible) buySheetState.hide()
                 }.invokeOnCompletion {
                     isBuySheetOpen = false
-                    backStack.add(Routes.PaymentRoute(orderId = newOrderId))
+                    // Kirim productId & quantity ke PaymentScreen, fromCart = false
+                    backStack.add(
+                        Routes.PaymentRoute(
+                            productId = productId,
+                            quantity = quantity,
+                            fromCart = false
+                        )
+                    )
                 }
             },
             onDismissRequest = {
@@ -424,7 +406,6 @@ private fun ProductBottomSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
         ) {
-            // Info produk
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val context = LocalContext.current
                 val safeResId = remember(product.imageResId) {
@@ -456,7 +437,6 @@ private fun ProductBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Quantity stepper
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -486,7 +466,6 @@ private fun ProductBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Total harga
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -501,7 +480,6 @@ private fun ProductBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol konfirmasi
             Button(
                 onClick = onConfirm,
                 modifier = Modifier

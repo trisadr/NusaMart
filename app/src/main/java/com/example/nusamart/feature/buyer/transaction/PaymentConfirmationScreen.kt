@@ -52,7 +52,7 @@ data class PaymentSection(
     val methods: List<PaymentMethod>
 )
 
-// ─── Data definisi metode pembayaran ─────────────────────────────────────────
+// ─── Data list metode pembayaran ─────────────────────────────────────────
 
 private val paymentSections = listOf(
     PaymentSection(
@@ -93,22 +93,33 @@ private val paymentSections = listOf(
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
-fun PaymentConfirmationScreen(orderId: String) {
+fun PaymentConfirmationScreen(
+    orderId: String? = null,
+    productId: String? = null,
+    quantity: Int = 1,
+    fromCart: Boolean = true
+) {
     val backStack = LocalBackStack.current
     var selectedMethod by remember { mutableStateOf<String?>(null) }
 
     Content(
         selectedMethod = selectedMethod,
         onMethodSelected = { selectedMethod = it },
-
         onBackClick = {
             if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
         },
-
         onConfirm = {
             if (selectedMethod == null) return@Content
             backStack.removeAt(backStack.lastIndex)
-            backStack.add(Routes.PaymentRoute(orderId, selectedMethod!!))
+            backStack.add(
+                Routes.PaymentRoute(
+                    orderId               = orderId,
+                    productId             = productId,
+                    quantity              = quantity,
+                    fromCart              = fromCart,
+                    selectedPaymentMethod = selectedMethod!!
+                )
+            )
         }
     )
 }
