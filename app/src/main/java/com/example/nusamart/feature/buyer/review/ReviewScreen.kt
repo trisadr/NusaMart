@@ -65,10 +65,6 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.UUID
 
-// ==========================================
-// DATA LOADING
-// ==========================================
-
 fun loadOrderById(context: Context, orderId: String): Order? {
     return try {
         val orderFile = File(context.filesDir, "order.json")
@@ -105,7 +101,6 @@ fun loadOrderItemsByOrderId(context: Context, orderId: String): List<OrderItem> 
 
 fun saveReviewsToJson(context: Context, newReviews: List<Review>) {
     try {
-        // Baca review yang sudah ada dari files dir (writable)
         val reviewFile = File(context.filesDir, "review.json")
         val existingReviews: MutableList<Review> = if (reviewFile.exists()) {
             val type = object : TypeToken<List<Review>>() {}.type
@@ -121,15 +116,10 @@ fun saveReviewsToJson(context: Context, newReviews: List<Review>) {
     }
 }
 
-// State per item untuk menyimpan rating dan review text masing-masing produk
 data class ReviewItemState(
     val rating: Int = 0,
     val reviewText: String = ""
 )
-
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun ReviewScreen(orderId: String) {
@@ -140,7 +130,6 @@ fun ReviewScreen(orderId: String) {
     val orderItems = remember { loadOrderItemsByOrderId(context, orderId) }
     val products = remember { loadProductsFromJson(context) }
 
-    // Map idProduct -> Product untuk lookup cepat
     val productMap = remember { products.associateBy { it.idProduct } }
 
     if (order == null) {
@@ -148,7 +137,6 @@ fun ReviewScreen(orderId: String) {
         return
     }
 
-    // State review untuk setiap order item, key = idOrderItem
     val reviewStates = remember {
         orderItems.associate { item ->
             item.idOrderItem to mutableStateOf(ReviewItemState())
@@ -176,14 +164,12 @@ fun ReviewScreen(orderId: String) {
         },
 
         onSubmitClick = {
-            // Validasi: semua item wajib ada rating
             val allRated = orderItems.all { item ->
                 (reviewStates[item.idOrderItem]?.value?.rating ?: 0) > 0
             }
 
             if (!allRated) return@Content false
 
-            // Buat list Review dari semua order item
             val reviews = orderItems.map { item ->
                 val state = reviewStates[item.idOrderItem]!!.value
                 Review(
@@ -198,7 +184,6 @@ fun ReviewScreen(orderId: String) {
 
             saveReviewsToJson(context, reviews)
 
-            // Kembali ke OrderDetail
             backStack.removeAt(backStack.lastIndex)
             backStack.add(Routes.OrderDetailRoute(orderId))
 
@@ -206,10 +191,6 @@ fun ReviewScreen(orderId: String) {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -294,10 +275,6 @@ private fun Content(
     }
 }
 
-// ==========================================
-// REVIEW ITEM SECTION (per produk)
-// ==========================================
-
 @Composable
 private fun ReviewItemSection(
     product: Product?,
@@ -311,7 +288,6 @@ private fun ReviewItemSection(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Info produk singkat
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -321,7 +297,7 @@ private fun ReviewItemSection(
                 val resId = product?.imageResId ?: 0
                 try {
                     if (resId != 0) {
-                        context.resources.getResourceName(resId) // throws jika ID tidak valid
+                        context.resources.getResourceName(resId)
                         resId
                     } else null
                 } catch (e: Exception) {
@@ -359,7 +335,6 @@ private fun ReviewItemSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Rating bintang
         Text(
             text = "Bagaimana kualitas produk ini?",
             style = MaterialTheme.typography.bodyMedium,
@@ -385,7 +360,7 @@ private fun ReviewItemSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Upload foto (placeholder, belum ada aksi)
+        // Upload foto (belum ada aksi)
         Text(
             text = "Tambahkan Foto (Opsional)",
             style = MaterialTheme.typography.bodyMedium,
@@ -420,7 +395,6 @@ private fun ReviewItemSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Teks ulasan (opsional)
         Text(
             text = "Tulis Ulasan (Opsional)",
             style = MaterialTheme.typography.bodyMedium,
@@ -442,10 +416,6 @@ private fun ReviewItemSection(
         )
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,68 +63,50 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-// ==========================================
-// HELPER: Baca & Tulis buyer.json dari assets → files
-// ==========================================
+// ─── Data helper ─────────────────────────────────────────────────────────────
 
-/**
- * Membaca buyer.json. Prioritas: internal storage (files/buyer.json).
- * Jika belum ada, fallback ke assets/buyer.json.
- */
 private fun readBuyerJson(context: Context): JSONArray {
     val internalFile = java.io.File(context.filesDir, "buyer.json")
     return try {
         if (internalFile.exists()) {
             JSONArray(internalFile.readText())
         } else {
-            // Salin dari assets ke internal storage agar bisa ditulis nanti
             val assetText = context.assets.open("buyer.json").bufferedReader().use { it.readText() }
             internalFile.writeText(assetText)
             JSONArray(assetText)
         }
     } catch (e: Exception) {
-        // Jika assets juga tidak ada, mulai dengan array kosong
         JSONArray()
     }
 }
 
-/**
- * Menulis JSONArray ke internal storage (files/buyer.json).
- */
 private fun writeBuyerJson(context: Context, array: JSONArray) {
     val internalFile = java.io.File(context.filesDir, "buyer.json")
     internalFile.writeText(array.toString(2))
 }
 
-/**
- * Validasi format email sederhana berbasis pengecekan string.
- * Aturan: harus mengandung tepat satu '@', dan bagian setelah '@' harus mengandung titik.
- */
 private fun isEmailValid(email: String): Boolean {
     val atIndex = email.indexOf('@')
-    if (atIndex <= 0) return false                   // tidak ada '@' atau '@' di awal
-    if (email.lastIndexOf('@') != atIndex) return false // lebih dari satu '@'
+    if (atIndex <= 0) return false
+    if (email.lastIndexOf('@') != atIndex) return false
     val domain = email.substring(atIndex + 1)
     if (domain.isEmpty()) return false
     val dotIndex = domain.lastIndexOf('.')
-    if (dotIndex <= 0) return false                  // tidak ada '.' di domain
-    if (dotIndex == domain.length - 1) return false  // '.' di akhir domain
+    if (dotIndex <= 0) return false
+    if (dotIndex == domain.length - 1) return false
     return true
 }
 
-// ==========================================
-// REGISTER SCREEN (STATEFUL)
-// ==========================================
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
 @Composable
 fun RegisterScreen() {
     val backStack = LocalBackStack.current
     val context = LocalContext.current
 
-    // State Loading & Simulasi
     var isLoading by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
 
-    // State Input Form
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -132,7 +115,14 @@ fun RegisterScreen() {
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
     var isSeller by remember { mutableStateOf(false) }
 
-    // Efek simulasi setelah registrasi berhasil
+    var isFormErrorDialogOpen by remember { mutableStateOf(false) }    // field kosong & format salah
+    var isDuplicateDialogOpen by remember { mutableStateOf(false) }    // username/email sudah dipakai
+    var isPasswordMismatchDialogOpen by remember { mutableStateOf(false) } // password tidak cocok
+
+    // Pesan error yang akan ditampilkan di dialog
+    var formErrorMessage by remember { mutableStateOf("") }
+    var duplicateErrorMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
             delay(2000L)
@@ -167,39 +157,33 @@ fun RegisterScreen() {
             backStack.add(Routes.LoginPageRoute)
         },
         onRegisterClick = {
-            // ── 1. Cek semua field wajib diisi ──
             when {
                 username.isBlank() -> {
-                    Toast.makeText(context, "Username wajib diisi!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    formErrorMessage = "Username wajib diisi."
+                    isFormErrorDialogOpen = true
                 }
                 email.isBlank() -> {
-                    Toast.makeText(context, "Email wajib diisi!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    formErrorMessage = "Email wajib diisi."
+                    isFormErrorDialogOpen = true
                 }
                 password.isBlank() -> {
-                    Toast.makeText(context, "Password wajib diisi!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    formErrorMessage = "Password wajib diisi."
+                    isFormErrorDialogOpen = true
                 }
                 konfirmasiPassword.isBlank() -> {
-                    Toast.makeText(context, "Konfirmasi password wajib diisi!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    formErrorMessage = "Konfirmasi password wajib diisi."
+                    isFormErrorDialogOpen = true
                 }
-
-                // ── 2. Validasi format email ──
                 !isEmailValid(email.trim()) -> {
-                    Toast.makeText(context, "Format email tidak valid!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    formErrorMessage = "Format email tidak valid. Pastikan email mengandung '@' dan domain yang benar."
+                    isFormErrorDialogOpen = true
                 }
 
-                // ── 3. Cocokkan password ──
                 password != konfirmasiPassword -> {
-                    Toast.makeText(context, "Password dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
-                    return@Content
+                    isPasswordMismatchDialogOpen = true
                 }
 
                 else -> {
-                    // ── 4. Cek keunikan username & email di buyer.json ──
                     val buyers = readBuyerJson(context)
                     val usernameLower = username.trim().lowercase()
                     val emailLower = email.trim().lowercase()
@@ -215,20 +199,21 @@ fun RegisterScreen() {
 
                     when {
                         usernameTaken -> {
-                            Toast.makeText(context, "Username sudah digunakan!", Toast.LENGTH_SHORT).show()
+                            duplicateErrorMessage = "Username \"${username.trim()}\" sudah digunakan. Silakan pilih username lain."
+                            isDuplicateDialogOpen = true
                         }
                         emailTaken -> {
-                            Toast.makeText(context, "Email sudah terdaftar!", Toast.LENGTH_SHORT).show()
+                            duplicateErrorMessage = "Email \"${email.trim()}\" sudah terdaftar. Silakan gunakan email lain atau login."
+                            isDuplicateDialogOpen = true
                         }
                         else -> {
-                            // ── 5. Simpan ke buyer.json (hanya field yang ada di struktur asli) ──
                             val newUser = JSONObject().apply {
                                 put("email", email.trim())
                                 put("username", username.trim())
                                 put("password", password)
-                                put("address", "")          // kosong dulu, bisa diisi di profil
-                                put("profilePicResId", 0)   // default, belum ada foto
-                                put("role", isSeller)       // false = buyer, true = seller
+                                put("address", "")
+                                put("profilePicResId", 0)
+                                put("role", isSeller)
                             }
                             buyers.put(newUser)
                             writeBuyerJson(context, buyers)
@@ -241,11 +226,35 @@ fun RegisterScreen() {
             }
         }
     )
+
+    if (isFormErrorDialogOpen) {
+        FormErrorDialog(
+            message = formErrorMessage,
+            onDismissRequest = { isFormErrorDialogOpen = false }
+        )
+    }
+
+    if (isPasswordMismatchDialogOpen) {
+        PasswordMismatchDialog(
+            onDismissRequest = { isPasswordMismatchDialogOpen = false }
+        )
+    }
+
+    if (isDuplicateDialogOpen) {
+        DuplicateAccountDialog(
+            message = duplicateErrorMessage,
+            onDismissRequest = { isDuplicateDialogOpen = false },
+            onLoginClick = {
+                isDuplicateDialogOpen = false
+                backStack.clear()
+                backStack.add(Routes.LoginPageRoute)
+            }
+        )
+    }
 }
 
-// ==========================================
-// REGISTER CONTENT (STATELESS)
-// ==========================================
+// ─── Content ─────────────────────────────────────────────────────────────────
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -318,8 +327,6 @@ private fun Content(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
             )
-
-            // --- PEMILIHAN ROLE ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -329,64 +336,43 @@ private fun Content(
                 OutlinedButton(
                     onClick = { onSellerChange(false) },
                     enabled = !isLoading,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                    modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (!isSeller) BluePrimary.copy(alpha = 0.1f) else Color.Transparent,
                         contentColor = if (!isSeller) BluePrimary else Color.Gray
                     )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Pembeli",
-                        fontWeight = if (!isSeller) FontWeight.Bold else FontWeight.Normal
-                    )
+                    Text("Pembeli", fontWeight = if (!isSeller) FontWeight.Bold else FontWeight.Normal)
                 }
 
                 OutlinedButton(
                     onClick = { onSellerChange(true) },
                     enabled = !isLoading,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                    modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (isSeller) BluePrimary.copy(alpha = 0.1f) else Color.Transparent,
                         contentColor = if (isSeller) BluePrimary else Color.Gray
                     )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Store,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Icon(Icons.Default.Store, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Penjual",
-                        fontWeight = if (isSeller) FontWeight.Bold else FontWeight.Normal
-                    )
+                    Text("Penjual", fontWeight = if (isSeller) FontWeight.Bold else FontWeight.Normal)
                 }
             }
 
-            // --- INPUT FORM ---
-
-            // ── USERNAME ──
+            // Input Form
             MyOutlinedTextField(
                 value = username,
-                onValueChange = { onUsernameChange(it.trim()) }, // trim spasi otomatis
+                onValueChange = { onUsernameChange(it.trim()) },
                 label = "Username",
                 icon = Icons.Default.AccountCircle
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email
             MyOutlinedTextField(
                 value = email,
                 onValueChange = onEmailChange,
@@ -395,7 +381,6 @@ private fun Content(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password
             MyOutlinedTextField(
                 value = password,
                 onValueChange = onPasswordChange,
@@ -407,7 +392,6 @@ private fun Content(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Konfirmasi Password
             MyOutlinedTextField(
                 value = konfirmasiPassword,
                 onValueChange = onKonfirmasiPasswordChange,
@@ -420,13 +404,10 @@ private fun Content(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // --- TOMBOL DAFTAR ---
             Button(
                 onClick = onRegisterClick,
                 enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RedPrimary,
@@ -441,7 +422,7 @@ private fun Content(
                         strokeWidth = 3.dp
                     )
                 } else {
-                    Text(text = "Buat Akun", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("Buat Akun", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -452,23 +433,75 @@ private fun Content(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Sudah punya akun?", color = Color.Gray, fontSize = 14.sp)
+                Text("Sudah punya akun?", color = Color.Gray, fontSize = 14.sp)
                 TextButton(onClick = onLoginClick, enabled = !isLoading) {
-                    Text(
-                        "Log In",
-                        color = BluePrimary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Log In", color = BluePrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
+// ─── Alert Dialogs ────────────────────────────────────────────────────────────
+
+@Composable
+private fun FormErrorDialog(
+    message: String,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Form Tidak Lengkap", fontWeight = FontWeight.Bold) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Composable
+private fun PasswordMismatchDialog(
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Password Tidak Cocok", fontWeight = FontWeight.Bold) },
+        text = { Text("Password dan konfirmasi password yang kamu masukkan tidak sama. Periksa kembali dan coba lagi.") },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Perbaiki")
+            }
+        },
+    )
+}
+
+@Composable
+private fun DuplicateAccountDialog(
+    message: String,
+    onDismissRequest: () -> Unit,
+    onLoginClick: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Akun Sudah Terdaftar", fontWeight = FontWeight.Bold) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onLoginClick) {
+                Text("Login", fontWeight = FontWeight.Bold, color = BluePrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Tutup")
+            }
+        }
+    )
+}
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun RegisterScreenPreview() {
@@ -477,5 +510,36 @@ private fun RegisterScreenPreview() {
         CompositionLocalProvider(LocalBackStack provides dummyBackStack) {
             RegisterScreen()
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FormErrorDialogPreview() {
+    NusaMartTheme {
+        FormErrorDialog(
+            message = "Email wajib diisi.",
+            onDismissRequest = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PasswordMismatchDialogPreview() {
+    NusaMartTheme {
+        PasswordMismatchDialog(onDismissRequest = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DuplicateAccountDialogPreview() {
+    NusaMartTheme {
+        DuplicateAccountDialog(
+            message = "Username \"john123\" sudah digunakan. Silakan pilih username lain.",
+            onDismissRequest = {},
+            onLoginClick = {}
+        )
     }
 }

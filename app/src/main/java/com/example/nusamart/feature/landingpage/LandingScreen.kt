@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.landingpage // Pastikan package-nya sesuai
+package com.example.nusamart.feature.landingpage 
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

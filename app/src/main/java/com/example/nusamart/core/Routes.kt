@@ -5,23 +5,24 @@ import kotlinx.serialization.Serializable
 
 object Routes {
 
-    // LANDING PAGE
+    // ================== LANDING PAGE ==================
     @Serializable
     data object LandingPageRoute : NavKey
 
-    // AUTH
+    // ================== AUTH ==================
     @Serializable
     data object RegisterRoute : NavKey
 
     @Serializable
     data object LoginPageRoute : NavKey
 
-    // BUYER
-    // Cart
+    // ================== BUYER ==================
+
+    // --- Keranjang ---
     @Serializable
     data object CartRoute : NavKey
 
-    // HomePage
+    // --- HomePage ---
     @Serializable
     data object HomeRoute : NavKey
 
@@ -30,55 +31,65 @@ object Routes {
         val keyword: String
     ) : NavKey
 
+    // Membawa ID Product dari HomePage
     @Serializable
     data class ProductPageRoute(
         val productId: String
     ) : NavKey
 
-    // Notification
+    // --- Notification ---
     @Serializable
     data object NotificationRoute : NavKey
 
+    // Membawa ID Notification dari NotificationScreen
     @Serializable
     data class NotificationDetailRoute(
         val notificationId: String
     ) : NavKey
 
-    // Profile
+    // --- Profile ---
     @Serializable
     data object ProfileRoute : NavKey
 
-    // Transaction
+    // --- Transaction ---
     @Serializable
     data class PaymentRoute(
-        val orderId: String,
-        val selectedPaymentMethod: String? = null  // nullable, diisi setelah dari confirmation
-    ) : NavKey
+        // dari CartScreen — orderId sudah ada di storage
+        val orderId: String? = null,
 
+        // dari ProductPage — order belum dibuat, bawa data produknya
+        val productId: String? = null,
+        val quantity: Int = 1,
+        val fromCart: Boolean = true,
+
+        val selectedPaymentMethod: String? = null
+    ) : NavKey
     @Serializable
     data class PaymentConfirmationRoute(
-        val orderId: String  // perlu orderId untuk balik ke PaymentRoute dengan method terpilih
+        val orderId: String? = null,
+        val productId: String? = null,
+        val quantity: Int = 1,
+        val fromCart: Boolean = true  // perlu orderId untuk balik ke PaymentRoute
     ) : NavKey
-    // Tambah route baru
+    
     @Serializable
     data class PaymentSuccessRoute(
         val paymentCode: String,
         val orderId: String
     ) : NavKey
-    // Order
+    // --- Order ---
     @Serializable
     data object OrderListRoute : NavKey
 
+    // Membawa ID Order dari OrderListScreen
     @Serializable
     data class OrderDetailRoute(
         val orderId: String
     ) : NavKey
 
-    // Review
+    // --- Review ---
     @Serializable
     data class ReviewRoute(
         val orderId: String
     ) : NavKey
-
-    // SELLER (Belum ada)
 }

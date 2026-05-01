@@ -59,10 +59,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 
-// ==========================================
-// DATA LOADING
-// ==========================================
-
 fun loadAllOrders(context: Context): List<Order> {
     return try {
         val orderFile = File(context.filesDir, "order.json")
@@ -78,10 +74,6 @@ fun loadAllOrders(context: Context): List<Order> {
         emptyList()
     }
 }
-
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
 
 @Composable
 fun OrderListScreen() {
@@ -100,10 +92,6 @@ fun OrderListScreen() {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +138,6 @@ private fun Content(
                 .padding(paddingValues)
                 .background(Color(0xFFFAFAFA))
         ) {
-            // Filter chips
             Surface(shadowElevation = 2.dp, color = Color.White) {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
@@ -212,10 +199,6 @@ private fun Content(
         }
     }
 }
-
-// ==========================================
-// ORDER LIST ITEM
-// ==========================================
 
 @Composable
 private fun OrderListItem(
@@ -288,10 +271,6 @@ private fun OrderListItem(
         }
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

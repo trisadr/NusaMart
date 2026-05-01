@@ -63,9 +63,7 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.UUID
 
-// ==========================================
-// DATA LOADING & SAVING
-// ==========================================
+// ─── Data helpers ─────────────────────────────────────────────────────────────
 
 fun loadCartItems(context: Context): List<Cart> {
     return try {
@@ -125,15 +123,48 @@ fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
         }
         existingItems.addAll(orderItems)
         orderItemFile.writeText(Gson().toJson(existingItems))
-
     } catch (e: Exception) {
         e.printStackTrace()
     }
 }
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
+// ─── Pending Order helpers ────────────────────────────────────────────────────
+// Dipakai untuk menyimpan data order sementara sebelum user konfirmasi bayar
+
+data class PendingOrder(
+    val order: Order,
+    val orderItems: List<OrderItem>,
+    val cartIdsToDelete: List<String> = emptyList()
+)
+
+fun savePendingOrder(context: Context, pending: PendingOrder) {
+    try {
+        val file = File(context.filesDir, "pending_order.json")
+        file.writeText(Gson().toJson(pending))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun loadPendingOrder(context: Context): PendingOrder? {
+    return try {
+        val file = File(context.filesDir, "pending_order.json")
+        if (!file.exists()) return null
+        Gson().fromJson(file.readText(), PendingOrder::class.java)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun clearPendingOrder(context: Context) {
+    try {
+        File(context.filesDir, "pending_order.json").delete()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 @Composable
 fun CartScreen() {
@@ -202,7 +233,7 @@ fun CartScreen() {
             when (menu) {
                 BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
                 BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
-                BottomMenu.CART -> Unit // sudah di halaman cart
+                BottomMenu.CART -> Unit
                 BottomMenu.PROFILE -> backStack.add(Routes.ProfileRoute)
             }
         },
@@ -234,19 +265,26 @@ fun CartScreen() {
                 )
             }
 
-            saveNewOrder(context, newOrder, newOrderItems)
+            savePendingOrder(
+                context,
+                PendingOrder(
+                    order = newOrder,
+                    orderItems = newOrderItems,
+                    cartIdsToDelete = checkedItems.map { it.idCart }
+                )
+            )
 
-            cartItems = cartItems.filter { !it.isChecked }
-            saveCartItems(context, cartItems)
-
-            backStack.add(Routes.PaymentRoute(newOrderId))
+            backStack.add(
+                Routes.PaymentRoute(
+                    orderId  = newOrderId,
+                    fromCart = true
+                )
+            )
         }
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
+// ─── Content ──────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -266,18 +304,20 @@ private fun Content(
 ) {
     val checkedCount = cartItems.count { it.isChecked }
     val isAllChecked = cartItems.isNotEmpty() && cartItems.all { it.isChecked }
-    val grouped = cartItems.groupBy { productMap[it.idProduct]?.idStore ?: "Toko Lainnya" }
+
+    val groupEntries = remember(cartItems) {
+        cartItems
+            .groupBy { productMap[it.idProduct]?.idStore ?: "Toko Lainnya" }
+            .entries
+            .toList()
+    }
 
     Scaffold(
         topBar = {
-            CartTopBar(
-                itemCount = cartItems.size,
-                onBackClick = onBackClick
-            )
+            CartTopBar(itemCount = cartItems.size, onBackClick = onBackClick)
         },
         bottomBar = {
             Column {
-                // Checkout bar
                 CartBottomBar(
                     isAllChecked = isAllChecked,
                     totalPrice = totalPrice,
@@ -285,7 +325,6 @@ private fun Content(
                     onAllCheckedChange = onAllCheckedChange,
                     onCheckout = onCheckout
                 )
-                // Bottom navigation
                 NusaMartBottomNavigation(
                     selectedMenu = BottomMenu.CART,
                     onMenuSelected = onMenuSelected
@@ -294,30 +333,27 @@ private fun Content(
         }
     ) { innerPadding ->
         if (cartItems.isEmpty()) {
-            CartEmptyState(
-                modifier = Modifier.padding(innerPadding),
-                onShopClick = onShopNow
-            )
+            CartEmptyState(modifier = Modifier.padding(innerPadding), onShopClick = onShopNow)
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                grouped.forEach { (storeName, storeItems) ->
-                    item(key = storeName) {
-                        ShopGroup(
-                            shopName = storeName,
-                            items = storeItems,
-                            productMap = productMap,
-                            onCheckedChange = onCheckedChange,
-                            onQuantityIncrease = onQuantityIncrease,
-                            onQuantityDecrease = onQuantityDecrease,
-                            onDeleteItem = onDeleteItem
-                        )
-                    }
+                items(
+                    count = groupEntries.size,
+                    key = { index -> groupEntries[index].key }
+                ) { index ->
+                    val (storeName, storeItems) = groupEntries[index]
+                    ShopGroup(
+                        shopName = storeName,
+                        items = storeItems,
+                        productMap = productMap,
+                        onCheckedChange = onCheckedChange,
+                        onQuantityIncrease = onQuantityIncrease,
+                        onQuantityDecrease = onQuantityDecrease,
+                        onDeleteItem = onDeleteItem
+                    )
                 }
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
@@ -325,23 +361,14 @@ private fun Content(
     }
 }
 
-// ==========================================
-// TOP BAR
-// ==========================================
+// ─── Top Bar ──────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CartTopBar(
-    itemCount: Int,
-    onBackClick: () -> Unit
-) {
+private fun CartTopBar(itemCount: Int, onBackClick: () -> Unit) {
     TopAppBar(
         title = {
-            Text(
-                text = "Keranjang ($itemCount)",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
-            )
+            Text(text = "Keranjang ($itemCount)", fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
@@ -351,9 +378,7 @@ private fun CartTopBar(
     )
 }
 
-// ==========================================
-// SHOP GROUP
-// ==========================================
+// ─── Shop Group ───────────────────────────────────────────────────────────────
 
 @Composable
 private fun ShopGroup(
@@ -368,26 +393,20 @@ private fun ShopGroup(
     val allChecked = items.all { it.isChecked }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Checkbox(
                     checked = allChecked,
-                    onCheckedChange = { checked ->
-                        items.forEach { onCheckedChange(it.idCart, checked) }
-                    }
+                    onCheckedChange = { checked -> items.forEach { onCheckedChange(it.idCart, checked) } }
                 )
                 Text(
                     text = shopName,
@@ -412,19 +431,14 @@ private fun ShopGroup(
                     onDelete = { onDeleteItem(cart.idCart) }
                 )
                 if (index < items.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp
-                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                 }
             }
         }
     }
 }
 
-// ==========================================
-// CART ITEM ROW
-// ==========================================
+// ─── Cart Item Row ────────────────────────────────────────────────────────────
 
 @Composable
 private fun CartItemRow(
@@ -436,152 +450,62 @@ private fun CartItemRow(
     onDelete: () -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Checkbox(
-            checked = cart.isChecked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.padding(top = 2.dp)
-        )
+        Checkbox(checked = cart.isChecked, onCheckedChange = onCheckedChange, modifier = Modifier.padding(top = 2.dp))
 
         Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(8.dp))
+            modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         )
 
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = product?.name ?: cart.idProduct,
-                fontSize = 13.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 18.sp
-            )
-
-            Text(
-                text = "Rp ${product?.price?.toLong() ?: 0}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                QuantityStepper(
-                    quantity = cart.quantity,
-                    onIncrease = onIncrease,
-                    onDecrease = onDecrease
-                )
-
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Hapus",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(text = product?.name ?: cart.idProduct, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 18.sp)
+            Text(text = "Rp ${product?.price?.toLong() ?: 0}", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                QuantityStepper(quantity = cart.quantity, onIncrease = onIncrease, onDecrease = onDecrease)
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 }
             }
         }
     }
 }
 
-// ==========================================
-// QUANTITY STEPPER
-// ==========================================
+// ─── Quantity Stepper ─────────────────────────────────────────────────────────
 
 @Composable
-private fun QuantityStepper(
-    quantity: Int,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit
-) {
+private fun QuantityStepper(quantity: Int, onIncrease: () -> Unit, onDecrease: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        OutlinedIconButton(
-            onClick = onDecrease,
-            modifier = Modifier.size(28.dp),
-            shape = RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp)
-        ) {
+        OutlinedIconButton(onClick = onDecrease, modifier = Modifier.size(28.dp), shape = RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp)) {
             Text(text = "−", fontSize = 14.sp)
         }
-
-        Box(
-            modifier = Modifier
-                .width(36.dp)
-                .height(28.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = quantity.toString(),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
+        Box(modifier = Modifier.width(36.dp).height(28.dp).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+            Text(text = quantity.toString(), fontSize = 13.sp, fontWeight = FontWeight.Medium)
         }
-
-        OutlinedIconButton(
-            onClick = onIncrease,
-            modifier = Modifier.size(28.dp),
-            shape = RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp)
-        ) {
+        OutlinedIconButton(onClick = onIncrease, modifier = Modifier.size(28.dp), shape = RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp)) {
             Text(text = "+", fontSize = 14.sp)
         }
     }
 }
 
-// ==========================================
-// EMPTY STATE
-// ==========================================
+// ─── Empty State ──────────────────────────────────────────────────────────────
 
 @Composable
-private fun CartEmptyState(
-    modifier: Modifier = Modifier,
-    onShopClick: () -> Unit
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Unit) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(text = "🛒", fontSize = 64.sp)
-            Text(
-                text = "Keranjangmu masih kosong",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-            Text(
-                text = "Yuk, mulai belanja sekarang!",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Button(onClick = onShopClick) {
-                Text(text = "Mulai Belanja")
-            }
+            Text(text = "Keranjangmu masih kosong", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(text = "Yuk, mulai belanja sekarang!", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Button(onClick = onShopClick) { Text(text = "Mulai Belanja") }
         }
     }
 }
 
-// ==========================================
-// BOTTOM BAR (checkout)
-// ==========================================
+// ─── Bottom Bar ───────────────────────────────────────────────────────────────
 
 @Composable
 private fun CartBottomBar(
@@ -591,55 +515,25 @@ private fun CartBottomBar(
     onAllCheckedChange: (Boolean) -> Unit,
     onCheckout: () -> Unit
 ) {
-    Surface(
-        tonalElevation = 8.dp,
-        shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
+    Surface(tonalElevation = 8.dp, shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Checkbox(
-                    checked = isAllChecked,
-                    onCheckedChange = onAllCheckedChange
-                )
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                Checkbox(checked = isAllChecked, onCheckedChange = onAllCheckedChange)
                 Text(text = "Semua", fontSize = 13.sp)
             }
-
-            Text(
-                text = "Rp ${totalPrice.toLong()}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-
+            Text(text = "Rp ${totalPrice.toLong()}", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(10.dp))
-
-            Button(
-                onClick = onCheckout,
-                shape = RoundedCornerShape(8.dp),
-                enabled = checkedCount > 0
-            ) {
-                Text(
-                    text = "Beli ($checkedCount)",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
+            Button(onClick = onCheckout, shape = RoundedCornerShape(8.dp), enabled = checkedCount > 0) {
+                Text(text = "Beli ($checkedCount)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             }
         }
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
+// ─── Previews ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -654,21 +548,12 @@ private fun CartPreview() {
         "PROD-002" to Product("PROD-002", "Minyak Goreng Sunco 2L", 38000.0, "", 30, "", 0, "SELL-002", "STORE-002", "Solo"),
         "PROD-003" to Product("PROD-003", "Minyak Goreng Palsu", 1000.0, "", 30, "", 0, "SELL-002", "STORE-002", "Solo")
     )
-
     NusaMartTheme(dynamicColor = false) {
         Content(
-            cartItems = dummyCart,
-            productMap = dummyProducts,
-            totalPrice = 188000.0,
-            onBackClick = {},
-            onCheckedChange = { _, _ -> },
-            onAllCheckedChange = {},
-            onQuantityIncrease = {},
-            onQuantityDecrease = {},
-            onDeleteItem = {},
-            onCheckout = {},
-            onShopNow = {},
-            onMenuSelected = {}
+            cartItems = dummyCart, productMap = dummyProducts, totalPrice = 188000.0,
+            onBackClick = {}, onCheckedChange = { _, _ -> }, onAllCheckedChange = {},
+            onQuantityIncrease = {}, onQuantityDecrease = {}, onDeleteItem = {},
+            onCheckout = {}, onShopNow = {}, onMenuSelected = {}
         )
     }
 }
@@ -678,18 +563,10 @@ private fun CartPreview() {
 private fun CartEmptyPreview() {
     NusaMartTheme(dynamicColor = false) {
         Content(
-            cartItems = emptyList(),
-            productMap = emptyMap(),
-            totalPrice = 0.0,
-            onBackClick = {},
-            onCheckedChange = { _, _ -> },
-            onAllCheckedChange = {},
-            onQuantityIncrease = {},
-            onQuantityDecrease = {},
-            onDeleteItem = {},
-            onCheckout = {},
-            onShopNow = {},
-            onMenuSelected = {}
+            cartItems = emptyList(), productMap = emptyMap(), totalPrice = 0.0,
+            onBackClick = {}, onCheckedChange = { _, _ -> }, onAllCheckedChange = {},
+            onQuantityIncrease = {}, onQuantityDecrease = {}, onDeleteItem = {},
+            onCheckout = {}, onShopNow = {}, onMenuSelected = {}
         )
     }
 }

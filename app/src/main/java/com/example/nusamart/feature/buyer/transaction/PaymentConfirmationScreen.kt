@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -31,43 +32,99 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
+// ─── Data Model ───────────────────────────────────────────────────────────────
+data class PaymentMethod(
+    val name: String,
+    val icon: ImageVector,
+    val methodKey: String,
+    val subtitle: String? = null
+)
+
+data class PaymentSection(
+    val header: String,
+    val methods: List<PaymentMethod>
+)
+
+// ─── Data list metode pembayaran ─────────────────────────────────────────
+
+private val paymentSections = listOf(
+    PaymentSection(
+        header = "Transfer Bank",
+        methods = listOf(
+            PaymentMethod("BCA", Icons.Default.AccountBalance, "Transfer Bank - BCA"),
+            PaymentMethod("Mandiri", Icons.Default.AccountBalance, "Transfer Bank - Mandiri"),
+            PaymentMethod("BNI", Icons.Default.AccountBalance, "Transfer Bank - BNI"),
+            PaymentMethod("BRI", Icons.Default.AccountBalance, "Transfer Bank - BRI"),
+        )
+    ),
+    PaymentSection(
+        header = "E-Wallet & QRIS",
+        methods = listOf(
+            PaymentMethod(
+                name = "QRIS (Gopay, OVO, Dana, LinkAja)",
+                icon = Icons.Default.QrCodeScanner,
+                methodKey = "QRIS"
+            ),
+            PaymentMethod("ShopeePay", Icons.Default.Wallet, "ShopeePay"),
+            PaymentMethod("Dana", Icons.Default.Wallet, "Dana"),
+            PaymentMethod("OVO", Icons.Default.Wallet, "OVO"),
+        )
+    ),
+    PaymentSection(
+        header = "Bayar di Tempat",
+        methods = listOf(
+            PaymentMethod(
+                name = "COD (Bayar di Tempat)",
+                icon = Icons.Default.Payments,
+                methodKey = "COD",
+                subtitle = "Bayar tunai ke kurir saat barang sampai"
+            )
+        )
+    )
+)
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
-fun PaymentConfirmationScreen(orderId: String) {
+fun PaymentConfirmationScreen(
+    orderId: String? = null,
+    productId: String? = null,
+    quantity: Int = 1,
+    fromCart: Boolean = true
+) {
     val backStack = LocalBackStack.current
     var selectedMethod by remember { mutableStateOf<String?>(null) }
 
     Content(
         selectedMethod = selectedMethod,
         onMethodSelected = { selectedMethod = it },
-
         onBackClick = {
             if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
         },
-
         onConfirm = {
             if (selectedMethod == null) return@Content
-
-            // Pop PaymentConfirmationScreen, push PaymentScreen baru dengan metode terpilih
             backStack.removeAt(backStack.lastIndex)
-            backStack.add(Routes.PaymentRoute(orderId, selectedMethod!!))
+            backStack.add(
+                Routes.PaymentRoute(
+                    orderId               = orderId,
+                    productId             = productId,
+                    quantity              = quantity,
+                    fromCart              = fromCart,
+                    selectedPaymentMethod = selectedMethod!!
+                )
+            )
         }
     )
 }
 
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
-
+// ─── Content ─────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -115,70 +172,31 @@ private fun Content(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item { PaymentSectionHeader("Transfer Bank") }
-            item {
-                PaymentMethodItem("BCA", Icons.Default.AccountBalance, selectedMethod) {
-                    onMethodSelected("Transfer Bank - BCA")
+            paymentSections.forEachIndexed { sectionIndex, section ->
+                item(key = "header_${section.header}") {
+                    if (sectionIndex > 0) Spacer(modifier = Modifier.height(4.dp))
+                    PaymentSectionHeader(section.header)
                 }
-            }
-            item {
-                PaymentMethodItem("Mandiri", Icons.Default.AccountBalance, selectedMethod) {
-                    onMethodSelected("Transfer Bank - Mandiri")
-                }
-            }
-            item {
-                PaymentMethodItem("BNI", Icons.Default.AccountBalance, selectedMethod) {
-                    onMethodSelected("Transfer Bank - BNI")
-                }
-            }
-            item {
-                PaymentMethodItem("BRI", Icons.Default.AccountBalance, selectedMethod) {
-                    onMethodSelected("Transfer Bank - BRI")
-                }
-            }
 
-            item { Spacer(modifier = Modifier.height(4.dp)) }
-            item { PaymentSectionHeader("E-Wallet & QRIS") }
-            item {
-                PaymentMethodItem(
-                    "QRIS (Gopay, OVO, Dana, LinkAja)",
-                    Icons.Default.QrCodeScanner,
-                    selectedMethod
-                ) { onMethodSelected("QRIS") }
-            }
-            item {
-                PaymentMethodItem("ShopeePay", Icons.Default.Wallet, selectedMethod) {
-                    onMethodSelected("ShopeePay")
+                items(
+                    items = section.methods,
+                    key = { method -> method.methodKey }
+                ) { method ->
+                    PaymentMethodItem(
+                        name = method.name,
+                        icon = method.icon,
+                        selectedMethod = selectedMethod,
+                        subtitle = method.subtitle
+                    ) {
+                        onMethodSelected(method.methodKey)
+                    }
                 }
-            }
-            item {
-                PaymentMethodItem("Dana", Icons.Default.Wallet, selectedMethod) {
-                    onMethodSelected("Dana")
-                }
-            }
-            item {
-                PaymentMethodItem("OVO", Icons.Default.Wallet, selectedMethod) {
-                    onMethodSelected("OVO")
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(4.dp)) }
-            item { PaymentSectionHeader("Bayar di Tempat") }
-            item {
-                PaymentMethodItem(
-                    name = "COD (Bayar di Tempat)",
-                    icon = Icons.Default.Payments,
-                    selectedMethod = selectedMethod,
-                    subtitle = "Bayar tunai ke kurir saat barang sampai"
-                ) { onMethodSelected("COD") }
             }
         }
     }
 }
 
-// ==========================================
-// PREVIEW
-// ==========================================
+// ─── Preview ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

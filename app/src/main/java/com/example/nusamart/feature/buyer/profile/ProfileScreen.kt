@@ -60,15 +60,9 @@ import com.example.nusamart.ui.theme.RedLight
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 
-// ==========================================
-// STATEFUL SCREEN
-// ==========================================
-
 @Composable
 fun ProfileScreen() {
     val backStack = LocalBackStack.current
-
-    // Langsung pakai activeUser, tidak perlu load dari JSON
     val currentBuyer = activeUser
 
     ProfileContent(
@@ -100,10 +94,6 @@ fun ProfileScreen() {
         }
     )
 }
-
-// ==========================================
-// STATELESS CONTENT
-// ==========================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,7 +147,6 @@ private fun ProfileContent(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // Header info user
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -200,7 +189,6 @@ private fun ProfileContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Menu grup 1
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -230,7 +218,6 @@ private fun ProfileContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Menu grup 2
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -252,7 +239,6 @@ private fun ProfileContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tombol logout
             OutlinedButton(
                 onClick = onLogoutClick,
                 modifier = Modifier
@@ -282,10 +268,6 @@ private fun ProfileContent(
         }
     }
 }
-
-// ==========================================
-// MENU ITEM COMPONENT
-// ==========================================
 
 @Composable
 private fun ProfileMenuItem(
@@ -332,10 +314,6 @@ private fun ProfileMenuItem(
         )
     }
 }
-
-// ==========================================
-// PREVIEW
-// ==========================================
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
