@@ -63,8 +63,7 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.UUID
 
-// ─── Data helpers ─────────────────────────────────────────────────────────────
-
+// Data helpers
 fun loadCartItems(context: Context): List<Cart> {
     return try {
         val cartFile = File(context.filesDir, "cart.json")
@@ -128,9 +127,7 @@ fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
     }
 }
 
-// ─── Pending Order helpers ────────────────────────────────────────────────────
-// Dipakai untuk menyimpan data order sementara sebelum user konfirmasi bayar
-
+// Pending Order helpers
 data class PendingOrder(
     val order: Order,
     val orderItems: List<OrderItem>,
@@ -164,8 +161,7 @@ fun clearPendingOrder(context: Context) {
     }
 }
 
-// ─── Screen ───────────────────────────────────────────────────────────────────
-
+// Screen
 @Composable
 fun CartScreen() {
     val context = LocalContext.current
@@ -284,8 +280,7 @@ fun CartScreen() {
     )
 }
 
-// ─── Content ──────────────────────────────────────────────────────────────────
-
+// Content
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -361,8 +356,7 @@ private fun Content(
     }
 }
 
-// ─── Top Bar ──────────────────────────────────────────────────────────────────
-
+// Top Bar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CartTopBar(itemCount: Int, onBackClick: () -> Unit) {
@@ -378,8 +372,7 @@ private fun CartTopBar(itemCount: Int, onBackClick: () -> Unit) {
     )
 }
 
-// ─── Shop Group ───────────────────────────────────────────────────────────────
-
+// Shop Group
 @Composable
 private fun ShopGroup(
     shopName: String,
@@ -438,8 +431,7 @@ private fun ShopGroup(
     }
 }
 
-// ─── Cart Item Row ────────────────────────────────────────────────────────────
-
+// Cart Item Row
 @Composable
 private fun CartItemRow(
     cart: Cart,
@@ -474,8 +466,7 @@ private fun CartItemRow(
     }
 }
 
-// ─── Quantity Stepper ─────────────────────────────────────────────────────────
-
+// Quantity Stepper
 @Composable
 private fun QuantityStepper(quantity: Int, onIncrease: () -> Unit, onDecrease: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -491,8 +482,7 @@ private fun QuantityStepper(quantity: Int, onIncrease: () -> Unit, onDecrease: (
     }
 }
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
-
+// Empty State
 @Composable
 private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -505,8 +495,7 @@ private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Uni
     }
 }
 
-// ─── Bottom Bar ───────────────────────────────────────────────────────────────
-
+// Bottom Bar
 @Composable
 private fun CartBottomBar(
     isAllChecked: Boolean,
@@ -533,8 +522,7 @@ private fun CartBottomBar(
     }
 }
 
-// ─── Previews ─────────────────────────────────────────────────────────────────
-
+// Previews
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CartPreview() {
