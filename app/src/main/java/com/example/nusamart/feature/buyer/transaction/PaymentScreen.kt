@@ -79,7 +79,6 @@ fun PaymentScreen(
     // Dari CartScreen: baca pending order yang disimpan CartScreen
     val pendingOrder = remember { if (fromCart) loadPendingOrder(context) else null }
 
-    // Dari ProductPage: bangun order items sementara dari productId + quantity
     val directProduct = remember(productId) {
         if (!fromCart && productId != null) productMap[productId] else null
     }
