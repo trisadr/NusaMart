@@ -74,12 +74,9 @@ import java.text.NumberFormat
 import java.util.Locale
 import java.util.UUID
 
-// ─── Sheet Mode ───────────────────────────────────────────────────────────────
-
 enum class SheetMode { NONE, CART, BUY }
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
-
+// Screen 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductPageScreen(productId: String) {
@@ -154,7 +151,7 @@ fun ProductPageScreen(productId: String) {
         }
     )
 
-    // ─── Cart Bottom Sheet ────────────────────────────────────────────────────
+    // Cart Bottom Sheet
     if (isCartSheetOpen) {
         ProductBottomSheet(
             product = product!!,
@@ -203,7 +200,7 @@ fun ProductPageScreen(productId: String) {
         )
     }
 
-    // ─── Buy Now Bottom Sheet ─────────────────────────────────────────────────
+    // Buy Now Bottom Sheet
     if (isBuySheetOpen) {
         ProductBottomSheet(
             product = product!!,
@@ -236,8 +233,7 @@ fun ProductPageScreen(productId: String) {
     }
 }
 
-// ─── Content ─────────────────────────────────────────────────────────────────
-
+// Content
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -379,8 +375,7 @@ private fun Content(
     }
 }
 
-// ─── Product Bottom Sheet ─────────────────────────────────────────────────────
-
+// Product Bottom Sheet
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProductBottomSheet(
@@ -493,15 +488,13 @@ private fun ProductBottomSheet(
     }
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
+// Helper 
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price.toLong())}"
 }
 
-// ─── Preview ─────────────────────────────────────────────────────────────────
-
+// Preview
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun ProductPagePreview() {
