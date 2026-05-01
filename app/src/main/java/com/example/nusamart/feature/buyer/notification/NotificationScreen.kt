@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -57,12 +58,13 @@ import com.example.nusamart.ui.theme.WhiteSurface
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+// ─── Data helper ─────────────────────────────────────────────────────────────
+
 fun loadNotifications(context: Context): List<Notification> {
     return try {
         val jsonString = context.assets.open("notification.json")
             .bufferedReader()
             .use { it.readText() }
-
         val type = object : TypeToken<List<Notification>>() {}.type
         Gson().fromJson(jsonString, type) ?: emptyList()
     } catch (e: Exception) {
@@ -70,6 +72,8 @@ fun loadNotifications(context: Context): List<Notification> {
         emptyList()
     }
 }
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
 fun NotificationScreen() {
@@ -82,9 +86,7 @@ fun NotificationScreen() {
         notifications = notifications,
 
         onBackClick = {
-            if (backStack.isNotEmpty()) {
-                backStack.removeAt(backStack.lastIndex)
-            }
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
         },
 
         onNotificationClick = { notificationId ->
@@ -93,23 +95,16 @@ fun NotificationScreen() {
 
         onMenuSelected = { menu ->
             when (menu) {
-                BottomMenu.HOME -> {
-                    backStack.add(Routes.HomeRoute)
-                }
-
+                BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
                 BottomMenu.NOTIFICATION -> Unit
-
-                BottomMenu.PROFILE -> {
-                    backStack.add(Routes.ProfileRoute)
-                }
-
-                BottomMenu.CART -> {
-                    backStack.add(Routes.CartRoute)
-                }
+                BottomMenu.PROFILE -> backStack.add(Routes.ProfileRoute)
+                BottomMenu.CART -> backStack.add(Routes.CartRoute)
             }
         }
     )
 }
+
+// ─── Content ─────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,35 +154,31 @@ private fun Content(
         ) {
 
             if (promoNotifications.isNotEmpty()) {
-                item {
-                    Column(modifier = Modifier.background(WhiteSurface)) {
-                        promoNotifications.forEach { notification ->
-                            PromoNotificationItem(
-                                icon = if (notification.idOrder == null)
-                                    Icons.Default.ShoppingCart
-                                else
-                                    Icons.Default.Storefront,
-
-                                iconBackgroundColor = if (notification.idOrder == null)
-                                    BluePrimary
-                                else
-                                    OrangePrimary,
-
-                                title = notification.title,
-                                message = notification.message,
-                                date = notification.date,
-                                showImageGallery = notification.idOrder != null,
-                                onClick = {
-                                    onNotificationClick(notification.idNotification)
-                                }
-                            )
-                        }
-                    }
+                items(
+                    count = promoNotifications.size,
+                    key = { index -> promoNotifications[index].idNotification }
+                ) { index ->
+                    val notification = promoNotifications[index]
+                    PromoNotificationItem(
+                        icon = if (notification.idOrder == null)
+                            Icons.Default.ShoppingCart
+                        else
+                            Icons.Default.Storefront,
+                        iconBackgroundColor = if (notification.idOrder == null)
+                            BluePrimary
+                        else
+                            OrangePrimary,
+                        title = notification.title,
+                        message = notification.message,
+                        date = notification.date,
+                        showImageGallery = notification.idOrder != null,
+                        onClick = { onNotificationClick(notification.idNotification) }
+                    )
                 }
             }
 
             if (orderNotifications.isNotEmpty()) {
-                item {
+                item(key = "header_status_pesanan") {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -202,7 +193,6 @@ private fun Content(
                             color = Color.DarkGray,
                             fontWeight = FontWeight.SemiBold
                         )
-
                         Text(
                             text = "Tandai Sudah Dibaca",
                             fontSize = 12.sp,
@@ -212,30 +202,28 @@ private fun Content(
                     }
                 }
 
-                item {
+                itemsIndexed(
+                    items = orderNotifications,
+                    key = { _, notification -> notification.idNotification }
+                ) { index, notification ->
                     Column(modifier = Modifier.background(WhiteSurface)) {
-                        orderNotifications.forEachIndexed { index, notification ->
-                            OrderNotificationItem(
-                                icon = if (index == 0)
-                                    Icons.Default.Inventory
-                                else
-                                    Icons.Default.LocalShipping,
-
-                                title = notification.title,
-                                message = notification.message,
-                                date = notification.date,
-                                onClick = {
-                                    onNotificationClick(notification.idNotification)
-                                }
+                        OrderNotificationItem(
+                            icon = if (index == 0)
+                                Icons.Default.Inventory
+                            else
+                                Icons.Default.LocalShipping,
+                            title = notification.title,
+                            message = notification.message,
+                            date = notification.date,
+                            onClick = { onNotificationClick(notification.idNotification) }
+                        )
+                        // Divider ditampilkan di bawah setiap item kecuali yang terakhir
+                        if (index < orderNotifications.lastIndex) {
+                            HorizontalDivider(
+                                color = GrayBackground,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(start = 80.dp)
                             )
-
-                            if (index < orderNotifications.lastIndex) {
-                                HorizontalDivider(
-                                    color = GrayBackground,
-                                    thickness = 1.dp,
-                                    modifier = Modifier.padding(start = 80.dp)
-                                )
-                            }
                         }
                     }
                 }
@@ -243,6 +231,8 @@ private fun Content(
         }
     }
 }
+
+// ─── Promo Notification Item ──────────────────────────────────────────────────
 
 @Composable
 private fun PromoNotificationItem(
@@ -257,6 +247,7 @@ private fun PromoNotificationItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(WhiteSurface)
             .clickable(onClick = onClick)
     ) {
         Row(
@@ -303,6 +294,8 @@ private fun PromoNotificationItem(
     }
 }
 
+// ─── Order Notification Item ──────────────────────────────────────────────────
+
 @Composable
 private fun OrderNotificationItem(
     icon: ImageVector,
@@ -342,6 +335,8 @@ private fun OrderNotificationItem(
         Icon(Icons.Default.KeyboardArrowDown, null, tint = Color.LightGray)
     }
 }
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true)
 @Composable

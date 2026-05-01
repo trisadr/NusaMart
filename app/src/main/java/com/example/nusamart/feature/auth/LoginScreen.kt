@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +66,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 
+// ─── Data helper ─────────────────────────────────────────────────────────────
+
 fun loadBuyers(context: Context): List<Buyer> {
     return try {
         val buyerFile = File(context.filesDir, "buyer.json")
@@ -81,6 +84,14 @@ fun loadBuyers(context: Context): List<Buyer> {
     }
 }
 
+// ─── Dialog State ─────────────────────────────────────────────────────────────
+data class DialogState(
+    val title: String,
+    val message: String
+)
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
 @Composable
 fun LoginScreen() {
     val backStack = LocalBackStack.current
@@ -89,6 +100,7 @@ fun LoginScreen() {
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
+    var dialogState by remember { mutableStateOf<DialogState?>(null) }
 
     Content(
         emailOrUsername = emailOrUsername,
@@ -99,35 +111,38 @@ fun LoginScreen() {
         onPasswordVisibilityChange = { isPasswordVisible = !isPasswordVisible },
 
         onLoginClick = {
-            if (emailOrUsername.isBlank() || password.isBlank()) {
-                Toast.makeText(
-                    context,
-                    "Email/Username dan Password wajib diisi",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                val buyers = loadBuyers(context)
-                if (buyers.isEmpty()) {
-                    Toast.makeText(
-                        context,
-                        "Data buyer tidak ditemukan",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    val matchedBuyer = buyers.find {
-                        (it.email == emailOrUsername || it.username == emailOrUsername)
-                                && it.password == password
-                    }
-                    if (matchedBuyer != null) {
-                        activeUser = matchedBuyer
-                        backStack.clear()
-                        backStack.add(Routes.HomeRoute)
+            when {
+                emailOrUsername.isBlank() || password.isBlank() -> {
+                    dialogState = DialogState(
+                        title = "Form Belum Lengkap",
+                        message = "Email/Username dan Password wajib diisi sebelum login."
+                    )
+                }
+
+                else -> {
+                    val buyers = loadBuyers(context)
+
+                    if (buyers.isEmpty()) {
+                        dialogState = DialogState(
+                            title = "Terjadi Kesalahan",
+                            message = "Data pengguna tidak ditemukan. Silakan coba lagi nanti."
+                        )
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Login gagal! Username/email atau password salah",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val matchedBuyer = buyers.find {
+                            (it.email == emailOrUsername || it.username == emailOrUsername)
+                                    && it.password == password
+                        }
+
+                        if (matchedBuyer != null) {
+                            activeUser = matchedBuyer
+                            backStack.clear()
+                            backStack.add(Routes.HomeRoute)
+                        } else {
+                            dialogState = DialogState(
+                                title = "Login Gagal",
+                                message = "Username/email atau password yang kamu masukkan salah. Periksa kembali dan coba lagi."
+                            )
+                        }
                     }
                 }
             }
@@ -149,17 +164,29 @@ fun LoginScreen() {
             backStack.removeAt(backStack.lastIndex)
         }
     )
+    dialogState?.let { state ->
+        LoginErrorDialog(
+            title = state.title,
+            message = state.message,
+            onDismiss = {
+                dialogState = null  // tutup dialog saat user klik OK atau di luar dialog
+            }
+        )
+    }
 }
+
+// ─── Google Sign In ───────────────────────────────────────────────────────────
 
 fun signInWithGoogle(context: Context) {
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
         .build()
-
     val googleSignInClient = GoogleSignIn.getClient(context, gso)
     val signInIntent: Intent = googleSignInClient.signInIntent
     context.startActivity(signInIntent)
 }
+
+// ─── Content ─────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -239,7 +266,9 @@ private fun Content(
 
             Button(
                 onClick = onLoginClick,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = RedPrimary)
             ) {
                 Text("Log In")
@@ -251,20 +280,17 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextButton(onClick = onRegisterClick) {
-                    Text("Daftar")
-                }
-
-                TextButton(onClick = onForgotPasswordClick) {
-                    Text("Lupa Password?")
-                }
+                TextButton(onClick = onRegisterClick) { Text("Daftar") }
+                TextButton(onClick = onForgotPasswordClick) { Text("Lupa Password?") }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
                 onClick = onGoogleLoginClick,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 border = BorderStroke(1.dp, Color.LightGray)
             ) {
                 Image(
@@ -278,6 +304,31 @@ private fun Content(
         }
     }
 }
+
+// ─── Alert Dialog ─────────────────────────────────────────────────────────────
+@Composable
+private fun LoginErrorDialog(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = title, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Text(text = message)
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+// ─── Reusable TextField ───────────────────────────────────────────────────────
 
 @Composable
 fun MyOutlinedTextField(
@@ -298,7 +349,8 @@ fun MyOutlinedTextField(
             if (isPassword) {
                 IconButton(onClick = onPasswordVisibilityChange) {
                     Icon(
-                        if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        if (isPasswordVisible) Icons.Default.VisibilityOff
+                        else Icons.Default.Visibility,
                         null
                     )
                 }
@@ -311,10 +363,12 @@ fun MyOutlinedTextField(
     )
 }
 
+// ─── Preview ─────────────────────────────────────────────────────────────────
+
 @Preview(showBackground = true)
 @Composable
 private fun LoginScreenPreview() {
-    NusaMartTheme() {
+    NusaMartTheme {
         Content(
             emailOrUsername = "",
             onEmailOrUsernameChange = {},
@@ -327,6 +381,18 @@ private fun LoginScreenPreview() {
             onForgotPasswordClick = {},
             onGoogleLoginClick = {},
             onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginErrorDialogPreview() {
+    NusaMartTheme {
+        LoginErrorDialog(
+            title = "Login Gagal",
+            message = "Username/email atau password yang kamu masukkan salah. Periksa kembali dan coba lagi.",
+            onDismiss = {}
         )
     }
 }

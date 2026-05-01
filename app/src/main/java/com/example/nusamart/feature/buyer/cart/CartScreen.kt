@@ -63,6 +63,8 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.UUID
 
+// ─── Data helpers ────────────────────────────────────────────────────────────
+
 fun loadCartItems(context: Context): List<Cart> {
     return try {
         val cartFile = File(context.filesDir, "cart.json")
@@ -126,6 +128,8 @@ fun saveNewOrder(context: Context, order: Order, orderItems: List<OrderItem>) {
         e.printStackTrace()
     }
 }
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
 fun CartScreen() {
@@ -194,7 +198,7 @@ fun CartScreen() {
             when (menu) {
                 BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
                 BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
-                BottomMenu.CART -> Unit // sudah di halaman cart
+                BottomMenu.CART -> Unit
                 BottomMenu.PROFILE -> backStack.add(Routes.ProfileRoute)
             }
         },
@@ -236,6 +240,7 @@ fun CartScreen() {
     )
 }
 
+// ─── Content ─────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -254,7 +259,14 @@ private fun Content(
 ) {
     val checkedCount = cartItems.count { it.isChecked }
     val isAllChecked = cartItems.isNotEmpty() && cartItems.all { it.isChecked }
-    val grouped = cartItems.groupBy { productMap[it.idProduct]?.idStore ?: "Toko Lainnya" }
+
+    // Dibuat sebagai List<Pair> agar bisa dipakai langsung oleh items()
+    val groupEntries = remember(cartItems) {
+        cartItems
+            .groupBy { productMap[it.idProduct]?.idStore ?: "Toko Lainnya" }
+            .entries
+            .toList()
+    }
 
     Scaffold(
         topBar = {
@@ -292,24 +304,29 @@ private fun Content(
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                grouped.forEach { (storeName, storeItems) ->
-                    item(key = storeName) {
-                        ShopGroup(
-                            shopName = storeName,
-                            items = storeItems,
-                            productMap = productMap,
-                            onCheckedChange = onCheckedChange,
-                            onQuantityIncrease = onQuantityIncrease,
-                            onQuantityDecrease = onQuantityDecrease,
-                            onDeleteItem = onDeleteItem
-                        )
-                    }
+                items(
+                    count = groupEntries.size,
+                    key = { index -> groupEntries[index].key }
+                ) { index ->
+                    val (storeName, storeItems) = groupEntries[index]
+                    ShopGroup(
+                        shopName = storeName,
+                        items = storeItems,
+                        productMap = productMap,
+                        onCheckedChange = onCheckedChange,
+                        onQuantityIncrease = onQuantityIncrease,
+                        onQuantityDecrease = onQuantityDecrease,
+                        onDeleteItem = onDeleteItem
+                    )
                 }
+
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
         }
     }
 }
+
+// ─── Top Bar ─────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -333,6 +350,8 @@ private fun CartTopBar(
     )
 }
 
+// ─── Shop Group ──────────────────────────────────────────────────────────────
+
 @Composable
 private fun ShopGroup(
     shopName: String,
@@ -354,6 +373,7 @@ private fun ShopGroup(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            // Header toko
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -400,6 +420,8 @@ private fun ShopGroup(
     }
 }
 
+// ─── Cart Item Row ────────────────────────────────────────────────────────────
+
 @Composable
 private fun CartItemRow(
     cart: Cart,
@@ -422,6 +444,7 @@ private fun CartItemRow(
             modifier = Modifier.padding(top = 2.dp)
         )
 
+        // Placeholder gambar produk
         Box(
             modifier = Modifier
                 .size(80.dp)
@@ -475,6 +498,8 @@ private fun CartItemRow(
     }
 }
 
+// ─── Quantity Stepper ─────────────────────────────────────────────────────────
+
 @Composable
 private fun QuantityStepper(
     quantity: Int,
@@ -514,6 +539,8 @@ private fun QuantityStepper(
     }
 }
 
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
 @Composable
 private fun CartEmptyState(
     modifier: Modifier = Modifier,
@@ -544,6 +571,8 @@ private fun CartEmptyState(
         }
     }
 }
+
+// ─── Bottom Bar ───────────────────────────────────────────────────────────────
 
 @Composable
 private fun CartBottomBar(
@@ -598,6 +627,8 @@ private fun CartBottomBar(
         }
     }
 }
+
+// ─── Previews ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
