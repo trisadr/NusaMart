@@ -1,17 +1,16 @@
-package com.example.nusamart.feature.screen
+package com.example.nusamart.feature.buyer.transaction
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalance
@@ -19,37 +18,122 @@ import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
 
+// ─── Data Model ───────────────────────────────────────────────────────────────
+data class PaymentMethod(
+    val name: String,
+    val icon: ImageVector,
+    val methodKey: String,
+    val subtitle: String? = null
+)
+
+data class PaymentSection(
+    val header: String,
+    val methods: List<PaymentMethod>
+)
+
+// ─── Data definisi metode pembayaran ─────────────────────────────────────────
+
+private val paymentSections = listOf(
+    PaymentSection(
+        header = "Transfer Bank",
+        methods = listOf(
+            PaymentMethod("BCA", Icons.Default.AccountBalance, "Transfer Bank - BCA"),
+            PaymentMethod("Mandiri", Icons.Default.AccountBalance, "Transfer Bank - Mandiri"),
+            PaymentMethod("BNI", Icons.Default.AccountBalance, "Transfer Bank - BNI"),
+            PaymentMethod("BRI", Icons.Default.AccountBalance, "Transfer Bank - BRI"),
+        )
+    ),
+    PaymentSection(
+        header = "E-Wallet & QRIS",
+        methods = listOf(
+            PaymentMethod(
+                name = "QRIS (Gopay, OVO, Dana, LinkAja)",
+                icon = Icons.Default.QrCodeScanner,
+                methodKey = "QRIS"
+            ),
+            PaymentMethod("ShopeePay", Icons.Default.Wallet, "ShopeePay"),
+            PaymentMethod("Dana", Icons.Default.Wallet, "Dana"),
+            PaymentMethod("OVO", Icons.Default.Wallet, "OVO"),
+        )
+    ),
+    PaymentSection(
+        header = "Bayar di Tempat",
+        methods = listOf(
+            PaymentMethod(
+                name = "COD (Bayar di Tempat)",
+                icon = Icons.Default.Payments,
+                methodKey = "COD",
+                subtitle = "Bayar tunai ke kurir saat barang sampai"
+            )
+        )
+    )
+)
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
+@Composable
+fun PaymentConfirmationScreen(orderId: String) {
+    val backStack = LocalBackStack.current
+    var selectedMethod by remember { mutableStateOf<String?>(null) }
+
+    Content(
+        selectedMethod = selectedMethod,
+        onMethodSelected = { selectedMethod = it },
+
+        onBackClick = {
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
+        },
+
+        onConfirm = {
+            if (selectedMethod == null) return@Content
+            backStack.removeAt(backStack.lastIndex)
+            backStack.add(Routes.PaymentRoute(orderId, selectedMethod!!))
+        }
+    )
+}
+
+// ─── Content ─────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentConfirmationScreen() {
+private fun Content(
+    selectedMethod: String?,
+    onMethodSelected: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onConfirm: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pilih Metode Pembayaran", style = MaterialTheme.typography.titleMedium) },
+                title = {
+                    Text(
+                        "Pilih Metode Pembayaran",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 }
             )
@@ -57,10 +141,13 @@ fun PaymentConfirmationScreen() {
         bottomBar = {
             Surface(shadowElevation = 8.dp) {
                 Button(
-                    onClick = { },
+                    onClick = onConfirm,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
+                        .navigationBarsPadding(),
+                    enabled = selectedMethod != null,
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Konfirmasi Metode")
                 }
@@ -72,102 +159,43 @@ fun PaymentConfirmationScreen() {
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // --- TRANSFER BANK ---
-            item { PaymentHeader("Transfer Bank") }
-            item { PaymentItem("BCA", Icons.Default.AccountBalance) }
-            item { PaymentItem("Mandiri", Icons.Default.AccountBalance) }
-            item { PaymentItem("BNI", Icons.Default.AccountBalance) }
-            item { PaymentItem("BRI", Icons.Default.AccountBalance) }
+            paymentSections.forEachIndexed { sectionIndex, section ->
+                item(key = "header_${section.header}") {
+                    if (sectionIndex > 0) Spacer(modifier = Modifier.height(4.dp))
+                    PaymentSectionHeader(section.header)
+                }
 
-            // --- E-WALLET & QRIS ---
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item { PaymentHeader("E-Wallet & QRIS") }
-            item { PaymentItem("QRIS (Gopay, OVO, Dana, LinkAja)", Icons.Default.QrCodeScanner) }
-            item { PaymentItem("ShopeePay", Icons.Default.Wallet) }
-            item { PaymentItem("Dana", Icons.Default.Wallet) }
-            item { PaymentItem("OVO", Icons.Default.Wallet) }
-
-            // --- TUNAI / COD ---
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item { PaymentHeader("Bayar di Tempat") }
-            item {
-                PaymentItem(
-                    name = "COD (Bayar di Tempat)",
-                    icon = Icons.Default.Payments,
-                    subtitle = "Bayar tunai ke kurir saat barang sampai"
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-        }
-    }
-}
-
-@Composable
-fun PaymentHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 4.dp)
-    )
-}
-
-@Composable
-fun PaymentItem(
-    name: String,
-    icon: ImageVector,
-    subtitle: String? = null
-) {
-    OutlinedCard(
-        onClick = { },
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
+                items(
+                    items = section.methods,
+                    key = { method -> method.methodKey }
+                ) { method ->
+                    PaymentMethodItem(
+                        name = method.name,
+                        icon = method.icon,
+                        selectedMethod = selectedMethod,
+                        subtitle = method.subtitle
+                    ) {
+                        onMethodSelected(method.methodKey)
+                    }
                 }
             }
-            RadioButton(selected = false, onClick = { })
         }
     }
 }
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PaymentConfirmationScreenPreview() {
-
+private fun PaymentConfirmationScreenPreview() {
     NusaMartTheme(dynamicColor = false) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            PaymentConfirmationScreen()
-        }
+        Content(
+            selectedMethod = "Transfer Bank - BCA",
+            onMethodSelected = {},
+            onBackClick = {},
+            onConfirm = {}
+        )
     }
 }

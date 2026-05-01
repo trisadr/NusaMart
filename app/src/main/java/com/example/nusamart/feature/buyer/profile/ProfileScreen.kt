@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.screen
+package com.example.nusamart.feature.buyer.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,9 +18,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Payment
@@ -48,17 +48,64 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.Routes
+import com.example.nusamart.core.activeUser
+import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.GrayBackground
+import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedLight
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 
-@Preview
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen() {
+    val backStack = LocalBackStack.current
+    val currentBuyer = activeUser
+
+    ProfileContent(
+        username = currentBuyer?.username ?: "Pengguna",
+        email = currentBuyer?.email ?: "-",
+        address = currentBuyer?.address ?: "Alamat belum diatur",
+
+        onBackClick = {
+            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
+        },
+
+        onPesananClick = {
+            backStack.add(Routes.OrderListRoute)
+        },
+
+        onLogoutClick = {
+            activeUser = null
+            backStack.clear()
+            backStack.add(Routes.LoginPageRoute)
+        },
+
+        onMenuSelected = { menu ->
+            when (menu) {
+                BottomMenu.HOME -> backStack.add(Routes.HomeRoute)
+                BottomMenu.NOTIFICATION -> backStack.add(Routes.NotificationRoute)
+                BottomMenu.CART -> backStack.add(Routes.CartRoute)
+                BottomMenu.PROFILE -> Unit
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfileContent(
+    username: String,
+    email: String,
+    address: String,
+    onBackClick: () -> Unit,
+    onPesananClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+    onMenuSelected: (BottomMenu) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -71,9 +118,9 @@ fun ProfileScreen() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* logic belum ada */ }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
                             tint = BlackText
                         )
@@ -86,7 +133,8 @@ fun ProfileScreen() {
         },
         bottomBar = {
             NusaMartBottomNavigation(
-                selectedMenu = "Saya"
+                selectedMenu = BottomMenu.PROFILE,
+                onMenuSelected = onMenuSelected
             )
         },
         containerColor = GrayBackground
@@ -105,10 +153,7 @@ fun ProfileScreen() {
                     .background(WhiteSurface)
                     .padding(24.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // PP Placeholder
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         modifier = Modifier
                             .size(72.dp)
@@ -125,17 +170,16 @@ fun ProfileScreen() {
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // info user
                     Column {
                         Text(
-                            text = "Mahasigma", // data dummy
+                            text = username,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = BlackText
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "mahasigma@gmail.com", // data dummy
+                            text = email,
                             fontSize = 14.sp,
                             color = Color.Gray
                         )
@@ -145,7 +189,6 @@ fun ProfileScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Navigasi
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -154,21 +197,22 @@ fun ProfileScreen() {
                 ProfileMenuItem(
                     icon = Icons.Default.ShoppingCart,
                     title = "Pesanan Saya",
-                    onClick = { /* logic belum ada */ }
+                    onClick = onPesananClick
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
                 ProfileMenuItem(
                     icon = Icons.Default.LocationOn,
                     title = "Alamat Pengiriman",
-                    onClick = { /* logic belum ada */ }
+                    subtitle = address,
+                    onClick = {}
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
                 ProfileMenuItem(
                     icon = Icons.Default.Payment,
                     title = "Metode Pembayaran",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
             }
 
@@ -182,22 +226,21 @@ fun ProfileScreen() {
                 ProfileMenuItem(
                     icon = Icons.Default.Settings,
                     title = "Pengaturan Akun",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
                 HorizontalDivider(color = GrayBackground, thickness = 1.dp)
 
                 ProfileMenuItem(
-                    icon = Icons.Default.HelpOutline,
+                    icon = Icons.AutoMirrored.Filled.HelpOutline,
                     title = "Pusat Bantuan",
-                    onClick = { /* logic belum ada */ }
+                    onClick = {}
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // LOgout
             OutlinedButton(
-                onClick = { /* logic belum ada */ },
+                onClick = onLogoutClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
@@ -209,7 +252,7 @@ fun ProfileScreen() {
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.ExitToApp,
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
@@ -227,9 +270,10 @@ fun ProfileScreen() {
 }
 
 @Composable
-fun ProfileMenuItem(
+private fun ProfileMenuItem(
     icon: ImageVector,
     title: String,
+    subtitle: String? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -246,17 +290,43 @@ fun ProfileMenuItem(
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            color = BlackText,
-            modifier = Modifier.weight(1f) // teks ambil sisa ruang kosong
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                color = BlackText
+            )
+            if (subtitle != null) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 13.sp,
+                    color = Color.Gray,
+                    lineHeight = 16.sp
+                )
+            }
+        }
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Detail",
+            contentDescription = null,
             tint = Color.LightGray,
             modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun ProfileScreenPreview() {
+    NusaMartTheme {
+        ProfileContent(
+            username = "buyer_01",
+            email = "buyer.satu@gmail.com",
+            address = "Jl. Ir. Sutami No.36, Kentingan, Surakarta",
+            onBackClick = {},
+            onPesananClick = {},
+            onLogoutClick = {},
+            onMenuSelected = {}
         )
     }
 }

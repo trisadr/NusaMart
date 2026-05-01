@@ -1,0 +1,42 @@
+[
+  {
+    "idNotification": "N001",
+    "idOrder": null,
+    "idStore": null,
+    "title": "Keranjang Belanjamu Menunggu!",
+    "message": "Hai buyer_01, produk di keranjangmu belum dicheckout nih. Yuk segera selesaikan sebelum kehabisan!",
+    "date": "17-04-2026 09:00",
+    "type": "promo",
+    "isRead": false
+  },
+  {
+    "idNotification": "N002",
+    "idOrder": null,
+    "idStore": "STORE-002",
+    "title": "Telur Ayam Turun Harga!",
+    "message": "Dapatkan telur ayam segar langsung dari peternakan khusus untukmu hari ini.",
+    "date": "16-04-2026 18:02",
+    "type": "promo",
+    "isRead": false
+  },
+  {
+    "idNotification": "N003",
+    "idOrder": "ORD002",
+    "idStore": null,
+    "title": "Pesanan Sedang Dikirim",
+    "message": "Pesanan ORD002 kamu telah diserahkan ke kurir Sicepat.",
+    "date": "17-04-2026 14:01",
+    "type": "order",
+    "isRead": false
+  },
+  {
+    "idNotification": "N004",
+    "idOrder": "ORD001",
+    "idStore": null,
+    "title": "Pesanan ORD001 telah tiba",
+    "message": "Mohon konfirmasi terima pesanan dalam 2x24 jam dan berikan ulasan.",
+    "date": "16-04-2026 14:01",
+    "type": "order",
+    "isRead": true
+  }
+]

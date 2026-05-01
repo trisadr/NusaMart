@@ -16,10 +16,6 @@ object Routes {
     @Serializable
     data object LoginPageRoute : NavKey
 
-    // Catatan: Logout biasanya berupa fungsi/action, bukan screen tersendiri.
-    // Namun jika ada screen khusus untuk proses logout, bisa ditambahkan:
-    // @Serializable data object LogoutRoute : NavKey
-
     // ================== BUYER ==================
 
     // --- Keranjang ---
@@ -59,11 +55,21 @@ object Routes {
 
     // --- Transaction ---
     @Serializable
-    data object PaymentRoute : NavKey
+    data class PaymentRoute(
+        val orderId: String,
+        val selectedPaymentMethod: String? = null
+    ) : NavKey
 
     @Serializable
-    data object PaymentConfirmationRoute : NavKey
-
+    data class PaymentConfirmationRoute(
+        val orderId: String  // perlu orderId untuk balik ke PaymentRoute
+    ) : NavKey
+    
+    @Serializable
+    data class PaymentSuccessRoute(
+        val paymentCode: String,
+        val orderId: String
+    ) : NavKey
     // --- Order ---
     @Serializable
     data object OrderListRoute : NavKey
@@ -76,8 +82,7 @@ object Routes {
 
     // --- Review ---
     @Serializable
-    data object ReviewRoute : NavKey
-
-    // ================== SELLER ==================
-    // Tambahkan route seller di sini nanti saat screen-nya sudah didefinisikan
+    data class ReviewRoute(
+        val orderId: String
+    ) : NavKey
 }

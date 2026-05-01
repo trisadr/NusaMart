@@ -1,0 +1,42 @@
+[
+  {
+    "idOrder": "ORD001",
+    "totalPrice": 168000,
+    "status": "SELESAI",
+    "trackingNumber": "JNE123456789",
+    "description": "Pesanan Beras dan Gula",
+    "orderDate": 1713600000,
+    "arrivedDate": 1713900000,
+    "idSeller": "SELL-001"
+  },
+  {
+    "idOrder": "ORD002",
+    "totalPrice": 104000,
+    "status": "DIKIRIM",
+    "trackingNumber": "SICEPAT987654",
+    "description": "Pesanan Minyak dan Telur",
+    "orderDate": 1713700000,
+    "arrivedDate": null,
+    "idSeller": "SELL-002"
+  },
+  {
+    "idOrder": "ORD003",
+    "totalPrice": 75000,
+    "status": "DIPROSES",
+    "trackingNumber": "",
+    "description": "Pesanan Beras Raja Lele",
+    "orderDate": 1713800000,
+    "arrivedDate": null,
+    "idSeller": "SELL-001"
+  },
+  {
+    "idOrder": "ORD004",
+    "totalPrice": 56000,
+    "status": "MENUNGGU",
+    "trackingNumber": "",
+    "description": "Pesanan Telur",
+    "orderDate": 1713850000,
+    "arrivedDate": null,
+    "idSeller": "SELL-002"
+  }
+]

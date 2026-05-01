@@ -1,0 +1,18 @@
+[
+  {
+    "idReview": "REV001",
+    "idOrder": "ORD099",
+    "idProduct": "PROD-001",
+    "imageResId": 2131230890,
+    "rating": 5,
+    "reviewProduct": "Berasnya beneran pulen dan wangi. Pengiriman cepat, mantap!"
+  },
+  {
+    "idReview": "REV002",
+    "idOrder": "ORD099",
+    "idProduct": "PROD-003",
+    "imageResId": 2131230890,
+    "rating": 4,
+    "reviewProduct": "Gula sampai dengan aman tidak bocor. Terima kasih seller."
+  }
+]
