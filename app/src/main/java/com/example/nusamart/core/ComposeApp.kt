@@ -7,8 +7,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.nusamart.feature.auth.LoginScreen
-import com.example.nusamart.feature.auth.RegisterScreen
+import com.example.nusamart.feature.auth.login.LoginScreen
+import com.example.nusamart.feature.auth.register.RegisterScreen
 import com.example.nusamart.feature.buyer.cart.CartScreen
 import com.example.nusamart.feature.buyer.homepage.HomePageScreen
 import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
@@ -17,7 +17,8 @@ import com.example.nusamart.feature.buyer.notification.NotificationDetailScreen
 import com.example.nusamart.feature.buyer.notification.NotificationScreen
 import com.example.nusamart.feature.buyer.order.OrderDetailScreen
 import com.example.nusamart.feature.buyer.order.OrderListScreen
-import com.example.nusamart.feature.buyer.profile.ProfileScreen
+import com.example.nusamart.feature.buyer.profile.mainprofile.ProfileScreen
+import com.example.nusamart.feature.buyer.profile.address.AddressScreen
 import com.example.nusamart.feature.buyer.review.ReviewScreen
 import com.example.nusamart.feature.buyer.transaction.PaymentConfirmationScreen
 import com.example.nusamart.feature.buyer.transaction.PaymentScreen
@@ -28,7 +29,6 @@ import com.example.nusamart.ui.theme.NusaMartTheme
 @Composable
 fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.LandingPageRoute)
-    val activeUserId = "";
 
     // Menyediakan backStack secara global ke seluruh halaman di bawahnya
     CompositionLocalProvider(LocalBackStack provides backStack) {
@@ -68,6 +68,7 @@ fun ComposeApp() {
 
                     // --- Profile ---
                     entry<Routes.ProfileRoute> { ProfileScreen() }
+                    entry<Routes.AddressListRoute> { AddressScreen() }
 
                     entry<Routes.PaymentRoute> { route ->
                         PaymentScreen(

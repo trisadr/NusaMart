@@ -7,3 +7,12 @@ data class Seller(
     val bankName: String,
     val accountNumber: String
 )
+
+// JSON-friendly version
+data class SellerJson(
+    val idSeller: String,
+    val nik: String,
+    val ktpPhoto: Int,
+    val bankName: String,
+    val accountNumber: String
+)

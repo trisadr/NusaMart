@@ -11,6 +11,7 @@ object Routes {
 
     // ================== AUTH ==================
     @Serializable
+
     data object RegisterRoute : NavKey
 
     @Serializable
@@ -50,6 +51,8 @@ object Routes {
     // --- Profile ---
     @Serializable
     data object ProfileRoute : NavKey
+    @Serializable
+    data object AddressListRoute : NavKey
 
     // --- Transaction ---
     @Serializable

@@ -1,260 +1,230 @@
 package com.example.nusamart.data.repository.user
 
-import com.example.nusamart.data.model.user.Seller
-import com.example.nusamart.data.model.user.User
-import com.example.nusamart.data.model.user.UserAddress
+import android.content.Context
+import com.example.nusamart.data.model.user.SellerJson
+import com.example.nusamart.data.model.user.UserAddressJson
+import com.example.nusamart.data.model.user.UserJson
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.LocalDateTime
-import java.util.UUID
 
-// Hasil operasi login — bisa sukses atau gagal dengan pesan error
-sealed class AuthResult {
-    data class Success(val user: User, val token: String) : AuthResult()
-    data class Error(val message: String) : AuthResult()
+// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+
+sealed class RegisterResult {
+    object Success : RegisterResult()
+    data class ErrorDuplicate(val message: String) : RegisterResult()
 }
 
-class UserRepository(private val dataSource: UserLocalDataSource) {
+sealed class LoginResult {
+    data class Success(val role: String, val userId: String) : LoginResult()
+    data class Error(val message: String) : LoginResult()
+}
 
-    // ── Mapper: JSON → Data Class ─────────────────────────────────────────────
-    private fun UserJson.toUser() = User(
-        idUser = idUser,
-        username = username,
-        email = email,
-        passwordHashed = passwordHashed,
-        phone = phone,
-        role = User.Role.valueOf(role),
-        createAt = LocalDateTime.parse(createAt),
-        updateAt = LocalDateTime.parse(updateAt),
-        imageURL = imageURL
-    )
+// ─── Repository ──────────────────────────────────────────────────────────────
 
-    private fun User.toJson() = UserJson(
-        idUser = idUser,
-        username = username,
-        email = email,
-        passwordHashed = passwordHashed,
-        phone = phone,
-        role = role.name,
-        createAt = createAt.toString(),
-        updateAt = updateAt.toString(),
-        imageURL = imageURL
-    )
+class UserRepository(private val context: Context) {
 
-    private fun UserAddressJson.toAddress() = UserAddress(
-        idAddress = idAddress,
-        idUser = idUser,
-        label = label,
-        receiver = receiver,
-        phone = phone,
-        completeAddress = completeAddress,
-        city = city,
-        province = province,
-        postalCode = postalCode,
-        isDefault = isDefault
-    )
+    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
-    private fun UserAddress.toJson() = UserAddressJson(
-        idAddress = idAddress,
-        idUser = idUser,
-        label = label,
-        receiver = receiver,
-        phone = phone,
-        completeAddress = completeAddress,
-        city = city,
-        province = province,
-        postalCode = postalCode,
-        isDefault = isDefault
-    )
+    private var currentActiveUserId: String? = null
+    private var currentActiveUserRole: String? = null
 
-    // ── AUTH ──────────────────────────────────────────────────────────────────
+    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
+        val file = File(context.filesDir, fileName)
+        if (!file.exists()) return mutableListOf()
+        val json = file.readText()
+        val type = object : TypeToken<List<T>>() {}.type
+        return gson.fromJson(json, type) ?: mutableListOf()
+    }
 
-    fun login(email: String, password: String): AuthResult {
-        val db = dataSource.readDatabase()
+    private fun <T> writeJson(fileName: String, data: List<T>) {
+        val file = File(context.filesDir, fileName)
+        file.writeText(gson.toJson(data))
+    }
 
-        // Cari user berdasarkan email
-        val userJson = db.users.find { it.email == email }
-            ?: return AuthResult.Error("Email tidak ditemukan")
+    // ─── Fitur Login & Logout ─────────────────────────────────────────────────
 
-        // Validasi password (di real app pakai bcrypt / hash check)
-        // Sementara pakai simple check dulu
-        if (userJson.passwordHashed != password) {
-            return AuthResult.Error("Password salah")
+    suspend fun login(emailOrUsername: String, password: String): LoginResult = withContext(Dispatchers.IO) {
+        delay(1000)
+
+        val users = readJson<UserJson>("user.json")
+
+        val matchedUser = users.find {
+            (it.email.lowercase() == emailOrUsername.lowercase().trim() ||
+                    it.username.lowercase() == emailOrUsername.lowercase().trim()) &&
+                    it.password == password
         }
 
-        // Buat session token baru
-        val token = UUID.randomUUID().toString()
-        val session = SessionJson(
-            idUser = userJson.idUser,
-            token = token,
-            role = userJson.role,
-            loginAt = LocalDateTime.now().toString()
+        if (matchedUser != null) {
+            currentActiveUserId = matchedUser.idUser
+            currentActiveUserRole = matchedUser.role
+            return@withContext LoginResult.Success(role = matchedUser.role, userId = matchedUser.idUser)
+        } else {
+            return@withContext LoginResult.Error("Username/email atau password yang kamu masukkan salah. Periksa kembali dan coba lagi.")
+        }
+    }
+
+    fun logout() {
+        currentActiveUserId = null
+        currentActiveUserRole = null
+    }
+
+    fun getActiveUserId(): String? = currentActiveUserId
+    fun getActiveUserRole(): String? = currentActiveUserRole
+
+    // ─── Fitur Profile & Address ──────────────────────────────────────────────
+
+    suspend fun getCurrentUser(): UserJson? = withContext(Dispatchers.IO) {
+        if (currentActiveUserId == null) return@withContext null
+        val users = readJson<UserJson>("user.json")
+        return@withContext users.find { it.idUser == currentActiveUserId }
+    }
+
+    suspend fun getUserAddresses(): List<UserAddressJson> = withContext(Dispatchers.IO) {
+        if (currentActiveUserId == null) return@withContext emptyList()
+        val addresses = readJson<UserAddressJson>("userAddress.json")
+        return@withContext addresses.filter { it.idUser == currentActiveUserId }
+    }
+
+    suspend fun addAddress(
+        label: String,
+        receiver: String,
+        phone: String,
+        completeAddress: String,
+        city: String,
+        province: String,
+        postalCode: String,
+        isDefault: Boolean
+    ) = withContext(Dispatchers.IO) {
+        if (currentActiveUserId == null) return@withContext
+        val addresses = readJson<UserAddressJson>("userAddress.json")
+
+        if (isDefault) {
+            for (i in addresses.indices) {
+                if (addresses[i].idUser == currentActiveUserId) {
+                    addresses[i] = addresses[i].copy(isDefault = false)
+                }
+            }
+        }
+
+        val maxIdNum = addresses.maxOfOrNull { it.idAddress.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newId = String.format("ADR-%06d", maxIdNum + 1)
+
+        val newAddress = UserAddressJson(
+            idAddress = newId,
+            idUser = currentActiveUserId!!,
+            label = label,
+            receiver = receiver,
+            phone = phone,
+            completeAddress = completeAddress,
+            city = city,
+            province = province,
+            postalCode = postalCode,
+            isDefault = isDefault
         )
-
-        // Hapus session lama untuk user ini, simpan yang baru
-        db.sessions.removeAll { it.idUser == userJson.idUser }
-        db.sessions.add(session)
-        dataSource.writeDatabase(db)
-
-        return AuthResult.Success(user = userJson.toUser(), token = token)
+        addresses.add(newAddress)
+        writeJson("userAddress.json", addresses)
     }
 
-    fun logout(userId: String) {
-        val db = dataSource.readDatabase()
-        db.sessions.removeAll { it.idUser == userId }
-        dataSource.writeDatabase(db)
+    // --- FUNGSI UPDATE ALAMAT ---
+    suspend fun updateAddress(
+        addressId: String,
+        label: String,
+        receiver: String,
+        phone: String,
+        completeAddress: String,
+        city: String,
+        province: String,
+        postalCode: String,
+        isDefault: Boolean
+    ) = withContext(Dispatchers.IO) {
+        if (currentActiveUserId == null) return@withContext
+        val addresses = readJson<UserAddressJson>("userAddress.json")
+
+        if (isDefault) {
+            for (i in addresses.indices) {
+                if (addresses[i].idUser == currentActiveUserId && addresses[i].idAddress != addressId) {
+                    addresses[i] = addresses[i].copy(isDefault = false)
+                }
+            }
+        }
+
+        val index = addresses.indexOfFirst { it.idAddress == addressId }
+        if (index != -1) {
+            addresses[index] = addresses[index].copy(
+                label = label,
+                receiver = receiver,
+                phone = phone,
+                completeAddress = completeAddress,
+                city = city,
+                province = province,
+                postalCode = postalCode,
+                isDefault = isDefault
+            )
+            writeJson("userAddress.json", addresses)
+        }
     }
 
-    fun getActiveSession(): SessionJson? {
-        val db = dataSource.readDatabase()
-        return db.sessions.lastOrNull()
+    suspend fun deleteAddress(addressId: String) = withContext(Dispatchers.IO) {
+        val addresses = readJson<UserAddressJson>("userAddress.json")
+        addresses.removeAll { it.idAddress == addressId }
+        writeJson("userAddress.json", addresses)
     }
 
-    fun register(
+    // ─── Fitur Register ───────────────────────────────────────────────────────
+
+    suspend fun register(
         username: String,
         email: String,
-        password: String,
         phone: String,
-        role: User.Role = User.Role.BUYER
-    ): AuthResult {
-        val db = dataSource.readDatabase()
+        password: String,
+        isSeller: Boolean
+    ): RegisterResult = withContext(Dispatchers.IO) {
+        delay(1000)
 
-        // Cek email sudah dipakai
-        if (db.users.any { it.email == email }) {
-            return AuthResult.Error("Email sudah terdaftar")
+        val userFile = "user.json"
+        val sellerFile = "seller.json"
+        val users = readJson<UserJson>(userFile)
+
+        val usernameLower = username.lowercase().trim()
+        val emailLower = email.lowercase().trim()
+
+        if (users.any { it.username.lowercase() == usernameLower }) {
+            return@withContext RegisterResult.ErrorDuplicate("Username \"$username\" sudah digunakan. Silakan pilih username lain.")
+        }
+        if (users.any { it.email.lowercase() == emailLower }) {
+            return@withContext RegisterResult.ErrorDuplicate("Email \"$email\" sudah terdaftar. Silakan gunakan email lain atau login.")
         }
 
-        // Cek username sudah dipakai
-        if (db.users.any { it.username == username }) {
-            return AuthResult.Error("Username sudah dipakai")
-        }
-
+        val prefix = if (isSeller) "SLR-" else "BYR-"
+        val filteredUsers = users.filter { it.idUser.startsWith(prefix) }
+        val maxIdNum = filteredUsers.maxOfOrNull { it.idUser.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newId = String.format("%s%06d", prefix, maxIdNum + 1)
         val now = LocalDateTime.now().toString()
+        val role = if (isSeller) "SELLER" else "BUYER"
+
         val newUser = UserJson(
-            idUser = "usr-${UUID.randomUUID()}",
-            username = username,
-            email = email,
-            passwordHashed = password,   // Di real app: hash dulu sebelum simpan
-            phone = phone,
-            role = role.name,
-            createAt = now,
-            updateAt = now
+            idUser = newId, username = username.trim(), email = email.trim(),
+            password = password, phone = phone.trim(), role = role,
+            createAt = now, updateAt = now, imageURL = null
         )
+        users.add(newUser)
+        writeJson(userFile, users)
 
-        db.users.add(newUser)
-        dataSource.writeDatabase(db)
-
-        // Langsung login setelah register
-        return login(email, password)
-    }
-
-    // ── USER ──────────────────────────────────────────────────────────────────
-
-    fun getUserById(userId: String): User? {
-        return dataSource.readDatabase().users
-            .find { it.idUser == userId }
-            ?.toUser()
-    }
-
-    fun updateUser(updatedUser: User): Boolean {
-        val db = dataSource.readDatabase()
-        val index = db.users.indexOfFirst { it.idUser == updatedUser.idUser }
-        if (index == -1) return false
-
-        db.users[index] = updatedUser.copy(updateAt = LocalDateTime.now()).toJson()
-        dataSource.writeDatabase(db)
-        return true
-    }
-
-    // ── SELLER ────────────────────────────────────────────────────────────────
-
-    fun getSellerById(sellerId: String): Seller? {
-        return dataSource.readDatabase().sellers
-            .find { it.idSeller == sellerId }
-            ?.let {
-                Seller(
-                    idSeller = it.idSeller,
-                    nik = it.nik,
-                    ktpPhoto = it.ktpPhoto,
-                    bankName = it.bankName,
-                    accountNumber = it.accountNumber
-                )
-            }
-    }
-
-    fun registerSeller(userId: String, nik: String, ktpPhoto: Int, bankName: String, accountNumber: String): Boolean {
-        val db = dataSource.readDatabase()
-
-        // Pastikan user ada dan rolenya SELLER
-        val userIndex = db.users.indexOfFirst { it.idUser == userId }
-        if (userIndex == -1) return false
-
-        // Update role user jadi SELLER
-        db.users[userIndex] = db.users[userIndex].copy(role = User.Role.SELLER.name)
-
-        // Tambah data seller
-        db.sellers.add(
-            SellerJson(
-                idSeller = userId,
-                nik = nik,
-                ktpPhoto = ktpPhoto,
-                bankName = bankName,
-                accountNumber = accountNumber
+        if (isSeller) {
+            val sellers = readJson<SellerJson>(sellerFile)
+            val newSeller = SellerJson(
+                idSeller = newId, nik = "", ktpPhoto = 0, bankName = "", accountNumber = ""
             )
-        )
-
-        dataSource.writeDatabase(db)
-        return true
-    }
-
-    // ── USER ADDRESS ──────────────────────────────────────────────────────────
-
-    fun getAddressesByUser(userId: String): List<UserAddress> {
-        return dataSource.readDatabase().addresses
-            .filter { it.idUser == userId }
-            .map { it.toAddress() }
-    }
-
-    fun getDefaultAddress(userId: String): UserAddress? {
-        return dataSource.readDatabase().addresses
-            .find { it.idUser == userId && it.isDefault }
-            ?.toAddress()
-    }
-
-    fun addAddress(address: UserAddress): Boolean {
-        val db = dataSource.readDatabase()
-
-        // Kalau isDefault true, reset semua address lain milik user ini
-        if (address.isDefault) {
-            val indices = db.addresses.indices.filter { db.addresses[it].idUser == address.idUser }
-            indices.forEach { db.addresses[it] = db.addresses[it].copy(isDefault = false) }
+            sellers.add(newSeller)
+            writeJson(sellerFile, sellers)
         }
 
-        db.addresses.add(address.toJson())
-        dataSource.writeDatabase(db)
-        return true
-    }
-
-    fun updateAddress(updatedAddress: UserAddress): Boolean {
-        val db = dataSource.readDatabase()
-        val index = db.addresses.indexOfFirst { it.idAddress == updatedAddress.idAddress }
-        if (index == -1) return false
-
-        // Kalau dijadikan default, reset yang lain
-        if (updatedAddress.isDefault) {
-            val indices = db.addresses.indices.filter {
-                db.addresses[it].idUser == updatedAddress.idUser && it != index
-            }
-            indices.forEach { db.addresses[it] = db.addresses[it].copy(isDefault = false) }
-        }
-
-        db.addresses[index] = updatedAddress.toJson()
-        dataSource.writeDatabase(db)
-        return true
-    }
-
-    fun deleteAddress(addressId: String): Boolean {
-        val db = dataSource.readDatabase()
-        val removed = db.addresses.removeAll { it.idAddress == addressId }
-        if (removed) dataSource.writeDatabase(db)
-        return removed
+        RegisterResult.Success
     }
 }
