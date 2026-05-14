@@ -2,23 +2,120 @@
   {
     "idProduct": "PRD-000001",
     "idStore": "STR-000001",
-    "productName": "Batik Tulis Khas Solo",
-    "description": "Batik tulis halus bermotif parang, cocok untuk acara formal maupun semi-formal.",
-    "weightGram": 300.0,
+    "productName": "Vas Bunga Anyaman Rotan",
+    "description": "Vas bunga estetik buat foto-foto hasil kerajinan tangan pengrajin lokal berbakat.",
+    "weightGram": 500.0,
     "productStatus": "ACTIVE",
-    "createAt": "2026-05-14T10:00:00",
-    "updateAt": "2026-05-14T10:00:00",
-    "avgRating": 5.0
+    "createAt": "2026-04-01T10:00:00",
+    "updateAt": "2026-05-14T20:00:00",
+    "avgRating": 4.9
   },
+
   {
     "idProduct": "PRD-000002",
-    "idStore": "STR-000001",
-    "productName": "Kopi Lawu Robusta 250g",
-    "description": "Kopi robusta kualitas super, dipanen langsung dari petani lereng Gunung Lawu.",
+    "idStore": "STR-000002",
+    "productName": "Kemeja Batik Tulis Solo",
+    "description": "Batik tulis asli motif parang, bahan katun no polyester, high quality, motif keren tidak tertandingi HAHA",
+    "weightGram": 300.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-04-05T11:00:00",
+    "updateAt": "2026-05-10T09:00:00",
+    "avgRating": 4.8
+  },
+
+  {
+    "idProduct": "PRD-000003",
+    "idStore": "STR-000003",
+    "productName": "Kopi Arabica pack 250 gram",
+    "description": "Bubuk kopi arabica dengan biji kopi pilihan, membuat mata segar dan jadi bersemangat 45",
     "weightGram": 250.0,
     "productStatus": "ACTIVE",
-    "createAt": "2026-05-14T10:00:00",
+    "createAt": "2026-05-01T08:00:00",
+    "updateAt": "2026-05-14T08:00:00",
+    "avgRating": 4.9
+  },
+
+  {
+    "idProduct": "PRD-000004",
+    "idStore": "STR-000004",
+    "productName": "Rak Dinding Kayu Jati",
+    "description": "Rak minimalis handmade dengan finishing halus mulus tanpa minus",
+    "weightGram": 2000.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-04-20T10:00:00",
+    "updateAt": "2026-05-12T11:00:00",
+    "avgRating": 4.7
+  },
+
+  {
+    "idProduct": "PRD-000005",
+    "idStore": "STR-000005",
+    "productName": "Gorden Perca Shabby",
+    "description": "Gorden unik dari kain perca motif bunga, membuat yang melihat jadi berbunga-bunga",
+    "weightGram": 1200.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-04-25T09:00:00",
+    "updateAt": "2026-05-11T13:00:00",
+    "avgRating": 4.8
+  },
+
+  {
+    "idProduct": "PRD-000006",
+    "idStore": "STR-000006",
+    "productName": "Masker Kunyit Herbal",
+    "description": "Masker organik untuk mencerahkan kulitmu dan mengangkat segala kusam wajahmu, dijamin habis pakai tidak jadi kuning",
+    "weightGram": 100.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-05T14:00:00",
     "updateAt": "2026-05-14T10:00:00",
+    "avgRating": 4.6
+  },
+
+  {
+    "idProduct": "PRD-000007",
+    "idStore": "STR-000007",
+    "productName": "Keripik Tempe Sagu Kress",
+    "description": "Kripik tempe gurih renyah tanpa pengawet cocok buat teman nonton, scroll tiktok, dan lain-lain",
+    "weightGram": 200.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-08T08:00:00",
+    "updateAt": "2026-05-14T09:00:00",
+    "avgRating": 5.0
+  },
+
+  {
+    "idProduct": "PRD-000008",
+    "idStore": "STR-000008",
+    "productName": "Pelet Lele Super-Growth",
+    "description": "Pakan lele protein tinggi untuk pertumbuhan maksimal, sehat, tidak stunting",
+    "weightGram": 5000.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-10T10:00:00",
+    "updateAt": "2026-05-14T11:00:00",
+    "avgRating": 4.7
+  },
+
+  {
+    "idProduct": "PRD-000009",
+    "idStore": "STR-000009",
+    "productName": "Outer Tenun Ikat",
+    "description": "Kombinasi fashion modern dengan kain tenun tradisional.",
+    "weightGram": 600.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-12T15:00:00",
+    "updateAt": "2026-05-14T15:00:00",
+    "avgRating": 4.9
+  },
+
+  {
+    "idProduct": "PRD-000010",
+    "idStore": "STR-000010",
+    "productName": "Rendang Daging Frozen",
+    "description": "Rendang asli resep Bude, praktis...tinggal panaskan lalu makan, sedap sedappp",
+    "weightGram": 400.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-13T09:00:00",
+    "updateAt": "2026-05-14T16:00:00",
     "avgRating": 4.8
   }
 ]

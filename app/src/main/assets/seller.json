@@ -2,8 +2,80 @@
   {
     "idSeller": "SLR-000001",
     "nik": "3372000000000001",
-    "ktpPhoto": 0,
+    "ktpPhoto": 1001,
     "bankName": "BCA",
     "accountNumber": "1234567890"
+  },
+
+  {
+    "idSeller": "SLR-000002",
+    "nik": "3372000000000002",
+    "ktpPhoto": 1002,
+    "bankName": "Mandiri",
+    "accountNumber": "9876543210"
+  },
+
+  {
+    "idSeller": "SLR-000003",
+    "nik": "3372000000000003",
+    "ktpPhoto": 1003,
+    "bankName": "BNI",
+    "accountNumber": "5566778899"
+  },
+
+  {
+    "idSeller": "SLR-000004",
+    "nik": "3372000000000004",
+    "ktpPhoto": 1004,
+    "bankName": "BRI",
+    "accountNumber": "1122334455"
+  },
+
+  {
+    "idSeller": "SLR-000005",
+    "nik": "3372000000000005",
+    "ktpPhoto": 1005,
+    "bankName": "BCA",
+    "accountNumber": "2233445566"
+  },
+
+  {
+    "idSeller": "SLR-000006",
+    "nik": "3372000000000006",
+    "ktpPhoto": 1006,
+    "bankName": "BSI",
+    "accountNumber": "7788990011"
+  },
+
+  {
+    "idSeller": "SLR-000007",
+    "nik": "3372000000000007",
+    "ktpPhoto": 1007,
+    "bankName": "Mandiri",
+    "accountNumber": "8899001122"
+  },
+
+  {
+    "idSeller": "SLR-000008",
+    "nik": "3372000000000008",
+    "ktpPhoto": 1008,
+    "bankName": "BNI",
+    "accountNumber": "3344556677"
+  },
+
+  {
+    "idSeller": "SLR-000009",
+    "nik": "3372000000000009",
+    "ktpPhoto": 1009,
+    "bankName": "BCA",
+    "accountNumber": "4455667788"
+  },
+
+  {
+    "idSeller": "SLR-000010",
+    "nik": "3372000000000010",
+    "ktpPhoto": 1010,
+    "bankName": "BRI",
+    "accountNumber": "6677889900"
   }
 ]

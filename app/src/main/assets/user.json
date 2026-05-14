@@ -13,12 +13,111 @@
   {
     "idUser": "SLR-000001",
     "username": "rifqia",
-    "email": "rifqia@student.uns.ac.id",
-    "password": "password123",
+    "email": "rifqia@gmail.com",
+    "password": "123",
     "phone": "089876543210",
     "role": "SELLER",
-    "createAt": "2026-05-14T10:00:00",
+    "createAt": "2026-01-10T08:00:00",
     "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000002",
+    "username": "siti_merona",
+    "email": "sitiyati@gmail.com",
+    "password": "password123",
+    "phone": "081234567891",
+    "role": "SELLER",
+    "createAt": "2026-01-12T09:30:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000003",
+    "username": "budipekerti",
+    "email": "budi@gmail.com",
+    "password": "password123",
+    "phone": "081234567892",
+    "role": "SELLER",
+    "createAt": "2026-02-01T07:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000004",
+    "username": "agus_joss",
+    "email": "agus123@gmail.com",
+    "password": "password123",
+    "phone": "081234567893",
+    "role": "SELLER",
+    "createAt": "2026-02-05T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000005",
+    "username": "melly_admin",
+    "email": "melly@gmail.com",
+    "password": "password123",
+    "phone": "081234567894",
+    "role": "SELLER",
+    "createAt": "2026-02-10T08:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000006",
+    "username": "dewidewi",
+    "email": "dewi@gmail.com",
+    "password": "password123",
+    "phone": "081234567895",
+    "role": "SELLER",
+    "createAt": "2026-02-15T11:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000007",
+    "username": "ekocemalcemil",
+    "email": "ekoyanto@gmail.com",
+    "password": "password123",
+    "phone": "081234567896",
+    "role": "SELLER",
+    "createAt": "2026-03-01T09:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000008",
+    "username": "jokopakanlele",
+    "email": "jokolele@gmail.com",
+    "password": "password123",
+    "phone": "081234567897",
+    "role": "SELLER",
+    "createAt": "2026-03-05T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000009",
+    "username": "andi_gofashion",
+    "email": "andifashion@gmail.com",
+    "password": "password123",
+    "phone": "081234567898",
+    "role": "SELLER",
+    "createAt": "2026-03-10T08:30:00",
+    "updateAt": "2026-05-14T15:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000010",
+    "username": "bude_mar",
+    "email": "maryati01@gmail.com",
+    "password": "password123",
+    "phone": "081234567899",
+    "role": "SELLER",
+    "createAt": "2026-03-15T09:00:00",
+    "updateAt": "2026-05-14T16:00:00",
     "imageURL": null
   }
 ]
