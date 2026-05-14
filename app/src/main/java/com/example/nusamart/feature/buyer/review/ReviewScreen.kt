@@ -1,6 +1,6 @@
 package com.example.nusamart.feature.buyer.review
 
-import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,8 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,10 +39,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,203 +51,73 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
-import com.example.nusamart.core.Routes
-import com.example.nusamart.entity.Order
-import com.example.nusamart.entity.OrderItem
-import com.example.nusamart.entity.OrderStatus
-import com.example.nusamart.entity.Product
-import com.example.nusamart.entity.Review
-import com.example.nusamart.feature.buyer.homepage.loadProductsFromJson
-import com.example.nusamart.ui.theme.NusaMartTheme
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.io.File
-import java.util.UUID
-
-fun loadOrderById(context: Context, orderId: String): Order? {
-    return try {
-        val orderFile = File(context.filesDir, "order.json")
-        val jsonString = if (orderFile.exists()) {
-            orderFile.readText()
-        } else {
-            context.assets.open("order.json").bufferedReader().use { it.readText() }
-        }
-        val type = object : TypeToken<List<Order>>() {}.type
-        val orders: List<Order> = Gson().fromJson(jsonString, type) ?: emptyList()
-        orders.find { it.idOrder == orderId }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
-
-fun loadOrderItemsByOrderId(context: Context, orderId: String): List<OrderItem> {
-    return try {
-        val orderItemFile = File(context.filesDir, "order_item.json")
-        val jsonString = if (orderItemFile.exists()) {
-            orderItemFile.readText()
-        } else {
-            context.assets.open("order_item.json").bufferedReader().use { it.readText() }
-        }
-        val type = object : TypeToken<List<OrderItem>>() {}.type
-        val items: List<OrderItem> = Gson().fromJson(jsonString, type) ?: emptyList()
-        items.filter { it.idOrder == orderId }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        emptyList()
-    }
-}
-
-fun saveReviewsToJson(context: Context, newReviews: List<Review>) {
-    try {
-        val reviewFile = File(context.filesDir, "review.json")
-        val existingReviews: MutableList<Review> = if (reviewFile.exists()) {
-            val type = object : TypeToken<List<Review>>() {}.type
-            Gson().fromJson(reviewFile.readText(), type) ?: mutableListOf()
-        } else {
-            mutableListOf()
-        }
-
-        existingReviews.addAll(newReviews)
-        reviewFile.writeText(Gson().toJson(existingReviews))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-data class ReviewItemState(
-    val rating: Int = 0,
-    val reviewText: String = ""
-)
-
-@Composable
-fun ReviewScreen(orderId: String) {
-    val context = LocalContext.current
-    val backStack = LocalBackStack.current
-
-    val order = remember { loadOrderById(context, orderId) }
-    val orderItems = remember { loadOrderItemsByOrderId(context, orderId) }
-    val products = remember { loadProductsFromJson(context) }
-
-    val productMap = remember { products.associateBy { it.idProduct } }
-
-    if (order == null) {
-        Text("Order tidak ditemukan")
-        return
-    }
-
-    val reviewStates = remember {
-        orderItems.associate { item ->
-            item.idOrderItem to mutableStateOf(ReviewItemState())
-        }
-    }
-
-    Content(
-        order = order,
-        orderItems = orderItems,
-        productMap = productMap,
-        reviewStates = reviewStates.mapValues { it.value.value },
-
-        onRatingChange = { idOrderItem, rating ->
-            reviewStates[idOrderItem]?.value =
-                reviewStates[idOrderItem]!!.value.copy(rating = rating)
-        },
-
-        onReviewTextChange = { idOrderItem, text ->
-            reviewStates[idOrderItem]?.value =
-                reviewStates[idOrderItem]!!.value.copy(reviewText = text)
-        },
-
-        onBackClick = {
-            if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
-        },
-
-        onSubmitClick = {
-            val allRated = orderItems.all { item ->
-                (reviewStates[item.idOrderItem]?.value?.rating ?: 0) > 0
-            }
-
-            if (!allRated) return@Content false
-
-            val reviews = orderItems.map { item ->
-                val state = reviewStates[item.idOrderItem]!!.value
-                Review(
-                    idReview = UUID.randomUUID().toString(),
-                    idOrder = orderId,
-                    idProduct = item.idProduct,
-                    imageResId = null,
-                    rating = state.rating,
-                    reviewProduct = state.reviewText.ifBlank { null }
-                )
-            }
-
-            saveReviewsToJson(context, reviews)
-
-            backStack.removeAt(backStack.lastIndex)
-            backStack.add(Routes.OrderDetailRoute(orderId))
-
-            true
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Content(
-    order: Order,
-    orderItems: List<OrderItem>,
-    productMap: Map<String, Product>,
-    reviewStates: Map<String, ReviewItemState>,
-    onRatingChange: (String, Int) -> Unit,
-    onReviewTextChange: (String, String) -> Unit,
-    onBackClick: () -> Unit,
-    onSubmitClick: () -> Boolean
+fun ReviewScreen(
+    orderId: String,
+    vm: ReviewVM = viewModel(factory = ReviewVM.Factory)
 ) {
-    var showRatingError by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val backStack = LocalBackStack.current
+    val uiState by vm.uiState.collectAsState()
+
+    LaunchedEffect(orderId) {
+        vm.loadOrderItems(orderId)
+    }
+
+    LaunchedEffect(uiState.isSubmitSuccess) {
+        if (uiState.isSubmitSuccess) {
+            Toast.makeText(context, "Ulasan berhasil dikirim!", Toast.LENGTH_SHORT).show()
+            backStack.removeAt(backStack.lastIndex)
+        }
+    }
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFFFF6D00))
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tulis Ulasan") },
+                title = { Text("Tulis Ulasan", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 }
             )
         },
         bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 8.dp
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .navigationBarsPadding()
-                ) {
-                    if (showRatingError) {
-                        Text(
-                            text = "Harap beri bintang untuk semua produk",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                    Button(
-                        onClick = {
-                            val success = onSubmitClick()
-                            if (!success) showRatingError = true
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Kirim Ulasan")
+            // Sembunyikan tombol jika pesanan belum selesai atau semua barang sudah diulas
+            if (uiState.isOrderDelivered && !uiState.allReviewed) {
+                Surface(modifier = Modifier.fillMaxWidth(), shadowElevation = 8.dp) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
+                        if (uiState.showValidationError) {
+                            Text(
+                                text = "Harap beri bintang untuk semua produk",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                        Button(
+                            onClick = vm::submitReviews,
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00))
+                        ) {
+                            Text("Kirim Ulasan", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
@@ -255,20 +129,60 @@ private fun Content(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            orderItems.forEachIndexed { index, orderItem ->
-                val product = productMap[orderItem.idProduct]
-                val state = reviewStates[orderItem.idOrderItem] ?: ReviewItemState()
+            // --- KONDISI: Pesanan Belum Selesai ---
+            if (!uiState.isOrderDelivered) {
+                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Pesanan Belum Selesai",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Kamu hanya bisa memberikan ulasan setelah pesanan berstatus Selesai (Diterima).",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            // --- KONDISI: Semua Sudah Diulas ---
+            else if (uiState.allReviewed) {
+                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color(0xFF4CAF50))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Semua Sudah Diulas",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Terima kasih! Kamu sudah memberikan ulasan untuk semua produk di pesanan ini.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            // --- KONDISI: Render Form Ulasan ---
+            else {
+                uiState.itemsToReview.forEachIndexed { index, form ->
+                    ReviewItemSection(
+                        form = form,
+                        onRatingChange = { rating -> vm.updateRating(form.idOrderItem, rating) },
+                        onReviewTextChange = { text -> vm.updateComment(form.idOrderItem, text) }
+                    )
 
-                ReviewItemSection(
-                    product = product,
-                    orderItem = orderItem,
-                    state = state,
-                    onRatingChange = { rating -> onRatingChange(orderItem.idOrderItem, rating) },
-                    onReviewTextChange = { text -> onReviewTextChange(orderItem.idOrderItem, text) }
-                )
-
-                if (index < orderItems.lastIndex) {
-                    HorizontalDivider(thickness = 8.dp, color = MaterialTheme.colorScheme.surfaceVariant)
+                    if (index < uiState.itemsToReview.lastIndex) {
+                        HorizontalDivider(thickness = 8.dp, color = MaterialTheme.colorScheme.surfaceVariant)
+                    }
                 }
             }
         }
@@ -277,40 +191,26 @@ private fun Content(
 
 @Composable
 private fun ReviewItemSection(
-    product: Product?,
-    orderItem: OrderItem,
-    state: ReviewItemState,
+    form: ReviewItemForm,
     onRatingChange: (Int) -> Unit,
     onReviewTextChange: (String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val context = LocalContext.current
-            val safeImageResId = remember(product?.imageResId) {
-                val resId = product?.imageResId ?: 0
+    val context = LocalContext.current
+
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        // Info Barang
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            val safeImageResId = remember(form.productImageResId) {
                 try {
-                    if (resId != 0) {
-                        context.resources.getResourceName(resId)
-                        resId
-                    } else null
-                } catch (e: Exception) {
-                    null
-                }
+                    context.resources.getResourceName(form.productImageResId)
+                    form.productImageResId
+                } catch (e: Exception) { R.drawable.nm_logo }
             }
 
             Image(
-                painter = painterResource(id = safeImageResId ?: R.drawable.nm_logo),
+                painter = painterResource(id = safeImageResId),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -318,144 +218,63 @@ private fun ReviewItemSection(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = product?.name ?: orderItem.idProduct,
+                    text = form.productName,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "${orderItem.quantity} barang",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+                Text(text = "${form.quantity} barang", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "Bagaimana kualitas produk ini?",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-
+        // Input Rating
+        Text("Bagaimana kualitas produk ini?", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-
         Row(horizontalArrangement = Arrangement.Start) {
             repeat(5) { index ->
                 val starValue = index + 1
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Bintang $starValue",
-                    tint = if (starValue <= state.rating) Color(0xFFFFC107) else Color.LightGray,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .padding(4.dp)
-                        .clickable { onRatingChange(starValue) }
+                    tint = if (starValue <= form.rating) Color(0xFFFFC107) else Color.LightGray,
+                    modifier = Modifier.size(40.dp).padding(4.dp).clickable { onRatingChange(starValue) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Upload foto (belum ada aksi)
-        Text(
-            text = "Tambahkan Foto (Opsional)",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-
+        // Input Foto
+        Text("Tambahkan Foto (Opsional)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-
         Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp))
+            modifier = Modifier.size(80.dp).clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable { /* TODO: buka galeri */ },
+                .clickable { Toast.makeText(context, "Fitur upload foto segera hadir!", Toast.LENGTH_SHORT).show() },
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    imageVector = Icons.Default.AddAPhoto,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
+                Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Tambah",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Text("Tambah", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6D00))
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "Tulis Ulasan (Opsional)",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-
+        // Input Teks
+        Text("Tulis Ulasan (Opsional)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-
         OutlinedTextField(
-            value = state.reviewText,
+            value = form.comment,
             onValueChange = onReviewTextChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            placeholder = {
-                Text("Ceritakan pengalamanmu menggunakan produk ini...")
-            },
+            modifier = Modifier.fillMaxWidth().height(120.dp),
+            placeholder = { Text("Ceritakan pengalamanmu menggunakan produk ini...", color = Color.Gray) },
             shape = RoundedCornerShape(12.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun ReviewScreenPreview() {
-    val dummyOrder = Order(
-        idOrder = "ORD12345",
-        totalPrice = 235000.0,
-        status = OrderStatus.SELESAI,
-        trackingNumber = "JNE123456789",
-        description = "Pesanan produk kebutuhan sehari-hari",
-        orderDate = 1713600000L,
-        arrivedDate = null,
-        idSeller = "SELLER001"
-    )
-
-    val dummyItems = listOf(
-        OrderItem("OI001", "ORD12345", "PRD001", 2, 50000.0),
-        OrderItem("OI002", "ORD12345", "PRD002", 1, 75000.0)
-    )
-
-    val dummyProducts = mapOf(
-        "PRD001" to Product("PRD001", "Beras Makmur 5kg", 50000.0, "Beras premium", 10, "", R.drawable.keranjang, "S1", "T1", "Solo"),
-        "PRD002" to Product("PRD002", "Keranjang Anyaman", 75000.0, "Keranjang kuat", 5, "", R.drawable.keranjang, "S2", "T2", "Solo")
-    )
-
-    val dummyStates = mapOf(
-        "OI001" to ReviewItemState(rating = 4, reviewText = "Produk bagus!"),
-        "OI002" to ReviewItemState(rating = 0, reviewText = "")
-    )
-
-    NusaMartTheme(dynamicColor = false) {
-        Content(
-            order = dummyOrder,
-            orderItems = dummyItems,
-            productMap = dummyProducts,
-            reviewStates = dummyStates,
-            onRatingChange = { _, _ -> },
-            onReviewTextChange = { _, _ -> },
-            onBackClick = {},
-            onSubmitClick = { true }
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.example.nusamart.core
 
+//import com.example.nusamart.feature.buyer.review.ReviewScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -7,28 +8,30 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.nusamart.feature.auth.LoginScreen
-import com.example.nusamart.feature.auth.RegisterScreen
+import com.example.nusamart.feature.auth.login.LoginScreen
+import com.example.nusamart.feature.auth.register.RegisterScreen
 import com.example.nusamart.feature.buyer.cart.CartScreen
-import com.example.nusamart.feature.buyer.homepage.HomePageScreen
-import com.example.nusamart.feature.buyer.homepage.ProductPageScreen
-import com.example.nusamart.feature.buyer.homepage.SearchResultScreen
-import com.example.nusamart.feature.buyer.notification.NotificationDetailScreen
-import com.example.nusamart.feature.buyer.notification.NotificationScreen
-import com.example.nusamart.feature.buyer.order.OrderDetailScreen
-import com.example.nusamart.feature.buyer.order.OrderListScreen
-import com.example.nusamart.feature.buyer.profile.ProfileScreen
+import com.example.nusamart.feature.buyer.homepage.home.HomePageScreen
+import com.example.nusamart.feature.buyer.homepage.product.ProductPageScreen
+import com.example.nusamart.feature.buyer.homepage.search.SearchResultScreen
+import com.example.nusamart.feature.buyer.notification.detail.NotificationDetailScreen
+import com.example.nusamart.feature.buyer.notification.list.NotificationScreen
+import com.example.nusamart.feature.buyer.order.detail.OrderDetailScreen
+import com.example.nusamart.feature.buyer.order.list.OrderListScreen
+import com.example.nusamart.feature.buyer.profile.address.AddressScreen
+import com.example.nusamart.feature.buyer.profile.mainprofile.ProfileScreen
 import com.example.nusamart.feature.buyer.review.ReviewScreen
-import com.example.nusamart.feature.buyer.transaction.PaymentConfirmationScreen
-import com.example.nusamart.feature.buyer.transaction.PaymentScreen
-import com.example.nusamart.feature.buyer.transaction.PaymentSuccessScreen
+import com.example.nusamart.feature.buyer.transaction.address.AddressOptionScreen
+import com.example.nusamart.feature.buyer.transaction.checkout.CheckoutScreen
+import com.example.nusamart.feature.buyer.transaction.courier.CourierOptionScreen
+import com.example.nusamart.feature.buyer.transaction.payment.PaymentOptionScreen
+import com.example.nusamart.feature.buyer.transaction.success.CheckoutSuccessScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @Composable
 fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.LandingPageRoute)
-    val activeUserId = "";
 
     // Menyediakan backStack secara global ke seluruh halaman di bawahnya
     CompositionLocalProvider(LocalBackStack provides backStack) {
@@ -46,7 +49,14 @@ fun ComposeApp() {
                     entry<Routes.RegisterRoute> { RegisterScreen() }
                     entry<Routes.LoginPageRoute> { LoginScreen() }
 
+                    // ================== SELLER ==================
+//                    entry<Routes.SellerHomeRoute> {
+//                        Text("Ini Halaman Beranda Penjual")
+//                    }
+
                     // ================== BUYER ==================
+
+                    // --- Cart & Home ---
                     entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
@@ -61,39 +71,46 @@ fun ComposeApp() {
                     // --- Notification ---
                     entry<Routes.NotificationRoute> { NotificationScreen() }
 
-//                    // Membaca notificationId yang dikirim melalui Routes
                     entry<Routes.NotificationDetailRoute> { route ->
                         NotificationDetailScreen(notificationId = route.notificationId)
                     }
 
-                    // --- Profile ---
+                    // --- Profile & Address ---
                     entry<Routes.ProfileRoute> { ProfileScreen() }
+                    entry<Routes.AddressListRoute> { AddressScreen() }
 
-                    entry<Routes.PaymentRoute> { route ->
-                        PaymentScreen(
-                            orderId = route.orderId,
-                            selectedPaymentMethod = route.selectedPaymentMethod
-                        )
+                    // --- Transaction / Checkout Flow ---
+                    entry<Routes.CheckoutRoute> { route ->
+                        CheckoutScreen(route = route)
                     }
-                    entry<Routes.PaymentConfirmationRoute> { route ->
-                        PaymentConfirmationScreen(orderId = route.orderId)
+
+                    entry<Routes.AddressOptionRoute> { route ->
+                        AddressOptionScreen(currentRoute = route.checkoutData)
                     }
-                    entry<Routes.PaymentSuccessRoute> { route ->
-                        PaymentSuccessScreen(
-                            paymentCode = route.paymentCode,
+
+                    entry<Routes.CourierOptionRoute> { route ->
+                        CourierOptionScreen(currentRoute = route.checkoutData)
+                    }
+
+                    entry<Routes.PaymentOptionRoute> { route ->
+                        PaymentOptionScreen(currentRoute = route.checkoutData)
+                    }
+
+                    entry<Routes.CheckoutSuccessRoute> { route ->
+                        CheckoutSuccessScreen(
+                            paymentId = route.paymentId,
                             orderId = route.orderId
                         )
                     }
 
-//                    // --- Order ---
+                    // --- Order History ---
                     entry<Routes.OrderListRoute> { OrderListScreen() }
 
-                    // Membaca orderId yang dikirim melalui Routes
                     entry<Routes.OrderDetailRoute> { route ->
                         OrderDetailScreen(orderId = route.orderId)
                     }
 
-//                    // --- Review ---
+                    // --- Review ---
                     entry<Routes.ReviewRoute> { route ->
                         ReviewScreen(orderId = route.orderId)
                     }

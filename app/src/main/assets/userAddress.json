@@ -1,0 +1,14 @@
+[
+  {
+    "idAddress": "ADR-000001",
+    "idUser": "BYR-000001",
+    "label": "Kos/Asrama",
+    "receiver": "Trisa",
+    "phone": "081234567890",
+    "completeAddress": "Kentingan, Jebres, sekitar area UNS",
+    "city": "Surakarta",
+    "province": "Jawa Tengah",
+    "postalCode": "57126",
+    "isDefault": true
+  }
+]

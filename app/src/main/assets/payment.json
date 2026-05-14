@@ -1,0 +1,11 @@
+[
+  {
+    "idPayment": "PAY-000001",
+    "idOrder": "ORD-000001",
+    "idMethod": "MET-000002",
+    "transactionIdGateway": null,
+    "snapToken": null,
+    "paymentStatus": "APPROVED",
+    "paymentTime": "2026-05-14T10:05:00"
+  }
+]

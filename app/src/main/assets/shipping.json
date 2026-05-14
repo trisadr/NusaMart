@@ -1,0 +1,11 @@
+[
+  {
+    "idShipping": "SHP-000001",
+    "idOrder": "ORD-000001",
+    "idCourier": "CUR-000001",
+    "resi": "JNE1234567890",
+    "shippingDate": "2026-05-14T15:00:00",
+    "deliveredDate": null,
+    "shippingStatus": "IN_TRANSIT"
+  }
+]

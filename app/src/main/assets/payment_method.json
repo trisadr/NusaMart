@@ -1,0 +1,20 @@
+[
+  {
+    "idMethod": "MET-000001",
+    "methodName": "QRIS NusaMart",
+    "provider": "MIDTRANS",
+    "isActive": true
+  },
+  {
+    "idMethod": "MET-000002",
+    "methodName": "Transfer Bank BCA",
+    "provider": "MANUAL",
+    "isActive": true
+  },
+  {
+    "idMethod": "MET-000003",
+    "methodName": "Bayar di Tempat (COD)",
+    "provider": "COD",
+    "isActive": true
+  }
+]

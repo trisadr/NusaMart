@@ -1,0 +1,14 @@
+[
+  {
+    "idVariation": "VAR-000001",
+    "idItem": "ITM-000001",
+    "typeVariation": "Ukuran",
+    "value": "M"
+  },
+  {
+    "idVariation": "VAR-000002",
+    "idItem": "ITM-000002",
+    "typeVariation": "Ukuran",
+    "value": "L"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "idProductSubCat": "PSC-000001",
+    "idProduct": "PRD-000001",
+    "idSubCategory": "SUB-000001"
+  },
+  {
+    "idProductSubCat": "PSC-000002",
+    "idProduct": "PRD-000002",
+    "idSubCategory": "SUB-000002"
+  }
+]

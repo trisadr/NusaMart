@@ -1,50 +1,24 @@
 [
   {
-    "idProduct": "PROD-001",
-    "name": "Beras Raja Lele 5kg",
-    "price": 75000.0,
-    "description": "Beras pulen berkualitas tinggi dari petani lokal.",
-    "stock": 50,
-    "map": "https://maps.google.com/?q=-7.558,110.831",
-    "imageResId": 2131230815,
-    "idSeller": "SELL-001",
-    "idStore": "STORE-001",
-    "location": "Jebres, Surakarta"
+    "idProduct": "PRD-000001",
+    "idStore": "STR-000001",
+    "productName": "Batik Tulis Khas Solo",
+    "description": "Batik tulis halus bermotif parang, cocok untuk acara formal maupun semi-formal.",
+    "weightGram": 300.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "avgRating": 5.0
   },
   {
-    "idProduct": "PROD-002",
-    "name": "Minyak Goreng Sunco 2L",
-    "price": 38000.0,
-    "description": "Minyak goreng bening, tidak mudah beku.",
-    "stock": 30,
-    "map": "https://maps.google.com/?q=-7.558,110.831",
-    "imageResId": 2131230816,
-    "idSeller": "SELL-002",
-    "idStore": "STORE-002",
-    "location": "Banjarsari, Surakarta"
-  },
-  {
-    "idProduct": "PROD-003",
-    "name": "Gula Pasir Gulaku 1kg",
-    "price": 18000.0,
-    "description": "Gula pasir putih bersih dan manis alami.",
-    "stock": 100,
-    "map": "https://maps.google.com/?q=-7.558,110.831",
-    "imageResId": 2131230817,
-    "idSeller": "SELL-001",
-    "idStore": "STORE-001",
-    "location": "Jebres, Surakarta"
-  },
-  {
-    "idProduct": "PROD-004",
-    "name": "Telur Ayam Negeri 1kg",
-    "price": 28000.0,
-    "description": "Telur ayam segar langsung dari peternakan.",
-    "stock": 20,
-    "map": "https://maps.google.com/?q=-7.558,110.831",
-    "imageResId": 2131230818,
-    "idSeller": "SELL-002",
-    "idStore": "STORE-002",
-    "location": "Banjarsari, Surakarta"
+    "idProduct": "PRD-000002",
+    "idStore": "STR-000001",
+    "productName": "Kopi Lawu Robusta 250g",
+    "description": "Kopi robusta kualitas super, dipanen langsung dari petani lereng Gunung Lawu.",
+    "weightGram": 250.0,
+    "productStatus": "ACTIVE",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "avgRating": 4.8
   }
 ]

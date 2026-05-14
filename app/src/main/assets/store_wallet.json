@@ -1,0 +1,8 @@
+[
+  {
+    "idWallet": "WAL-000001",
+    "idStore": "STR-000001",
+    "activeBalance": 0.0,
+    "outstandingBalance": 150000.0
+  }
+]

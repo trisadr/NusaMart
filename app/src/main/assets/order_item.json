@@ -1,44 +1,18 @@
 [
   {
-    "idOrderItem": "OI001",
-    "idOrder": "ORD001",
-    "idProduct": "PROD-001",
-    "quantity": 2,
-    "priceAtPurchase": 75000
-  },
-  {
-    "idOrderItem": "OI002",
-    "idOrder": "ORD001",
-    "idProduct": "PROD-003",
+    "idOrderItem": "OIT-000001",
+    "idOrder": "ORD-000001",
+    "idItem": "ITM-000001",
     "quantity": 1,
-    "priceAtPurchase": 18000
+    "nameSnapshot": "Batik Tulis Khas Solo",
+    "priceSnapshot": 150000.0
   },
   {
-    "idOrderItem": "OI003",
-    "idOrder": "ORD002",
-    "idProduct": "PROD-002",
+    "idOrderItem": "OIT-000002",
+    "idOrder": "ORD-000002",
+    "idItem": "ITM-000003",
     "quantity": 2,
-    "priceAtPurchase": 38000
-  },
-  {
-    "idOrderItem": "OI004",
-    "idOrder": "ORD002",
-    "idProduct": "PROD-004",
-    "quantity": 1,
-    "priceAtPurchase": 28000
-  },
-  {
-    "idOrderItem": "OI005",
-    "idOrder": "ORD003",
-    "idProduct": "PROD-001",
-    "quantity": 1,
-    "priceAtPurchase": 75000
-  },
-  {
-    "idOrderItem": "OI006",
-    "idOrder": "ORD004",
-    "idProduct": "PROD-004",
-    "quantity": 2,
-    "priceAtPurchase": 28000
+    "nameSnapshot": "Kopi Lawu Robusta 250g",
+    "priceSnapshot": 35000.0
   }
 ]
