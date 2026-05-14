@@ -54,33 +54,35 @@ object Routes {
     @Serializable
     data object AddressListRoute : NavKey
 
-    // --- Transaction ---
-    @Serializable
-    data class PaymentRoute(
-        // dari CartScreen — orderId sudah ada di storage
-        val orderId: String? = null,
 
-        // dari ProductPage — order belum dibuat, bawa data produknya
+// ================== TRANSACTION ==================
+    @Serializable
+    data class CheckoutRoute(
+        val orderId: String? = null,
         val productId: String? = null,
         val quantity: Int = 1,
         val fromCart: Boolean = true,
-
-        val selectedPaymentMethod: String? = null
+        // Properti ini menampung pilihan user (akan terisi jika user kembali dari layar opsi)
+        val selectedAddressId: String? = null,
+        val selectedCourierId: String? = null,
+        val selectedPaymentMethodId: String? = null
     ) : NavKey
 
     @Serializable
-    data class PaymentConfirmationRoute(
-        val orderId: String? = null,
-        val productId: String? = null,
-        val quantity: Int = 1,
-        val fromCart: Boolean = true  // perlu orderId untuk balik ke PaymentRoute
-    ) : NavKey
-    
+    data class AddressOptionRoute(val checkoutData: CheckoutRoute) : NavKey
+
     @Serializable
-    data class PaymentSuccessRoute(
-        val paymentCode: String,
+    data class CourierOptionRoute(val checkoutData: CheckoutRoute) : NavKey
+
+    @Serializable
+    data class PaymentOptionRoute(val checkoutData: CheckoutRoute) : NavKey
+
+    @Serializable
+    data class CheckoutSuccessRoute(
+        val paymentId: String,
         val orderId: String
     ) : NavKey
+
     // --- Order ---
     @Serializable
     data object OrderListRoute : NavKey

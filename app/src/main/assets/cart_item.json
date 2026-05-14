@@ -1,0 +1,9 @@
+[
+  {
+    "idCartItem": "CRI-000001",
+    "idCart": "CRT-000001",
+    "idItem": "ITM-000003",
+    "quantity": 2,
+    "isChecked": true
+  }
+]

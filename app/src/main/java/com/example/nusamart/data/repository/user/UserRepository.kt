@@ -36,7 +36,21 @@ class UserRepository(private val context: Context) {
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
-        if (!file.exists()) return mutableListOf()
+
+        // --- LOGIKA BARU: Cek assets jika file belum ada ---
+        if (!file.exists()) {
+            try {
+                context.assets.open(fileName).use { inputStream ->
+                    val json = inputStream.bufferedReader().readText()
+                    file.writeText(json) // Salin dari assets ke internal storage
+                }
+            } catch (e: Exception) {
+                // Jika di assets juga tidak ada, baru kembalikan list kosong
+                return mutableListOf()
+            }
+        }
+        // ---------------------------------------------------
+
         val json = file.readText()
         val type = object : TypeToken<List<T>>() {}.type
         return gson.fromJson(json, type) ?: mutableListOf()

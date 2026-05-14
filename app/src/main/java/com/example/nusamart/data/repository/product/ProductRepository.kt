@@ -1,318 +1,273 @@
 package com.example.nusamart.data.repository.product
 
-import com.example.nusamart.data.model.product.Category
+import android.content.Context
 import com.example.nusamart.data.model.product.Product
-import com.example.nusamart.data.model.product.ProductImage
-import com.example.nusamart.data.model.product.ProductItem
-import com.example.nusamart.data.model.product.ProductSubcategory
-import com.example.nusamart.data.model.product.ProductVariation
-import com.example.nusamart.data.model.product.SubCategory
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.LocalDateTime
-import java.util.UUID
 
-class ProductRepository(private val dataSource: ProductLocalDataSource) {
+// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
 
-    // ── Mappers: JSON → Data Class ────────────────────────────────────────────
+data class CategoryJson(
+    val idCategory: String,
+    val categoryName: String,
+    val iconURL: Int? = null,
+    val isActive: Boolean
+)
 
-    private fun CategoryJson.toCategory() = Category(
-        idCategory = idCategory,
-        categoryName = categoryName,
-        iconURL = iconURL,
-        isActive = isActive
-    )
+data class SubCategoryJson(
+    val idSubCategory: String,
+    val idCategory: String,
+    val subCategoryName: String,
+    val description: String? = null
+)
 
-    private fun SubCategoryJson.toSubCategory() = SubCategory(
-        idSubCategory = idSubCategory,
-        idCategory = idCategory,
-        subCategoryName = subCategoryName,
-        description = description
-    )
+data class ProductJson(
+    val idProduct: String,
+    val idStore: String,
+    val productName: String,
+    val description: String? = null,
+    val weightGram: Double,
+    val productStatus: String, // String mapping untuk enum
+    val createAt: String,
+    val updateAt: String,
+    val avgRating: Double? = null
+)
 
-    private fun ProductJson.toProduct() = Product(
-        idProduct = idProduct,
-        idStore = idStore,
-        productName = productName,
-        description = description,
-        weightGram = weightGram,
-        productStatus = Product.ProductStatus.valueOf(productStatus),
-        createAt = LocalDateTime.parse(createAt),
-        updateAt = LocalDateTime.parse(updateAt),
-        avgRating = avgRating
-    )
+data class ProductItemJson(
+    val idItem: String,
+    val idProduct: String,
+    val sku: String? = null,
+    val stock: Int,
+    val price: Double,
+    val isActive: Boolean
+)
 
-    private fun Product.toJson() = ProductJson(
-        idProduct = idProduct,
-        idStore = idStore,
-        productName = productName,
-        description = description,
-        weightGram = weightGram,
-        productStatus = productStatus.name,
-        createAt = createAt.toString(),
-        updateAt = updateAt.toString(),
-        avgRating = avgRating
-    )
+data class ProductImageJson(
+    val idImage: String,
+    val idProduct: String,
+    val imageURL: Int,
+    val isPrimary: Boolean
+)
 
-    private fun ProductImageJson.toImage() = ProductImage(
-        idImage = idImage,
-        idProduct = idProduct,
-        imageURL = imageURL,
-        isPrimary = isPrimary
-    )
+data class ProductVariationJson(
+    val idVariation: String,
+    val idItem: String,
+    val typeVariation: String,
+    val value: String
+)
 
-    private fun ProductItemJson.toItem() = ProductItem(
-        idItem = idItem,
-        idProduct = idProduct,
-        sku = sku,
-        stock = stock,
-        price = price,
-        isActive = isActive
-    )
+data class ProductSubcategoryJson(
+    val idProductSubCat: String,
+    val idProduct: String,
+    val idSubCategory: String
+)
 
-    private fun ProductItem.toJson() = ProductItemJson(
-        idItem = idItem,
-        idProduct = idProduct,
-        sku = sku,
-        stock = stock,
-        price = price,
-        isActive = isActive
-    )
+// ─── Hasil Operasi ───────────────────────────────────────────────────────────
 
-    private fun ProductVariationJson.toVariation() = ProductVariation(
-        idVariation = idVariation,
-        idItem = idItem,
-        typeVariation = typeVariation,
-        value = value
-    )
+sealed class ProductResult {
+    data class Success(val productId: String) : ProductResult()
+    data class Error(val message: String) : ProductResult()
+}
 
-    private fun ProductSubcategoryJson.toProductSubcategory() = ProductSubcategory(
-        idProductSubCat = idProductSubCat,
-        idProduct = idProduct,
-        idSubCategory = idSubCategory
-    )
+// ─── Repository ──────────────────────────────────────────────────────────────
 
-    // ── CATEGORY ──────────────────────────────────────────────────────────────
+class ProductRepository(private val context: Context) {
 
-    fun getCategories(): List<Category> {
-        return dataSource.readCategories().categories
-            .filter { it.isActive }
-            .map { it.toCategory() }
-    }
+    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
-    fun getCategoryById(categoryId: String): Category? {
-        return dataSource.readCategories().categories
-            .find { it.idCategory == categoryId }
-            ?.toCategory()
-    }
+    private val categoryFile = "category.json"
+    private val subCategoryFile = "sub_category.json"
+    private val productFile = "product.json"
+    private val productItemFile = "product_item.json"
+    private val productImageFile = "product_image.json"
+    private val productVariationFile = "product_variation.json"
+    private val productSubcatFile = "product_subcategory.json"
 
-    // ── SUBCATEGORY ───────────────────────────────────────────────────────────
+    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
 
-    fun getSubCategories(): List<SubCategory> {
-        return dataSource.readSubCategories().subcategories
-            .map { it.toSubCategory() }
-    }
-
-    fun getSubCategoriesByCategory(categoryId: String): List<SubCategory> {
-        return dataSource.readSubCategories().subcategories
-            .filter { it.idCategory == categoryId }
-            .map { it.toSubCategory() }
-    }
-
-    // ── PRODUCT ───────────────────────────────────────────────────────────────
-
-    fun getProducts(): List<Product> {
-        return dataSource.readProducts().products
-            .filter { it.productStatus == Product.ProductStatus.ACTIVE.name }
-            .map { it.toProduct() }
-    }
-
-    fun getProductById(productId: String): Product? {
-        return dataSource.readProducts().products
-            .find { it.idProduct == productId }
-            ?.toProduct()
-    }
-
-    fun getProductsByStore(storeId: String): List<Product> {
-        return dataSource.readProducts().products
-            .filter { it.idStore == storeId }
-            .map { it.toProduct() }
-    }
-
-    fun getProductsBySubCategory(subCategoryId: String): List<Product> {
-        // Cari idProduct dari tabel junction ProductSubcategory
-        val productIds = dataSource.readProductSubcategories().product_subcategories
-            .filter { it.idSubCategory == subCategoryId }
-            .map { it.idProduct }
-
-        return dataSource.readProducts().products
-            .filter { it.idProduct in productIds }
-            .map { it.toProduct() }
-    }
-
-    fun searchProducts(query: String): List<Product> {
-        return dataSource.readProducts().products
-            .filter {
-                it.productStatus == Product.ProductStatus.ACTIVE.name &&
-                        it.productName.contains(query, ignoreCase = true)
+    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
+        val file = File(context.filesDir, fileName)
+        if (!file.exists()) {
+            // Jika file belum ada di internal storage, coba ambil dari assets (sebagai data awal)
+            try {
+                context.assets.open(fileName).use { inputStream ->
+                    val json = inputStream.bufferedReader().readText()
+                    file.writeText(json)
+                }
+            } catch (e: Exception) {
+                // Abaikan jika tidak ada file awal di assets
+                return mutableListOf()
             }
-            .map { it.toProduct() }
+        }
+        val json = file.readText()
+        val type = object : TypeToken<List<T>>() {}.type
+        return gson.fromJson(json, type) ?: mutableListOf()
     }
 
-    fun addProduct(product: Product): Product {
-        val db = dataSource.readProducts()
-        db.products.add(product.toJson())
-        dataSource.writeProducts(db)
-        return product
+    private fun <T> writeJson(fileName: String, data: List<T>) {
+        val file = File(context.filesDir, fileName)
+        file.writeText(gson.toJson(data))
     }
 
-    fun updateProduct(updatedProduct: Product): Boolean {
-        val db = dataSource.readProducts()
-        val index = db.products.indexOfFirst { it.idProduct == updatedProduct.idProduct }
-        if (index == -1) return false
+    // ==========================================
+    // KATEGORI & SUB KATEGORI
+    // ==========================================
 
-        db.products[index] = updatedProduct
-            .copy(updateAt = LocalDateTime.now())
-            .toJson()
-        dataSource.writeProducts(db)
-        return true
+    suspend fun getAllProducts(): List<ProductJson> = withContext(Dispatchers.IO) {
+        return@withContext readJson<ProductJson>(productFile).filter { it.productStatus == "ACTIVE" }
     }
 
-    fun deleteProduct(productId: String): Boolean {
-        // Soft delete — ubah status jadi INACTIVE
-        val db = dataSource.readProducts()
-        val index = db.products.indexOfFirst { it.idProduct == productId }
-        if (index == -1) return false
+    suspend fun getAllCategories(): List<CategoryJson> = withContext(Dispatchers.IO) {
+        return@withContext readJson<CategoryJson>(categoryFile).filter { it.isActive }
+    }
 
-        db.products[index] = db.products[index].copy(
-            productStatus = Product.ProductStatus.INACTIVE.name,
-            updateAt = LocalDateTime.now().toString()
+    suspend fun getSubCategoriesByCategory(categoryId: String): List<SubCategoryJson> = withContext(Dispatchers.IO) {
+        return@withContext readJson<SubCategoryJson>(subCategoryFile).filter { it.idCategory == categoryId }
+    }
+
+    // ==========================================
+    // MANAJEMEN PRODUK
+    // ==========================================
+
+    suspend fun getProductsByStore(storeId: String): List<ProductJson> = withContext(Dispatchers.IO) {
+        val products = readJson<ProductJson>(productFile)
+        return@withContext products.filter { it.idStore == storeId }
+    }
+    suspend fun getProductItemsByItemId(itemId: String): ProductItemJson? = withContext(Dispatchers.IO) {
+        // Gunakan nama variabel file JSON-mu, biasanya "product_item.json" atau variabel productItemFile
+        val items = readJson<ProductItemJson>("product_item.json")
+        return@withContext items.find { it.idItem == itemId }
+    }
+    suspend fun getProductItems(productId: String): List<ProductItemJson> = withContext(Dispatchers.IO) {
+        val items = readJson<ProductItemJson>(productItemFile)
+        return@withContext items.filter { it.idProduct == productId }
+    }
+
+    suspend fun getProductImages(productId: String): List<ProductImageJson> = withContext(Dispatchers.IO) {
+        val images = readJson<ProductImageJson>(productImageFile)
+        return@withContext images.filter { it.idProduct == productId }
+    }
+
+    suspend fun getProductVariations(itemId: String): List<ProductVariationJson> = withContext(Dispatchers.IO) {
+        val variations = readJson<ProductVariationJson>(productVariationFile)
+        return@withContext variations.filter { it.idItem == itemId }
+    }
+
+    // ==========================================
+    // TAMBAH PRODUK BARU (KOMPLEKS)
+    // ==========================================
+
+    suspend fun addProduct(
+        storeId: String,
+        productName: String,
+        description: String,
+        weightGram: Double,
+        subCategoryIds: List<String>,
+        basePrice: Double,
+        baseStock: Int,
+        primaryImageRes: Int
+    ): ProductResult = withContext(Dispatchers.IO) {
+        delay(500) // Simulasi loading jaringan
+
+        val products = readJson<ProductJson>(productFile)
+
+        // 1. Generate Product ID (PRD-000001)
+        val maxPrdNum = products.maxOfOrNull { it.idProduct.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newProductId = String.format("PRD-%06d", maxPrdNum + 1)
+        val now = LocalDateTime.now().toString()
+
+        val newProduct = ProductJson(
+            idProduct = newProductId,
+            idStore = storeId,
+            productName = productName.trim(),
+            description = description.trim(),
+            weightGram = weightGram,
+            productStatus = Product.ProductStatus.ACTIVE.name,
+            createAt = now,
+            updateAt = now,
+            avgRating = null
         )
-        dataSource.writeProducts(db)
-        return true
-    }
+        products.add(newProduct)
+        writeJson(productFile, products)
 
-    // ── PRODUCT IMAGE ─────────────────────────────────────────────────────────
+        // 2. Simpan Relasi Subkategori (Many-to-Many)
+        if (subCategoryIds.isNotEmpty()) {
+            val productSubcats = readJson<ProductSubcategoryJson>(productSubcatFile)
+            var maxPscNum = productSubcats.maxOfOrNull { it.idProductSubCat.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
 
-    fun getImagesByProduct(productId: String): List<ProductImage> {
-        return dataSource.readProductImages().product_images
-            .filter { it.idProduct == productId }
-            .map { it.toImage() }
-            .sortedByDescending { it.isPrimary }   // primary image duluan
-    }
-
-    fun getPrimaryImage(productId: String): ProductImage? {
-        return dataSource.readProductImages().product_images
-            .find { it.idProduct == productId && it.isPrimary }
-            ?.toImage()
-    }
-
-    fun addProductImage(image: ProductImage): Boolean {
-        val db = dataSource.readProductImages()
-
-        // Kalau isPrimary, reset primary lain untuk product ini
-        if (image.isPrimary) {
-            val indices = db.product_images.indices
-                .filter { db.product_images[it].idProduct == image.idProduct }
-            indices.forEach { db.product_images[it] = db.product_images[it].copy(isPrimary = false) }
+            subCategoryIds.forEach { subCatId ->
+                maxPscNum++
+                productSubcats.add(
+                    ProductSubcategoryJson(
+                        idProductSubCat = String.format("PSC-%06d", maxPscNum),
+                        idProduct = newProductId,
+                        idSubCategory = subCatId
+                    )
+                )
+            }
+            writeJson(productSubcatFile, productSubcats)
         }
 
-        db.product_images.add(
-            ProductImageJson(
-                idImage = "img-${UUID.randomUUID()}",
-                idProduct = image.idProduct,
-                imageURL = image.imageURL,
-                isPrimary = image.isPrimary
+        // 3. Simpan Base Item (Harga & Stok utama)
+        val items = readJson<ProductItemJson>(productItemFile)
+        val maxItmNum = items.maxOfOrNull { it.idItem.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newItemId = String.format("ITM-%06d", maxItmNum + 1)
+
+        val newItem = ProductItemJson(
+            idItem = newItemId,
+            idProduct = newProductId,
+            sku = "SKU-${newProductId}",
+            stock = baseStock,
+            price = basePrice,
+            isActive = true
+        )
+        items.add(newItem)
+        writeJson(productItemFile, items)
+
+        // 4. Simpan Gambar Utama
+        val images = readJson<ProductImageJson>(productImageFile)
+        val maxImgNum = images.maxOfOrNull { it.idImage.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newImageId = String.format("IMG-%06d", maxImgNum + 1)
+
+        val newImage = ProductImageJson(
+            idImage = newImageId,
+            idProduct = newProductId,
+            imageURL = primaryImageRes,
+            isPrimary = true
+        )
+        images.add(newImage)
+        writeJson(productImageFile, images)
+
+        return@withContext ProductResult.Success(newProductId)
+    }
+
+    // ==========================================
+    // TAMBAH VARIASI PRODUK
+    // ==========================================
+
+    suspend fun addProductVariation(
+        itemId: String,
+        typeVariation: String,
+        value: String
+    ) = withContext(Dispatchers.IO) {
+        val variations = readJson<ProductVariationJson>(productVariationFile)
+        val maxVarNum = variations.maxOfOrNull { it.idVariation.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+        val newVarId = String.format("VAR-%06d", maxVarNum + 1)
+
+        variations.add(
+            ProductVariationJson(
+                idVariation = newVarId,
+                idItem = itemId,
+                typeVariation = typeVariation,
+                value = value
             )
         )
-        dataSource.writeProductImages(db)
-        return true
-    }
-
-    // ── PRODUCT ITEM ──────────────────────────────────────────────────────────
-
-    fun getItemsByProduct(productId: String): List<ProductItem> {
-        return dataSource.readProductItems().product_items
-            .filter { it.idProduct == productId && it.isActive }
-            .map { it.toItem() }
-    }
-
-    fun getItemById(itemId: String): ProductItem? {
-        return dataSource.readProductItems().product_items
-            .find { it.idItem == itemId }
-            ?.toItem()
-    }
-
-    fun updateStock(itemId: String, newStock: Int): Boolean {
-        val db = dataSource.readProductItems()
-        val index = db.product_items.indexOfFirst { it.idItem == itemId }
-        if (index == -1) return false
-
-        db.product_items[index] = db.product_items[index].copy(stock = newStock)
-        dataSource.writeProductItems(db)
-        return true
-    }
-
-    fun reduceStock(itemId: String, quantity: Int): Boolean {
-        val db = dataSource.readProductItems()
-        val index = db.product_items.indexOfFirst { it.idItem == itemId }
-        if (index == -1) return false
-
-        val currentStock = db.product_items[index].stock
-        if (currentStock < quantity) return false   // stok tidak cukup
-
-        db.product_items[index] = db.product_items[index].copy(stock = currentStock - quantity)
-        dataSource.writeProductItems(db)
-        return true
-    }
-
-    // ── PRODUCT VARIATION ─────────────────────────────────────────────────────
-
-    fun getVariationsByItem(itemId: String): List<ProductVariation> {
-        return dataSource.readProductVariations().product_variations
-            .filter { it.idItem == itemId }
-            .map { it.toVariation() }
-    }
-
-    // Ambil semua variasi untuk satu product sekaligus (grouped by item)
-    fun getVariationsByProduct(productId: String): Map<String, List<ProductVariation>> {
-        val itemIds = dataSource.readProductItems().product_items
-            .filter { it.idProduct == productId }
-            .map { it.idItem }
-
-        return dataSource.readProductVariations().product_variations
-            .filter { it.idItem in itemIds }
-            .map { it.toVariation() }
-            .groupBy { it.idItem }
-    }
-
-    // ── PRODUCT SUBCATEGORY ───────────────────────────────────────────────────
-
-    fun getSubCategoriesByProduct(productId: String): List<SubCategory> {
-        val subCatIds = dataSource.readProductSubcategories().product_subcategories
-            .filter { it.idProduct == productId }
-            .map { it.idSubCategory }
-
-        return dataSource.readSubCategories().subcategories
-            .filter { it.idSubCategory in subCatIds }
-            .map { it.toSubCategory() }
-    }
-
-    fun linkProductToSubCategory(productId: String, subCategoryId: String): Boolean {
-        val db = dataSource.readProductSubcategories()
-
-        // Cek duplikat
-        val exists = db.product_subcategories.any {
-            it.idProduct == productId && it.idSubCategory == subCategoryId
-        }
-        if (exists) return false
-
-        db.product_subcategories.add(
-            ProductSubcategoryJson(
-                idProductSubCat = "psc-${UUID.randomUUID()}",
-                idProduct = productId,
-                idSubCategory = subCategoryId
-            )
-        )
-        dataSource.writeProductSubcategories(db)
-        return true
+        writeJson(productVariationFile, variations)
     }
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "idStore": "STR-000001",
+    "idSeller": "SLR-000001",
+    "name": "NusaKarya Rifqia",
+    "description": "Menjual berbagai kerajinan dan produk lokal asli buatan Surakarta.",
+    "logoURL": null,
+    "location": "Surakarta",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "storeRating": 4.9,
+    "isActive": true
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "idUser": "BYR-000001",
+    "username": "trisa",
+    "email": "trisa@student.uns.ac.id",
+    "password": "123",
+    "phone": "081234567890",
+    "role": "BUYER",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  },
+  {
+    "idUser": "SLR-000001",
+    "username": "rifqia",
+    "email": "rifqia@student.uns.ac.id",
+    "password": "password123",
+    "phone": "089876543210",
+    "role": "SELLER",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T10:00:00",
+    "imageURL": null
+  }
+]

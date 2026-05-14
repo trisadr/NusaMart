@@ -1,0 +1,14 @@
+[
+  {
+    "idCategory": "CAT-000001",
+    "categoryName": "Fashion Lokal",
+    "iconURL": 0,
+    "isActive": true
+  },
+  {
+    "idCategory": "CAT-000002",
+    "categoryName": "Kuliner Nusantara",
+    "iconURL": 0,
+    "isActive": true
+  }
+]

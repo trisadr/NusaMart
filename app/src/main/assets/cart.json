@@ -1,23 +1,6 @@
 [
   {
-    "idCart": "CART-001",
-    "idBuyer": "BUYER-001",
-    "idProduct": "PROD-002",
-    "quantity": 2,
-    "isChecked": true
-  },
-  {
-    "idCart": "CART-002",
-    "idBuyer": "BUYER-001",
-    "idProduct": "PROD-004",
-    "quantity": 1,
-    "isChecked": true
-  },
-  {
-    "idCart": "CART-003",
-    "idBuyer": "BUYER-001",
-    "idProduct": "PROD-001",
-    "quantity": 3,
-    "isChecked": false
+    "idCart": "CRT-000001",
+    "idUser": "BYR-000001"
   }
 ]

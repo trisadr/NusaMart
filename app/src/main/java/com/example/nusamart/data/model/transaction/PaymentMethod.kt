@@ -8,6 +8,7 @@ data class PaymentMethod(
 ) {
     enum class Provider {
         MIDTRANS,
-        MANUAL
+        MANUAL,
+        COD
     }
 }

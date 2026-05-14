@@ -1,0 +1,26 @@
+[
+  {
+    "idItem": "ITM-000001",
+    "idProduct": "PRD-000001",
+    "sku": "BTK-SL-M",
+    "stock": 15,
+    "price": 150000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000002",
+    "idProduct": "PRD-000001",
+    "sku": "BTK-SL-L",
+    "stock": 10,
+    "price": 160000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000003",
+    "idProduct": "PRD-000002",
+    "sku": "KPL-250G",
+    "stock": 50,
+    "price": 35000.0,
+    "isActive": true
+  }
+]

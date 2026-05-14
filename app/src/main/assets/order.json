@@ -1,42 +1,36 @@
 [
   {
-    "idOrder": "ORD001",
-    "totalPrice": 168000,
-    "status": "SELESAI",
-    "trackingNumber": "JNE123456789",
-    "description": "Pesanan Beras dan Gula",
-    "orderDate": 1713600000,
-    "arrivedDate": 1713900000,
-    "idSeller": "SELL-001"
+    "idOrder": "ORD-000001",
+    "idUser": "BYR-000001",
+    "idStore": "STR-000001",
+    "idAddress": "ADR-000001",
+    "invoiceNumber": "INV/20260514/ORD-000001",
+    "orderDate": "2026-05-14T10:00:00",
+    "arrivedDate": "2026-05-14T13:30:00",
+    "orderStatus": "DELIVERED",
+    "productTotalPrice": 150000.0,
+    "shippingCost": 12000.0,
+    "servicePrice": 2500.0,
+    "grandTotal": 164500.0,
+    "buyerNote": "Tolong dibungkus yang rapi ya kak.",
+    "createAt": "2026-05-14T10:00:00",
+    "updateAt": "2026-05-14T13:30:00"
   },
   {
-    "idOrder": "ORD002",
-    "totalPrice": 104000,
-    "status": "DIKIRIM",
-    "trackingNumber": "SICEPAT987654",
-    "description": "Pesanan Minyak dan Telur",
-    "orderDate": 1713700000,
-    "arrivedDate": null,
-    "idSeller": "SELL-002"
-  },
-  {
-    "idOrder": "ORD003",
-    "totalPrice": 75000,
-    "status": "DIPROSES",
-    "trackingNumber": "",
-    "description": "Pesanan Beras Raja Lele",
-    "orderDate": 1713800000,
-    "arrivedDate": null,
-    "idSeller": "SELL-001"
-  },
-  {
-    "idOrder": "ORD004",
-    "totalPrice": 56000,
-    "status": "MENUNGGU",
-    "trackingNumber": "",
-    "description": "Pesanan Telur",
-    "orderDate": 1713850000,
-    "arrivedDate": null,
-    "idSeller": "SELL-002"
+    "idOrder": "ORD-000002",
+    "idUser": "BYR-000001",
+    "idStore": "STR-000001",
+    "idAddress": "ADR-000001",
+    "invoiceNumber": "INV/20260514/ORD-000002",
+    "orderDate": "2026-05-14T11:00:00",
+    "arrivedDate": "2026-05-14T14:15:00",
+    "orderStatus": "DELIVERED",
+    "productTotalPrice": 70000.0,
+    "shippingCost": 12000.0,
+    "servicePrice": 2500.0,
+    "grandTotal": 84500.0,
+    "buyerNote": "Pastikan kopinya fresh roast ya.",
+    "createAt": "2026-05-14T11:00:00",
+    "updateAt": "2026-05-14T14:15:00"
   }
 ]

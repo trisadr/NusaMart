@@ -1,0 +1,10 @@
+[
+  {
+    "idTransaction": "WTR-000001",
+    "idWallet": "WAL-000001",
+    "mutationType": "IN",
+    "nominal": 150000.0,
+    "description": "Pembayaran Pesanan ORD-000001",
+    "referenceId": "ORD-000001"
+  }
+]

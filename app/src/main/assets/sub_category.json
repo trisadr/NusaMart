@@ -1,0 +1,14 @@
+[
+  {
+    "idSubCategory": "SUB-000001",
+    "idCategory": "CAT-000001",
+    "subCategoryName": "Batik",
+    "description": "Batik tulis dan cap lokal"
+  },
+  {
+    "idSubCategory": "SUB-000002",
+    "idCategory": "CAT-000002",
+    "subCategoryName": "Kopi",
+    "description": "Biji kopi asli daerah"
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "idCourier": "CUR-000001",
+    "courierName": "JNE Reguler",
+    "serviceType": "REGULAR",
+    "timeEstimation": "2-3 Hari",
+    "isActive": true
+  },
+  {
+    "idCourier": "CUR-000002",
+    "courierName": "SiCepat HALU",
+    "serviceType": "REGULAR",
+    "timeEstimation": "1-2 Hari",
+    "isActive": true
+  },
+  {
+    "idCourier": "CUR-000003",
+    "courierName": "J&T Cargo",
+    "serviceType": "KARGO",
+    "timeEstimation": "5-7 Hari",
+    "isActive": true
+  }
+]

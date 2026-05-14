@@ -1,42 +1,57 @@
 [
   {
-    "idNotification": "N001",
-    "idOrder": null,
-    "idStore": null,
-    "title": "Keranjang Belanjamu Menunggu!",
-    "message": "Hai buyer_01, produk di keranjangmu belum dicheckout nih. Yuk segera selesaikan sebelum kehabisan!",
-    "date": "17-04-2026 09:00",
-    "type": "promo",
-    "isRead": false
+    "idNotif": "NTF-000001",
+    "idUser": "BYR-000001",
+    "title": "Selamat Datang di NusaMart!",
+    "body": "Halo Trisa! Terima kasih sudah bergabung di NusaMart. Temukan berbagai produk UMKM lokal terbaik dari seluruh penjuru Nusantara di sini.",
+    "type": "SISTEM",
+    "isRead": true,
+    "createAt": "2026-05-13T09:00:00",
+    "referenceId": null,
+    "referenceType": null
   },
   {
-    "idNotification": "N002",
-    "idOrder": null,
-    "idStore": "STORE-002",
-    "title": "Telur Ayam Turun Harga!",
-    "message": "Dapatkan telur ayam segar langsung dari peternakan khusus untukmu hari ini.",
-    "date": "16-04-2026 18:02",
-    "type": "promo",
-    "isRead": false
+    "idNotif": "NTF-000002",
+    "idUser": "BYR-000001",
+    "title": "Promo Akhir Pekan Tiba",
+    "body": "Nikmati gratis ongkir dan diskon hingga 50% untuk kategori Fashion Lokal. Berlaku hanya sampai akhir pekan ini, jangan sampai ketinggalan!",
+    "type": "SISTEM",
+    "isRead": false,
+    "createAt": "2026-05-14T08:00:00",
+    "referenceId": null,
+    "referenceType": null
   },
   {
-    "idNotification": "N003",
-    "idOrder": "ORD002",
-    "idStore": null,
-    "title": "Pesanan Sedang Dikirim",
-    "message": "Pesanan ORD002 kamu telah diserahkan ke kurir Sicepat.",
-    "date": "17-04-2026 14:01",
-    "type": "order",
-    "isRead": false
+    "idNotif": "NTF-000003",
+    "idUser": "BYR-000001",
+    "title": "Pesananmu sedang diproses",
+    "body": "Hore! Penjual sedang menyiapkan pesananmu dengan nomor pesanan ORD-000001. Silakan tunggu update resi pengiriman.",
+    "type": "ORDER",
+    "isRead": true,
+    "createAt": "2026-05-14T10:15:00",
+    "referenceId": "ORD-000001",
+    "referenceType": "ORDER"
   },
   {
-    "idNotification": "N004",
-    "idOrder": "ORD001",
-    "idStore": null,
-    "title": "Pesanan ORD001 telah tiba",
-    "message": "Mohon konfirmasi terima pesanan dalam 2x24 jam dan berikan ulasan.",
-    "date": "16-04-2026 14:01",
-    "type": "order",
-    "isRead": true
+    "idNotif": "NTF-000004",
+    "idUser": "BYR-000001",
+    "title": "Pesananmu telah dikirim!",
+    "body": "Paketmu untuk pesanan ORD-000001 telah diserahkan ke kurir JNE Reguler. Kamu bisa melacak status pengirimannya sekarang.",
+    "type": "ORDER",
+    "isRead": false,
+    "createAt": "2026-05-14T15:05:00",
+    "referenceId": "ORD-000001",
+    "referenceType": "ORDER"
+  },
+  {
+    "idNotif": "NTF-000005",
+    "idUser": "BYR-000001",
+    "title": "Pembayaran Berhasil Diverifikasi",
+    "body": "Pembayaran kamu untuk pesanan ORD-000002 telah berhasil kami terima. Pesananmu akan segera diproses oleh penjual.",
+    "type": "ORDER",
+    "isRead": false,
+    "createAt": "2026-05-14T11:05:00",
+    "referenceId": "ORD-000002",
+    "referenceType": "PAYMENT"
   }
 ]

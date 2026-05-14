@@ -1,18 +1,11 @@
 [
   {
-    "idReview": "REV001",
-    "idOrder": "ORD099",
-    "idProduct": "PROD-001",
-    "imageResId": 2131230890,
-    "rating": 5,
-    "reviewProduct": "Berasnya beneran pulen dan wangi. Pengiriman cepat, mantap!"
-  },
-  {
-    "idReview": "REV002",
-    "idOrder": "ORD099",
-    "idProduct": "PROD-003",
-    "imageResId": 2131230890,
-    "rating": 4,
-    "reviewProduct": "Gula sampai dengan aman tidak bocor. Terima kasih seller."
+    "idReview": "REV-000001",
+    "idOrderItem": "OIT-000001",
+    "idUser": "BYR-000001",
+    "rating": 5.0,
+    "comment": "Kain batiknya sangat halus, motifnya presisi, dan warnanya persis seperti di foto. Pengiriman juga sangat cepat. Terima kasih!",
+    "isHidden": false,
+    "createAt": "2026-05-14T14:15:00"
   }
 ]
