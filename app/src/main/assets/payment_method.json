@@ -13,6 +13,24 @@
   },
   {
     "idMethod": "MET-000003",
+    "methodName": "Transfer Bank BRI",
+    "provider": "MANUAL",
+    "isActive": true
+  },
+  {
+    "idMethod": "MET-000004",
+    "methodName": "Transfer Bank BNI",
+    "provider": "MANUAL",
+    "isActive": true
+  },
+  {
+    "idMethod": "MET-000005",
+    "methodName": "Transfer Bank MANDIRI",
+    "provider": "MANUAL",
+    "isActive": true
+  },
+  {
+    "idMethod": "MET-000006",
     "methodName": "Bayar di Tempat (COD)",
     "provider": "COD",
     "isActive": true
