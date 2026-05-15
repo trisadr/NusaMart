@@ -86,7 +86,7 @@
   },
   {
     "idOrder": "ORD-000006",
-    "idUser": "BYR-000002",
+    "idUser": "BYR-000001",
     "idStore": "STR-000007",
     "idAddress": "ADR-000002",
     "invoiceNumber": "INV/20260514/ORD-000006",
@@ -103,7 +103,7 @@
   },
   {
     "idOrder": "ORD-000007",
-    "idUser": "BYR-000002",
+    "idUser": "BYR-000001",
     "idStore": "STR-000007",
     "idAddress": "ADR-000002",
     "invoiceNumber": "INV/20260514/ORD-000007",
@@ -120,7 +120,7 @@
   },
   {
     "idOrder": "ORD-000008",
-    "idUser": "BYR-000002",
+    "idUser": "BYR-000001",
     "idStore": "STR-000010",
     "idAddress": "ADR-000002",
     "invoiceNumber": "INV/20260514/ORD-000008",
@@ -137,7 +137,7 @@
   },
   {
     "idOrder": "ORD-000009",
-    "idUser": "BYR-000002",
+    "idUser": "BYR-000001",
     "idStore": "STR-000010",
     "idAddress": "ADR-000002",
     "invoiceNumber": "INV/20260514/ORD-000009",
@@ -154,7 +154,7 @@
   },
   {
     "idOrder": "ORD-000010",
-    "idUser": "BYR-000002",
+    "idUser": "BYR-000001",
     "idStore": "STR-000001",
     "idAddress": "ADR-000002",
     "invoiceNumber": "INV/20260514/ORD-000010",
