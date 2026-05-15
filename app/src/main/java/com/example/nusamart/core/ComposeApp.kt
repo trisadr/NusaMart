@@ -1,6 +1,5 @@
 package com.example.nusamart.core
 
-//import com.example.nusamart.feature.buyer.review.ReviewScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
