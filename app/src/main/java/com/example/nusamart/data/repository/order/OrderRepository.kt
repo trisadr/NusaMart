@@ -12,8 +12,6 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
-
 data class OrderJson(
     val idOrder: String,
     val idUser: String,
@@ -41,8 +39,6 @@ data class OrderItemJson(
     val priceSnapshot: Double
 )
 
-// ─── Helper Input Model ───────────────────────────────────────────────────────
-// Digunakan sebagai parameter saat fungsi createOrder dipanggil
 data class OrderItemInput(
     val idItem: String,
     val quantity: Int,
@@ -50,14 +46,10 @@ data class OrderItemInput(
     val priceSnapshot: Double
 )
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
-
 sealed class OrderResult {
     data class Success(val orderId: String) : OrderResult()
     data class Error(val message: String) : OrderResult()
 }
-
-// ─── Repository ──────────────────────────────────────────────────────────────
 
 class OrderRepository(private val context: Context) {
 
@@ -66,12 +58,9 @@ class OrderRepository(private val context: Context) {
     private val orderFile = "order.json"
     private val orderItemFile = "order_item.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
-
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
 
-        // --- LOGIKA BARU: Cek assets jika file belum ada ---
         if (!file.exists()) {
             try {
                 context.assets.open(fileName).use { inputStream ->
@@ -83,7 +72,6 @@ class OrderRepository(private val context: Context) {
                 return mutableListOf()
             }
         }
-        // ---------------------------------------------------
 
         val json = file.readText()
         val type = object : TypeToken<List<T>>() {}.type
@@ -95,11 +83,7 @@ class OrderRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
-    // BACA DATA PESANAN
-    // ==========================================
-
-    // Mengambil semua pesanan milik seorang Pembeli (Buyer)
+   // Mengambil semua pesanan milik seorang Pembeli (Buyer)
     suspend fun getOrdersByUser(userId: String): List<OrderJson> = withContext(Dispatchers.IO) {
         val orders = readJson<OrderJson>(orderFile)
         return@withContext orders.filter { it.idUser == userId }
@@ -125,10 +109,6 @@ class OrderRepository(private val context: Context) {
         return@withContext orderItems.filter { it.idOrder == orderId }
     }
 
-    // ==========================================
-    // BUAT PESANAN BARU (CHECKOUT)
-    // ==========================================
-
     suspend fun createOrder(
         userId: String,
         storeId: String,
@@ -138,7 +118,7 @@ class OrderRepository(private val context: Context) {
         servicePrice: Double,
         buyerNote: String? = null
     ): OrderResult = withContext(Dispatchers.IO) {
-        delay(1000) // Simulasi loading proses pembayaran
+        delay(1000)
 
         if (items.isEmpty()) {
             return@withContext OrderResult.Error("Pesanan gagal dibuat: Tidak ada barang yang dibeli.")
@@ -147,11 +127,10 @@ class OrderRepository(private val context: Context) {
         val orders = readJson<OrderJson>(orderFile)
         val orderItems = readJson<OrderItemJson>(orderItemFile)
 
-        // 1. Kalkulasi Total Harga Produk
         val productTotalPrice = items.sumOf { it.priceSnapshot * it.quantity }
         val grandTotal = productTotalPrice + shippingCost + servicePrice
 
-        // 2. Generate Order ID (ORD-000001)
+        // Generate Order ID (ORD-000001)
         val maxOrdNum = orders.maxOfOrNull { it.idOrder.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newOrderId = String.format("ORD-%06d", maxOrdNum + 1)
 
@@ -160,7 +139,6 @@ class OrderRepository(private val context: Context) {
         val invoiceNumber = "INV/$todayStr/$newOrderId"
         val now = LocalDateTime.now().toString()
 
-        // 3. Simpan Data Order Utama
         val newOrder = OrderJson(
             idOrder = newOrderId,
             idUser = userId,
@@ -181,7 +159,6 @@ class OrderRepository(private val context: Context) {
         orders.add(newOrder)
         writeJson(orderFile, orders)
 
-        // 4. Generate & Simpan Data Order Items (OIT-000001)
         var maxOitNum = orderItems.maxOfOrNull { it.idOrderItem.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
 
         items.forEach { inputItem ->
@@ -201,10 +178,6 @@ class OrderRepository(private val context: Context) {
         return@withContext OrderResult.Success(newOrderId)
     }
 
-    // ==========================================
-    // UPDATE STATUS PESANAN
-    // ==========================================
-
     suspend fun updateOrderStatus(
         orderId: String,
         newStatus: Order.OrderStatus
@@ -219,7 +192,6 @@ class OrderRepository(private val context: Context) {
             orders[index] = orders[index].copy(
                 orderStatus = newStatus.name,
                 updateAt = nowStr,
-                // Set waktu tiba jika status diubah menjadi DELIVERED
                 arrivedDate = if (isDelivered) nowStr else orders[index].arrivedDate
             )
 
@@ -229,21 +201,15 @@ class OrderRepository(private val context: Context) {
         return@withContext false
     }
 
-    // ==========================================
-    // CEK REVIEW
-    // ==========================================
-
     suspend fun isOrderReviewed(orderId: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val file = File(context.filesDir, "review.json")
-            // Gunakan logika yang sama, cek file di internal atau assets
             val json = if (file.exists()) {
                 file.readText()
             } else {
                 context.assets.open("review.json").bufferedReader().readText()
             }
 
-            // Kita asumsikan ada data class ReviewJson dengan property idOrder
             val type = object : TypeToken<List<Map<String, Any>>>() {}.type
             val reviews: List<Map<String, Any>> = gson.fromJson(json, type) ?: emptyList()
 
