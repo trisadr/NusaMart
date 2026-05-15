@@ -7,6 +7,7 @@ data class Store(
     val description: String,
     val logoURL: Int? = null,
     val location: String,
+    val urlLocation: String?,
     val createAt: java.time.LocalDateTime,
     val updateAt: java.time.LocalDateTime,
     val storeRating: Double? = null,

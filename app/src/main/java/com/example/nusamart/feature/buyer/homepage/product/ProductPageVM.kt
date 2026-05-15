@@ -46,6 +46,7 @@ class ProductPageVM(
         val store = stores.find { it.idStore == product.idStore }
         val sName = store?.name ?: "Toko Tidak Diketahui"
         val sLoc = store?.location ?: "Lokasi Tidak Diketahui"
+        val sUrl = store?.urlLocation
 
         // 2. Ambil & Urutkan Gambar (Primary di urutan 0)
         val images = productRepository.getProductImages(productId)
@@ -84,6 +85,7 @@ class ProductPageVM(
                 storeId = product.idStore,
                 storeName = sName,
                 storeLocation = sLoc,
+                storeUrlLocation = sUrl,
                 items = uiItems,
                 selectedItemId = firstSelectedId,
                 quantity = 1

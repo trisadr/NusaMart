@@ -19,6 +19,7 @@ data class ProductPageUiState(
     val storeId: String = "",
     val storeName: String = "",
     val storeLocation: String = "",
+    val storeUrlLocation: String? = null,
     val mapUrl: String = "",
 
     // Bottom Sheet Management
