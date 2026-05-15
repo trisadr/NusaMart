@@ -7,7 +7,6 @@
     "price": 150000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000002",
     "idProduct": "PRD-000002",
@@ -16,7 +15,6 @@
     "price": 160000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000003",
     "idProduct": "PRD-000002",
@@ -25,7 +23,6 @@
     "price": 175000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000004",
     "idProduct": "PRD-000009",
@@ -34,7 +31,6 @@
     "price": 325000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000005",
     "idProduct": "PRD-000009",
@@ -43,7 +39,6 @@
     "price": 350000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000006",
     "idProduct": "PRD-000007",
@@ -52,7 +47,6 @@
     "price": 25000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000007",
     "idProduct": "PRD-000007",
@@ -61,7 +55,6 @@
     "price": 55000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000008",
     "idProduct": "PRD-000010",
@@ -70,7 +63,6 @@
     "price": 85000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000009",
     "idProduct": "PRD-000010",
@@ -79,13 +71,52 @@
     "price": 90000.0,
     "isActive": true
   },
-
   {
     "idItem": "ITM-000010",
     "idProduct": "PRD-000001",
     "sku": "VAS-RTN-NAT",
     "stock": 25,
     "price": 125000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000011",
+    "idProduct": "PRD-000003",
+    "sku": "KPI-ARC-250G",
+    "stock": 80,
+    "price": 45000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000012",
+    "idProduct": "PRD-000004",
+    "sku": "RAK-JTI-60CM",
+    "stock": 20,
+    "price": 285000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000013",
+    "idProduct": "PRD-000005",
+    "sku": "GRD-PRC-SHB",
+    "stock": 30,
+    "price": 120000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000014",
+    "idProduct": "PRD-000006",
+    "sku": "MSK-KNY-HRB",
+    "stock": 60,
+    "price": 35000.0,
+    "isActive": true
+  },
+  {
+    "idItem": "ITM-000015",
+    "idProduct": "PRD-000008",
+    "sku": "PLT-LLE-5KG",
+    "stock": 40,
+    "price": 75000.0,
     "isActive": true
   }
 ]
