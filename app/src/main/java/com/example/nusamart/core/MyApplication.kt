@@ -12,6 +12,7 @@ import com.example.nusamart.data.repository.transaction.TransactionRepository
 import com.example.nusamart.data.repository.user.UserRepository
 
 class MyApplication : Application() {
+    // berguna untuk inisialisasi repository repository
     lateinit var userRepository: UserRepository
         private set
 

@@ -46,7 +46,6 @@ class CartVM(
         }
     }
 
-    // Tambahkan kata 'suspend' dan HAPUS '= viewModelScope.launch'
     private suspend fun loadCart() {
         _uiState.update { it.copy(isLoading = true) }
         val userId = userRepository.getActiveUserId()
@@ -56,12 +55,12 @@ class CartVM(
             return
         }
 
-        // 1. Dapatkan keranjang dan isinya
+        // Dapatkan keranjang dan isinya
         val cart = cartRepository.getOrCreateCart(userId)
         activeCartId = cart.idCart
         val cartItems = cartRepository.getCartItems(cart.idCart)
 
-        // 2. Load semua data referensi
+        // Load semua data referensi
         val allProducts = productRepository.getAllProducts()
         val allStores = storeRepository.getAllStores()
 
@@ -73,7 +72,7 @@ class CartVM(
             }
         }
 
-        // 3. Gabungkan data
+        // Gabungkan data
         val uiItems = cartItems.mapNotNull { cItem ->
             val productData = itemMap[cItem.idItem] ?: return@mapNotNull null
             val product = productData.first
@@ -99,7 +98,7 @@ class CartVM(
             Pair(cartItemModel, Pair(storeName, storeId))
         }
 
-        // 4. Group berdasarkan toko
+        // Group berdasarkan toko
         val grouped = uiItems.groupBy { it.second }.map { entry ->
             val storeData = entry.key
             val itemsInStore = entry.value

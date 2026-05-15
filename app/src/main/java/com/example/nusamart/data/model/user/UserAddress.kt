@@ -13,7 +13,7 @@ data class UserAddress(
     val isDefault: Boolean
 )
 
-// JSON-friendly version
+// JSON-friendly version -- mungkin bisa pindah di repository aja entar
 data class UserAddressJson(
     val idAddress: String,
     val idUser: String,

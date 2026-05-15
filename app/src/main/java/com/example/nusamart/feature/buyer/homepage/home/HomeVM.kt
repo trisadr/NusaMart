@@ -25,8 +25,8 @@ class HomeVM(
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
                 HomeVM(
-                    productRepository = app.productRepository, // Pastikan sudah dideklarasikan di MyApplication
-                    storeRepository = app.storeRepository      // Pastikan sudah dideklarasikan di MyApplication
+                    productRepository = app.productRepository,
+                    storeRepository = app.storeRepository
                 )
             }
         }

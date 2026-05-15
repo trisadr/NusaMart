@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.transaction.success
 
-// --- STATE ---
 data class SuccessUiState(
     val isLoading: Boolean = true,
     val provider: String = "COD",

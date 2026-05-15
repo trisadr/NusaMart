@@ -35,7 +35,6 @@ import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.buyer.transaction.components.OptionItemCard
 import com.example.nusamart.feature.buyer.transaction.components.PaymentSectionHeader
 
-// --- SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentOptionScreen(
@@ -44,7 +43,6 @@ fun PaymentOptionScreen(
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
-
     val qrisMethods = uiState.methods.filter { it.provider == "MIDTRANS" }
     val bankMethods = uiState.methods.filter { it.provider == "MANUAL" }
     val codMethods = uiState.methods.filter { it.provider == "COD" }

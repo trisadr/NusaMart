@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class CheckoutSuccessVM(
     private val transactionRepository: TransactionRepository,
     private val userRepository: UserRepository
@@ -31,16 +30,16 @@ class CheckoutSuccessVM(
     val uiState = _uiState.asStateFlow()
 
     fun loadData(paymentId: String, orderId: String) = viewModelScope.launch {
-        // 1. Tarik data payment dari orderId
+        // Tarik data payment dari orderId
         val payment = transactionRepository.getPaymentByOrderId(orderId)
         val methods = transactionRepository.getActivePaymentMethods()
 
-        // 2. Cari metode pembayaran yang digunakan
+        // Cari metode pembayaran yang digunakan
         val selectedMethod = methods.find { it.idMethod == payment?.idMethod }
         val selectedProvider = selectedMethod?.provider ?: "COD"
         val methodName = selectedMethod?.methodName ?: "Bayar di Tempat"
 
-        // 3. Tarik data user untuk dummy Virtual Account
+        // Tarik data user untuk dummy Virtual Account
         val user = userRepository.getCurrentUser()
         val phone = user?.phone ?: "081234567890"
 

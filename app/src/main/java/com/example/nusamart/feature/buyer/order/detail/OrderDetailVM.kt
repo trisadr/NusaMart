@@ -17,7 +17,6 @@ class OrderDetailVM(
     private val orderRepository: OrderRepository,
     private val shippingRepository: ShippingRepository
 ) : ViewModel() {
-
     companion object {
         val Factory = viewModelFactory {
             initializer {
@@ -32,20 +31,16 @@ class OrderDetailVM(
 
     fun loadOrderDetail(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-
         val order = orderRepository.getOrderById(orderId)
         if (order == null) {
             _uiState.update { it.copy(isLoading = false, errorMessage = "Pesanan tidak ditemukan.") }
             return@launch
         }
-
         val items = orderRepository.getOrderItems(orderId)
         val isReviewed = orderRepository.isOrderReviewed(orderId)
-
         // Ambil data resi dari Shipping Repository
         val shipping = shippingRepository.getShippingByOrderId(orderId)
         val resi = shipping?.resi ?: "Belum dikirim"
-
         _uiState.update {
             it.copy(
                 isLoading = false,

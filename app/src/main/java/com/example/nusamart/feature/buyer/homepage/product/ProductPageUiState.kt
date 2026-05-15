@@ -21,15 +21,11 @@ data class ProductPageUiState(
     val storeLocation: String = "",
     val storeUrlLocation: String? = null,
     val mapUrl: String = "",
-
     // Bottom Sheet Management
     val items: List<ProductItemUiModel> = emptyList(),
     val selectedItemId: String? = null,
     val quantity: Int = 1,
-
-    // PERBAIKAN DI SINI: Cukup panggil SheetMode langsung
     val sheetMode: SheetMode = SheetMode.NONE
 )
 
-// Pastikan enum ini hanya ada SATU di seluruh project untuk fitur ini
 enum class SheetMode { NONE, CART, BUY }

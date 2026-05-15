@@ -98,7 +98,7 @@ fun ReviewScreen(
             )
         },
         bottomBar = {
-            // Sembunyikan tombol jika pesanan belum selesai atau semua barang sudah diulas
+            // tombol tidak muncul jika pesanan belum selesai atau semua barang sudah diulas
             if (uiState.isOrderDelivered && !uiState.allReviewed) {
                 Surface(modifier = Modifier.fillMaxWidth(), shadowElevation = 8.dp) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
@@ -129,7 +129,6 @@ fun ReviewScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // --- KONDISI: Pesanan Belum Selesai ---
             if (!uiState.isOrderDelivered) {
                 Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -150,7 +149,6 @@ fun ReviewScreen(
                     }
                 }
             }
-            // --- KONDISI: Semua Sudah Diulas ---
             else if (uiState.allReviewed) {
                 Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -171,7 +169,6 @@ fun ReviewScreen(
                     }
                 }
             }
-            // --- KONDISI: Render Form Ulasan ---
             else {
                 uiState.itemsToReview.forEachIndexed { index, form ->
                     ReviewItemSection(

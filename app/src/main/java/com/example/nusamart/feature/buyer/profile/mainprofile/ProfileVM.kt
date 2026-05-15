@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 class ProfileVM(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
     companion object {
         val Factory = viewModelFactory {
             initializer {

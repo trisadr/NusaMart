@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class NotificationDetailVM(
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
@@ -30,11 +29,7 @@ class NotificationDetailVM(
 
     fun loadAndMarkAsRead(notifId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-
-        // Tandai dibaca dulu
         notificationRepository.markAsRead(notifId)
-
-        // Tarik data
         val notif = notificationRepository.getNotificationById(notifId)
         _uiState.update { it.copy(isLoading = false, notification = notif) }
     }

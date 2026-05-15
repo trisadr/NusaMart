@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-// --- VIEWMODEL ---
 class AddressOptionVM(private val userRepository: UserRepository) : ViewModel() {
     companion object {
         val Factory = viewModelFactory { initializer { AddressOptionVM((this[APPLICATION_KEY] as MyApplication).userRepository) } }

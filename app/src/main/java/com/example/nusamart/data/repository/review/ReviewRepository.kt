@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class ReviewJson(
     val idReview: String,
@@ -28,7 +28,7 @@ data class ReviewImageJson(
     val urlImage: Int
 )
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class ReviewRepository(private val context: Context) {
 
@@ -36,7 +36,7 @@ class ReviewRepository(private val context: Context) {
     private val reviewFile = "review.json"
     private val reviewImageFile = "review_image.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -62,9 +62,8 @@ class ReviewRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
+
     // MANAJEMEN ULASAN
-    // ==========================================
 
     // Tambahkan di dalam class ReviewRepository
     suspend fun getReviewsByItemIds(itemIds: List<String>): List<ReviewJson> = withContext(Dispatchers.IO) {
@@ -81,7 +80,7 @@ class ReviewRepository(private val context: Context) {
         delay(300) // Simulasi loading network
         val reviews = readJson<ReviewJson>(reviewFile)
 
-        // Auto Increment REV-000001
+        // Auto Increment id REV-000001
         val maxRevNum = reviews.maxOfOrNull { it.idReview.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newReviewId = String.format("REV-%06d", maxRevNum + 1)
 

@@ -37,7 +37,6 @@ fun NusaMartBottomNavigation(
         tonalElevation = 8.dp,
         windowInsets = WindowInsets(0.dp)
     ) {
-
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Beranda") },
             label = { Text("Beranda") },
@@ -51,7 +50,6 @@ fun NusaMartBottomNavigation(
                 indicatorColor = WhiteSurface
             )
         )
-
         NavigationBarItem(
             icon = { Icon(Icons.Default.Notifications, contentDescription = "Notifikasi") },
             label = { Text("Notifikasi") },
@@ -65,7 +63,6 @@ fun NusaMartBottomNavigation(
                 indicatorColor = WhiteSurface
             )
         )
-
         NavigationBarItem(
             icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Keranjang") },
             label = { Text("Keranjang") },
@@ -79,7 +76,6 @@ fun NusaMartBottomNavigation(
                 indicatorColor = WhiteSurface
             )
         )
-
         NavigationBarItem(
             icon = { Icon(Icons.Default.Person, contentDescription = "Saya") },
             label = { Text("Saya") },

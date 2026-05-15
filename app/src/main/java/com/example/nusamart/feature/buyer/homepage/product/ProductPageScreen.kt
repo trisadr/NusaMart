@@ -127,8 +127,6 @@ fun ProductPageScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).verticalScroll(rememberScrollState())) {
-
-            // --- Image Pager ---
             val pagerState = rememberPagerState(pageCount = { uiState.images.size })
             Box {
                 HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().aspectRatio(1f).background(Color.LightGray)) { page ->
@@ -139,7 +137,6 @@ fun ProductPageScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                // Pager Indicator
                 if (uiState.images.size > 1) {
                     Surface(
                         modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
@@ -169,31 +166,22 @@ fun ProductPageScreen(
                     color = redColor,
                     fontSize = 13.sp,
                     modifier = Modifier.clickable {
-
                         val url = uiState.storeUrlLocation
-
                         if (!url.isNullOrBlank()) {
-
                             try {
-
                                 val intent = Intent(
                                     Intent.ACTION_VIEW,
                                     Uri.parse(url)
                                 )
-
                                 context.startActivity(intent)
-
                             } catch (e: Exception) {
-
                                 Toast.makeText(
                                     context,
                                     "Gagal membuka Google Maps",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-
                         } else {
-
                             Toast.makeText(
                                 context,
                                 "Lokasi toko belum tersedia",

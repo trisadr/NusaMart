@@ -3,7 +3,16 @@ package com.example.nusamart.feature.buyer.profile.mainprofile
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,8 +21,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +54,11 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
-import com.example.nusamart.ui.theme.*
+import com.example.nusamart.ui.theme.BlackText
+import com.example.nusamart.ui.theme.GrayBackground
+import com.example.nusamart.ui.theme.RedLight
+import com.example.nusamart.ui.theme.RedPrimary
+import com.example.nusamart.ui.theme.WhiteSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,14 +93,12 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
         },
         containerColor = GrayBackground
     ) { paddingValues ->
-
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
             val user = uiState.user
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -118,7 +144,6 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
                         subtitle = "Atur alamat pengirimanmu",
                         onClick = { backStack.add(Routes.AddressListRoute) } // Arahkan ke Layar Alamat
                     )
-                    // Menu Metode Pembayaran sudah dihapus
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class StoreJson(
     val idStore: String,
@@ -38,14 +38,14 @@ data class BadgeVerificationJson(
     val notes: String? = null
 )
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+// Hasil Operasi
 
 sealed class StoreResult {
     data class Success(val storeId: String) : StoreResult()
     data class Error(val message: String) : StoreResult()
 }
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class StoreRepository(private val context: Context) {
 
@@ -56,41 +56,31 @@ class StoreRepository(private val context: Context) {
     private val storeFileName = "store.json"
     private val badgeFileName = "badge.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
 
         val file = File(context.filesDir, fileName)
 
-        // Jika file belum ada → copy dari assets
+        // Jika file belum ada, maka copy dari assets
         if (!file.exists()) {
-
             try {
-
                 context.assets.open(fileName).use { inputStream ->
-
                     val json = inputStream
                         .bufferedReader()
                         .readText()
-
                     file.writeText(json)
                 }
-
             } catch (e: Exception) {
-
                 return mutableListOf()
             }
         }
-
         val json = file.readText()
-
         // Hindari crash kalau file kosong
         if (json.isBlank()) {
             return mutableListOf()
         }
-
         val type = object : TypeToken<List<T>>() {}.type
-
         return gson.fromJson(json, type)
             ?: mutableListOf()
     }
@@ -99,17 +89,14 @@ class StoreRepository(private val context: Context) {
         fileName: String,
         data: List<T>
     ) {
-
         val file = File(context.filesDir, fileName)
-
         file.writeText(
             gson.toJson(data)
         )
     }
 
-    // ==========================================
+
     // MANAJEMEN TOKO (STORE)
-    // ==========================================
 
     suspend fun getAllStores(): List<StoreJson> =
         withContext(Dispatchers.IO) {
@@ -218,35 +205,26 @@ class StoreRepository(private val context: Context) {
         urlLocation: String?,
         isActive: Boolean
     ): StoreResult = withContext(Dispatchers.IO) {
-
         val stores = readJson<StoreJson>(storeFileName)
-
         val index = stores.indexOfFirst {
             it.idStore == storeId
         }
-
         if (index == -1) {
-
             return@withContext StoreResult.Error(
                 "Toko tidak ditemukan."
             )
         }
-
         // Cek nama kembar
         if (stores.any {
-
                 it.name.equals(
                     name,
                     ignoreCase = true
                 ) && it.idStore != storeId
-
             }) {
-
             return@withContext StoreResult.Error(
                 "Nama toko \"$name\" sudah digunakan."
             )
         }
-
         stores[index] = stores[index].copy(
             name = name,
             description = description,
@@ -255,18 +233,15 @@ class StoreRepository(private val context: Context) {
             isActive = isActive,
             updateAt = LocalDateTime.now().toString()
         )
-
         writeJson(
             storeFileName,
             stores
         )
-
         return@withContext StoreResult.Success(storeId)
     }
 
-    // ==========================================
+
     // MANAJEMEN BADGE VERIFIKASI
-    // ==========================================
 
     suspend fun getBadgeByStoreId(
         storeId: String
@@ -288,16 +263,12 @@ class StoreRepository(private val context: Context) {
     suspend fun requestLocalBadge(
         storeId: String
     ): StoreResult = withContext(Dispatchers.IO) {
-
         delay(500)
-
         val badges = readJson<BadgeVerificationJson>(
             badgeFileName
         )
-
         // Cek badge aktif
         val existingActiveBadge = badges.find {
-
             it.idStore == storeId &&
                     (
                             it.status ==
@@ -307,9 +278,7 @@ class StoreRepository(private val context: Context) {
                                     BadgeVerification.Status.APPROVED.name
                             )
         }
-
         if (existingActiveBadge != null) {
-
             val statusMsg =
                 if (
                     existingActiveBadge.status ==
@@ -319,7 +288,6 @@ class StoreRepository(private val context: Context) {
                 } else {
                     "sedang diproses"
                 }
-
             return@withContext StoreResult.Error(
                 "Pengajuan badge toko ini $statusMsg."
             )
@@ -327,20 +295,15 @@ class StoreRepository(private val context: Context) {
 
         // Auto Increment BDG-000001
         val maxIdNum = badges.maxOfOrNull {
-
             it.idBadge
                 .substringAfter("-")
                 .toIntOrNull() ?: 0
-
         } ?: 0
-
         val newId = String.format(
             "BDG-%06d",
             maxIdNum + 1
         )
-
         val now = LocalDateTime.now().toString()
-
         val newBadge = BadgeVerificationJson(
             idBadge = newId,
             idStore = storeId,
@@ -351,14 +314,11 @@ class StoreRepository(private val context: Context) {
             status = BadgeVerification.Status.PENDING.name,
             notes = null
         )
-
         badges.add(newBadge)
-
         writeJson(
             badgeFileName,
             badges
         )
-
         return@withContext StoreResult.Success(newId)
     }
 }

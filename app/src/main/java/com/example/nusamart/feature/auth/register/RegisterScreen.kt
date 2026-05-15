@@ -109,7 +109,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
             )
 
-            // ─── Pilihan Role ───
+            // Pilihan Role
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -145,7 +145,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
                 }
             }
 
-            // ─── Input Form ───
+            // Input Form
             MyOutlinedTextField(
                 value = uiState.username,
                 onValueChange = vm::updateUsername,
@@ -161,7 +161,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- TAMPILKAN KEYBOARD ANGKA UNTUK NOMOR TELEPON ---
+            // keyboard angka untuk nomor telepon
             MyOutlinedTextField(
                 value = uiState.phone,
                 onValueChange = vm::updatePhone,
@@ -191,7 +191,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // ─── Button Submit ───
+            // Button Submit
             Button(
                 onClick = vm::register,
                 enabled = !uiState.isLoading,
@@ -248,9 +248,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
     }
 }
 
-// ─── Komponen Pendukung ───
-
-// --- TAMBAHKAN PARAMETER keyboardOptions DI SINI ---
+// Komponen Pendukung
 @Composable
 fun MyOutlinedTextField(
     value: String,

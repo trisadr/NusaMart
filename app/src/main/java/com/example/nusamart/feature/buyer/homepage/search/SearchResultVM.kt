@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.homepage.search
 
-import kotlin.collections.filter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
@@ -38,7 +37,6 @@ class SearchResultVM(
 
     fun initialize(initialKeyword: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, currentQuery = initialKeyword) }
-
         // Fetch dan Map data sama seperti HomeVM
         val allProductsRaw = productRepository.getAllProducts()
         val allStores = storeRepository.getAllStores()
@@ -77,13 +75,11 @@ class SearchResultVM(
         val baseList = allProductsCache.filter {
             it.name.contains(state.currentQuery, ignoreCase = true)
         }
-
         val sortedList = when (state.selectedFilter) {
             "Harga Termurah" -> baseList.sortedBy { it.price }
             "Harga Termahal" -> baseList.sortedByDescending { it.price }
             else -> baseList
         }
-
         _uiState.update { it.copy(filteredProducts = sortedList) }
     }
 }

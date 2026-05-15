@@ -20,7 +20,7 @@ data class User(
     }
 }
 
-// JSON-friendly version
+// JSON-friendly version -- mungkin bisa pindah di repository aja entar
 data class UserJson(
     val idUser: String,
     val username: String,

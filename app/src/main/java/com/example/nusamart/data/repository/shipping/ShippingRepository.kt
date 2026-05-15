@@ -1,7 +1,6 @@
 package com.example.nusamart.data.repository.shipping
 
 import android.content.Context
-import com.example.nusamart.data.model.shipping.CourierOption
 import com.example.nusamart.data.model.shipping.Shipping
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -12,7 +11,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class CourierOptionJson(
     val idCourier: String,
@@ -40,14 +39,14 @@ data class ShippingTrackingJson(
     val updateAt: String
 )
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+// Hasil Operasi
 
 sealed class ShippingResult {
     data class Success(val shippingId: String) : ShippingResult()
     data class Error(val message: String) : ShippingResult()
 }
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class ShippingRepository(private val context: Context) {
 
@@ -57,7 +56,7 @@ class ShippingRepository(private val context: Context) {
     private val shippingFile = "shipping.json"
     private val trackingFile = "shipping_tracking.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -82,9 +81,8 @@ class ShippingRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
+
     // MANAJEMEN KURIR (COURIER)
-    // ==========================================
 
     suspend fun getActiveCouriers(): List<CourierOptionJson> = withContext(Dispatchers.IO) {
         val couriers = readJson<CourierOptionJson>(courierFile)
@@ -96,9 +94,8 @@ class ShippingRepository(private val context: Context) {
         return@withContext couriers.find { it.idCourier == courierId }
     }
 
-    // ==========================================
+
     // MANAJEMEN PENGIRIMAN (SHIPPING)
-    // ==========================================
 
     suspend fun getShippingByOrderId(orderId: String): ShippingJson? = withContext(Dispatchers.IO) {
         val shippings = readJson<ShippingJson>(shippingFile)
@@ -178,9 +175,8 @@ class ShippingRepository(private val context: Context) {
         return@withContext false
     }
 
-    // ==========================================
+
     // RIWAYAT PELACAKAN (TRACKING)
-    // ==========================================
 
     suspend fun getTrackingHistory(shippingId: String): List<ShippingTrackingJson> = withContext(Dispatchers.IO) {
         val trackings = readJson<ShippingTrackingJson>(trackingFile)

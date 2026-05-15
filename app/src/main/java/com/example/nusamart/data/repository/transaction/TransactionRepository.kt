@@ -2,7 +2,6 @@ package com.example.nusamart.data.repository.transaction
 
 import android.content.Context
 import com.example.nusamart.data.model.transaction.Payment
-import com.example.nusamart.data.model.transaction.PaymentMethod
 import com.example.nusamart.data.model.transaction.WalletTransaction
 import com.example.nusamart.data.model.transaction.Withdrawal
 import com.google.gson.Gson
@@ -14,7 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class PaymentJson(
     val idPayment: String,
@@ -58,14 +57,14 @@ data class WithdrawalJson(
     val transferPic: Int? = null
 )
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+// Hasil Operasi
 
 sealed class TransactionResult {
     data class Success(val transactionId: String) : TransactionResult()
     data class Error(val message: String) : TransactionResult()
 }
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class TransactionRepository(private val context: Context) {
 
@@ -77,7 +76,7 @@ class TransactionRepository(private val context: Context) {
     private val walletTransactionFile = "wallet_transaction.json"
     private val withdrawalFile = "withdrawal.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -102,9 +101,8 @@ class TransactionRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
+
     // MANAJEMEN PEMBAYARAN (PAYMENT)
-    // ==========================================
 
     suspend fun getActivePaymentMethods(): List<PaymentMethodJson> = withContext(Dispatchers.IO) {
         val methods = readJson<PaymentMethodJson>(paymentMethodFile)
@@ -167,9 +165,8 @@ class TransactionRepository(private val context: Context) {
         return@withContext false
     }
 
-    // ==========================================
+
     // MANAJEMEN DOMPET TOKO (STORE WALLET)
-    // ==========================================
 
     suspend fun getWalletByStoreId(storeId: String): StoreWalletJson? = withContext(Dispatchers.IO) {
         val wallets = readJson<StoreWalletJson>(walletFile)
@@ -220,9 +217,8 @@ class TransactionRepository(private val context: Context) {
         return@withContext false
     }
 
-    // ==========================================
+
     // MUTASI TRANSAKSI DOMPET (WALLET TRANSACTION)
-    // ==========================================
 
     suspend fun getWalletTransactions(walletId: String): List<WalletTransactionJson> = withContext(Dispatchers.IO) {
         val transactions = readJson<WalletTransactionJson>(walletTransactionFile)
@@ -256,9 +252,8 @@ class TransactionRepository(private val context: Context) {
         return@withContext TransactionResult.Success(newTransactionId)
     }
 
-    // ==========================================
+
     // PENARIKAN DANA (WITHDRAWAL)
-    // ==========================================
 
     suspend fun getWithdrawalsByWalletId(walletId: String): List<WithdrawalJson> = withContext(Dispatchers.IO) {
         val withdrawals = readJson<WithdrawalJson>(withdrawalFile)

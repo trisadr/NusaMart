@@ -7,8 +7,8 @@ import com.google.gson.GsonBuilder
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID
-
-// ── JSON model ────────────────────────────────────────────────────────────────
+// class repository ini belum dipakai, kalau mau makai mungin bisa dicek ulang nantinya
+// JSON model
 
 data class ReportJson(
     val idReport: String,
@@ -27,7 +27,7 @@ data class ReportDatabase(
     val reports: MutableList<ReportJson> = mutableListOf()
 )
 
-// ── Local Data Source ─────────────────────────────────────────────────────────
+// Local Data Source
 
 class ReportLocalDataSource(private val context: Context) {
 
@@ -55,11 +55,11 @@ class ReportLocalDataSource(private val context: Context) {
     }
 }
 
-// ── Repository ────────────────────────────────────────────────────────────────
+// Repository
 
 class ReportRepository(private val dataSource: ReportLocalDataSource) {
 
-    // ── Mapper ────────────────────────────────────────────────────────────────
+    // Mapper
 
     private fun ReportJson.toReport() = Report(
         idReport = idReport,
@@ -87,7 +87,7 @@ class ReportRepository(private val dataSource: ReportLocalDataSource) {
         updateAt = updateAt?.toString()
     )
 
-    // ── Operasi User ──────────────────────────────────────────────────────────
+    // Operasi User
 
     // Kirim laporan baru
     fun submitReport(

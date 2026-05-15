@@ -1,7 +1,6 @@
 package com.example.nusamart.data.repository.notif
 
 import android.content.Context
-import com.example.nusamart.data.model.notif.Notification
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -9,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class NotificationJson(
     val idNotif: String,
@@ -23,7 +22,7 @@ data class NotificationJson(
     val referenceType: String? = null
 )
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class NotificationRepository(private val context: Context) {
 

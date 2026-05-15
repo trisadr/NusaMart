@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class NotificationListVM(
     private val notificationRepository: NotificationRepository,
     private val userRepository: UserRepository

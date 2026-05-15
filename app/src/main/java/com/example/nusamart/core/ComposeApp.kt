@@ -55,10 +55,11 @@ fun ComposeApp() {
 
                     // ================== BUYER ==================
 
-                    // --- Cart & Home ---
+                    // --- Cart & Home---
                     entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
+                    // -- Search result & Product page --
                     entry<Routes.SearchResultRoute> { route ->
                         SearchResultScreen(initialKeyword = route.keyword)
                     }

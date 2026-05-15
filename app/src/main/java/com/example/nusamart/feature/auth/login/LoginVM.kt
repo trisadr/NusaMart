@@ -31,7 +31,7 @@ class LoginVM(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    // Event sukses akan mengirimkan ROLE (untuk membedakan masuk ke Home Buyer atau Seller)
+    // Event sukses akan mengirimkan ROLE
     private val _successEvent = MutableSharedFlow<String>()
     val successEvent = _successEvent.asSharedFlow()
 
@@ -43,7 +43,7 @@ class LoginVM(
     fun login() = viewModelScope.launch {
         val state = _uiState.value
 
-        // 1. Validasi Input Kosong
+        // Validasi Input Kosong
         if (state.emailOrUsername.isBlank() || state.password.isBlank()) {
             _uiState.update {
                 it.copy(dialogState = LoginDialogState.Error(
@@ -54,12 +54,12 @@ class LoginVM(
             return@launch
         }
 
-        // 2. Proses Login ke Repository
+        // Proses Login ke Repository
         _uiState.update { it.copy(isLoading = true) }
 
         val result = userRepository.login(state.emailOrUsername, state.password)
 
-        // 3. Tangani Hasil
+        // Menangani Hasil
         when (result) {
             is LoginResult.Success -> {
                 _uiState.update { it.copy(isLoading = false) }

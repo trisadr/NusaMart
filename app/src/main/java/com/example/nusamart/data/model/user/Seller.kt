@@ -8,7 +8,7 @@ data class Seller(
     val accountNumber: String
 )
 
-// JSON-friendly version
+// JSON-friendly version -- mungkin bisa pindah di repository aja entar
 data class SellerJson(
     val idSeller: String,
     val nik: String,

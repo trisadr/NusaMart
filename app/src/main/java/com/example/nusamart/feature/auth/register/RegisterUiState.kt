@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.auth.register
 
-
 data class RegisterUiState(
     val username: String = "",
     val email: String = "",

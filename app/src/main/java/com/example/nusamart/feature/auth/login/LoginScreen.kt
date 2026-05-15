@@ -61,13 +61,13 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsState()
 
-    // Mendengarkan event sukses dari ViewModel
+    // listener event sukses dari ViewModel
     LaunchedEffect(Unit) {
         vm.successEvent.collect { role ->
             backStack.clear()
             // Arahkan berdasarkan Role
             if (role == "SELLER") {
-                // Pastikan Routes.SellerHomeRoute sudah ditambahkan di file Routes.kt
+                // seller belum diimplementasikan
                 //backStack.add(Routes.SellerHomeRoute)
             } else {
                 backStack.add(Routes.HomeRoute)
@@ -86,13 +86,11 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                         color = BlackText
                     )
                 },
-                // Tombol Back dihapus dari sini
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = WhiteSurface)
             )
         },
         containerColor = WhiteSurface
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -105,9 +103,7 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                 contentDescription = "Logo NusaMart",
                 modifier = Modifier.size(100.dp)
             )
-
             Spacer(modifier = Modifier.height(40.dp))
-
             // --- Form Input ---
             MyOutlinedTextField(
                 value = uiState.emailOrUsername,
@@ -115,9 +111,7 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                 label = "Email/Username",
                 icon = Icons.Default.Person
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             MyOutlinedTextField(
                 value = uiState.password,
                 onValueChange = vm::updatePassword,
@@ -127,9 +121,7 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                 isPasswordVisible = uiState.isPasswordVisible,
                 onPasswordVisibilityChange = vm::togglePasswordVisibility
             )
-
             Spacer(modifier = Modifier.height(32.dp))
-
             // --- Tombol Submit ---
             Button(
                 onClick = vm::login,
@@ -150,9 +142,7 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                     Text("Log In", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
             // --- Aksi Ekstra ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -170,7 +160,6 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
             }
         }
     }
-
     // --- Manajemen Alert Dialog ---
     when (val state = uiState.dialogState) {
         is LoginDialogState.Error -> {
@@ -184,7 +173,8 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
     }
 }
 
-// ─── Komponen Pendukung ───
+
+// Komponen Pendukung
 
 @Composable
 fun MyOutlinedTextField(

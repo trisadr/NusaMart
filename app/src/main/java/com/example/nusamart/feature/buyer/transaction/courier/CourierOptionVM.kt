@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class CourierOptionVM(private val shippingRepository: ShippingRepository) : ViewModel() {
     companion object {
         val Factory = viewModelFactory { initializer { CourierOptionVM((this[APPLICATION_KEY] as MyApplication).shippingRepository) } }
@@ -25,7 +24,7 @@ class CourierOptionVM(private val shippingRepository: ShippingRepository) : View
     private fun loadCouriers() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
         var list = shippingRepository.getActiveCouriers()
-        // Dummy data jika repository kosong
+        // Dummy data sementara kalau json dan file repository belum ada
         if (list.isEmpty()) {
             list = listOf(
                 CourierOptionJson("CUR-001", "JNE Reguler", "REGULAR", "2-3 Hari", true),

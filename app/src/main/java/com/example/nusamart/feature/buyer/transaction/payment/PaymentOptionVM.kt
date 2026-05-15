@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class PaymentOptionVM(private val transactionRepository: TransactionRepository) : ViewModel() {
     companion object {
         val Factory = viewModelFactory { initializer { PaymentOptionVM((this[APPLICATION_KEY] as MyApplication).transactionRepository) } }
@@ -33,7 +32,7 @@ class PaymentOptionVM(private val transactionRepository: TransactionRepository) 
                 PaymentMethodJson("MET-003", "Transfer Bank Mandiri", "MANUAL", true),
                 PaymentMethodJson("MET-004", "Transfer Bank BNI", "MANUAL", true),
                 PaymentMethodJson("MET-005", "Transfer Bank BRI", "MANUAL", true),
-                PaymentMethodJson("MET-006", "Bayar di Tempat (COD)", "COD", true) // Pastikan enum COD sudah ditambah!
+                PaymentMethodJson("MET-006", "Bayar di Tempat (COD)", "COD", true)
             )
         }
         _uiState.update { it.copy(methods = list, isLoading = false) }

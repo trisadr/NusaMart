@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- VIEWMODEL ---
 class CheckoutVM(
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
@@ -41,7 +40,7 @@ class CheckoutVM(
     fun loadData(route: Routes.CheckoutRoute) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // 1. Load Alamat
+        // Load Alamat
         val addresses = userRepository.getUserAddresses()
         val address = if (route.selectedAddressId != null) {
             addresses.find { it.idAddress == route.selectedAddressId }
@@ -49,23 +48,20 @@ class CheckoutVM(
             addresses.find { it.isDefault } ?: addresses.firstOrNull()
         }
 
-        // 2. Load Kurir
+        // Load Kurir
         var cName = "Pilih Kurir Pengiriman"
         if (route.selectedCourierId != null) {
             val courier = shippingRepository.getCourierById(route.selectedCourierId)
             if (courier != null) cName = "${courier.courierName} (${courier.timeEstimation})"
         }
 
-        // 3. Load Metode Pembayaran
+        // Load Metode Pembayaran
         var pName = "Pilih Metode Pembayaran"
         if (route.selectedPaymentMethodId != null) {
             val methods = transactionRepository.getActivePaymentMethods()
             val method = methods.find { it.idMethod == route.selectedPaymentMethodId }
             if (method != null) pName = method.methodName
         }
-
-        // 4. Load Item (Mock untuk Cart/Direct). Di aplikasi asli, ambil dari Cart repo
-        // Karena ini contoh, kita buat data produk dummy jika langsung beli
         val itemsInput = mutableListOf<OrderItemInput>()
         var subTotal = 0.0
         var storeId = "STR-000001" // Default toko
@@ -74,7 +70,6 @@ class CheckoutVM(
             val product = productRepository.getAllProducts().find { it.idProduct == route.productId }
             if (product != null) {
                 storeId = product.idStore
-                // Ambil harga (Item)
                 val itemData = productRepository.getProductItems(route.productId).firstOrNull()
                 val price = itemData?.price ?: 50000.0
                 itemsInput.add(OrderItemInput(itemData?.idItem ?: "ITM-0", route.quantity, product.productName, price))
@@ -94,17 +89,13 @@ class CheckoutVM(
 
     fun placeOrder(route: Routes.CheckoutRoute, onSuccess: (String, String) -> Unit) = viewModelScope.launch {
         val state = _uiState.value
-
         if (state.address == null) {
             _uiState.update { it.copy(showAddressDialog = true) }
             return@launch
         }
-
         val userId = userRepository.getActiveUserId() ?: return@launch
-
         _uiState.update { it.copy(isLoading = true) }
-
-        // 1. Buat Order
+        // Buat Order
         val orderRes = orderRepository.createOrder(
             userId = userId, storeId = state.orderStoreId, addressId = state.address.idAddress,
             items = state.items, shippingCost = state.shippingCost, servicePrice = state.serviceFee
@@ -112,10 +103,9 @@ class CheckoutVM(
 
         if (orderRes is com.example.nusamart.data.repository.order.OrderResult.Success) {
             val orderId = orderRes.orderId
-            // 2. Buat Shipping & Payment
+            // Buat Shipping & Payment
             shippingRepository.createShipping(orderId, route.selectedCourierId!!)
             val payRes = transactionRepository.createPayment(orderId, route.selectedPaymentMethodId!!)
-
             if (payRes is com.example.nusamart.data.repository.transaction.TransactionResult.Success) {
                 onSuccess(payRes.transactionId, orderId)
             }

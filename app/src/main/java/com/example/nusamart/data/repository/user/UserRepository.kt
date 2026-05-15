@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+// Hasil Operasi
 
 sealed class RegisterResult {
     object Success : RegisterResult()
@@ -25,7 +25,7 @@ sealed class LoginResult {
     data class Error(val message: String) : LoginResult()
 }
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class UserRepository(private val context: Context) {
 
@@ -37,7 +37,7 @@ class UserRepository(private val context: Context) {
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
 
-        // --- LOGIKA BARU: Cek assets jika file belum ada ---
+        // Cek assets jika file belum ada
         if (!file.exists()) {
             try {
                 context.assets.open(fileName).use { inputStream ->
@@ -49,8 +49,6 @@ class UserRepository(private val context: Context) {
                 return mutableListOf()
             }
         }
-        // ---------------------------------------------------
-
         val json = file.readText()
         val type = object : TypeToken<List<T>>() {}.type
         return gson.fromJson(json, type) ?: mutableListOf()
@@ -61,19 +59,16 @@ class UserRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ─── Fitur Login & Logout ─────────────────────────────────────────────────
+    // Fitur Login & Logout
 
     suspend fun login(emailOrUsername: String, password: String): LoginResult = withContext(Dispatchers.IO) {
         delay(1000)
-
         val users = readJson<UserJson>("user.json")
-
         val matchedUser = users.find {
             (it.email.lowercase() == emailOrUsername.lowercase().trim() ||
                     it.username.lowercase() == emailOrUsername.lowercase().trim()) &&
                     it.password == password
         }
-
         if (matchedUser != null) {
             currentActiveUserId = matchedUser.idUser
             currentActiveUserRole = matchedUser.role
@@ -91,7 +86,7 @@ class UserRepository(private val context: Context) {
     fun getActiveUserId(): String? = currentActiveUserId
     fun getActiveUserRole(): String? = currentActiveUserRole
 
-    // ─── Fitur Profile & Address ──────────────────────────────────────────────
+    // Fitur Profile & Address
 
     suspend fun getCurrentUser(): UserJson? = withContext(Dispatchers.IO) {
         if (currentActiveUserId == null) return@withContext null
@@ -145,7 +140,7 @@ class UserRepository(private val context: Context) {
         writeJson("userAddress.json", addresses)
     }
 
-    // --- FUNGSI UPDATE ALAMAT ---
+    // Fungsi untuk meng-update alamat
     suspend fun updateAddress(
         addressId: String,
         label: String,
@@ -190,7 +185,7 @@ class UserRepository(private val context: Context) {
         writeJson("userAddress.json", addresses)
     }
 
-    // ─── Fitur Register ───────────────────────────────────────────────────────
+    // Fitur Register
 
     suspend fun register(
         username: String,
@@ -200,28 +195,23 @@ class UserRepository(private val context: Context) {
         isSeller: Boolean
     ): RegisterResult = withContext(Dispatchers.IO) {
         delay(1000)
-
         val userFile = "user.json"
         val sellerFile = "seller.json"
         val users = readJson<UserJson>(userFile)
-
         val usernameLower = username.lowercase().trim()
         val emailLower = email.lowercase().trim()
-
         if (users.any { it.username.lowercase() == usernameLower }) {
             return@withContext RegisterResult.ErrorDuplicate("Username \"$username\" sudah digunakan. Silakan pilih username lain.")
         }
         if (users.any { it.email.lowercase() == emailLower }) {
             return@withContext RegisterResult.ErrorDuplicate("Email \"$email\" sudah terdaftar. Silakan gunakan email lain atau login.")
         }
-
         val prefix = if (isSeller) "SLR-" else "BYR-"
         val filteredUsers = users.filter { it.idUser.startsWith(prefix) }
         val maxIdNum = filteredUsers.maxOfOrNull { it.idUser.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newId = String.format("%s%06d", prefix, maxIdNum + 1)
         val now = LocalDateTime.now().toString()
         val role = if (isSeller) "SELLER" else "BUYER"
-
         val newUser = UserJson(
             idUser = newId, username = username.trim(), email = email.trim(),
             password = password, phone = phone.trim(), role = role,
@@ -229,7 +219,6 @@ class UserRepository(private val context: Context) {
         )
         users.add(newUser)
         writeJson(userFile, users)
-
         if (isSeller) {
             val sellers = readJson<SellerJson>(sellerFile)
             val newSeller = SellerJson(
@@ -238,7 +227,6 @@ class UserRepository(private val context: Context) {
             sellers.add(newSeller)
             writeJson(sellerFile, sellers)
         }
-
         RegisterResult.Success
     }
 }

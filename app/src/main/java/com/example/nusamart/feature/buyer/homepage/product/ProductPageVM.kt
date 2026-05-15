@@ -41,20 +41,20 @@ class ProductPageVM(
         val allProducts = productRepository.getAllProducts()
         val product = allProducts.find { it.idProduct == productId } ?: return@launch
 
-        // 1. Ambil Data Store
+        // Ambil Data Store
         val stores = storeRepository.getAllStores()
         val store = stores.find { it.idStore == product.idStore }
         val sName = store?.name ?: "Toko Tidak Diketahui"
         val sLoc = store?.location ?: "Lokasi Tidak Diketahui"
         val sUrl = store?.urlLocation
 
-        // 2. Ambil & Urutkan Gambar (Primary di urutan 0)
+        // Ambil & Urutkan Gambar (Primary di urutan 0)
         val images = productRepository.getProductImages(productId)
             .sortedByDescending { it.isPrimary }
             .map { it.imageURL }
             .ifEmpty { listOf(R.drawable.nm_logo) }
 
-        // 3. Ambil Item & Variasi
+        // Ambil Item & Variasi
         val itemsData = productRepository.getProductItems(productId)
         val uiItems = itemsData.map { item ->
             val variations = productRepository.getProductVariations(item.idItem)
@@ -112,12 +112,9 @@ class ProductPageVM(
     fun addToCart(onSuccess: (String) -> Unit) = viewModelScope.launch {
         val state = _uiState.value
         if (state.selectedItemId == null) return@launch
-
         val userId = userRepository.getActiveUserId() ?: return@launch
         val cart = cartRepository.getOrCreateCart(userId)
-
         cartRepository.addCartItem(cart.idCart, state.selectedItemId, state.quantity)
-
         closeSheet()
         onSuccess("${state.quantity} ${state.productName} masuk ke keranjang")
     }

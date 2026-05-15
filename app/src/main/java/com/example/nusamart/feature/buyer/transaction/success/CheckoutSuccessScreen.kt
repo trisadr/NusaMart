@@ -35,28 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.core.Routes
-import com.example.nusamart.data.repository.transaction.TransactionRepository
-import com.example.nusamart.data.repository.user.UserRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
-
-
-
-
-// --- SCREEN ---
 @Composable
 fun CheckoutSuccessScreen(
     paymentId: String,
@@ -66,7 +49,7 @@ fun CheckoutSuccessScreen(
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
-    // Pass orderId juga agar VM bisa menarik data real dari database
+    // Pass orderId
     LaunchedEffect(paymentId, orderId) { vm.loadData(paymentId, orderId) }
 
     Scaffold(
@@ -98,7 +81,6 @@ fun CheckoutSuccessScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- LOGIKA TAMPILAN BERDASARKAN PROVIDER ---
             when (uiState.provider) {
                 "MIDTRANS" -> {
                     // Tampilan QRIS
@@ -134,7 +116,7 @@ fun CheckoutSuccessScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
                 "COD" -> {
-                    // Jika COD, tidak merender Card apapun (Kosong)
+                    // Jika COD, tidak merender Card apapun
                 }
             }
 

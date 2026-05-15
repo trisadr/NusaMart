@@ -37,7 +37,6 @@ class OrderListVM(
     private fun loadOrders() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
         val userId = userRepository.getActiveUserId()
-
         if (userId != null) {
             val userOrders = orderRepository.getOrdersByUser(userId)
             _uiState.update { it.copy(orders = userOrders, isLoading = false) }

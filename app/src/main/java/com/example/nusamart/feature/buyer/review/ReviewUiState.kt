@@ -16,8 +16,6 @@ data class ReviewUiState(
     val itemsToReview: List<ReviewItemForm> = emptyList(),
     val showValidationError: Boolean = false,
     val isSubmitSuccess: Boolean = false,
-
-    // Flag validasi baru
-    val isOrderDelivered: Boolean = true,
+    val isOrderDelivered: Boolean = true,     // validasi untuk menentukan apakah bisa isi review
     val allReviewed: Boolean = false
 )

@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class CartJson(
     val idCart: String,
@@ -24,7 +24,7 @@ data class CartItemJson(
     val isChecked: Boolean
 )
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class CartRepository(private val context: Context) {
 
@@ -32,7 +32,7 @@ class CartRepository(private val context: Context) {
     private val cartFile = "cart.json"
     private val cartItemFile = "cart_item.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -56,9 +56,8 @@ class CartRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
+
     // MANAJEMEN KERANJANG & ITEM
-    // ==========================================
 
     suspend fun getOrCreateCart(userId: String): CartJson = withContext(Dispatchers.IO) {
         val carts = readJson<CartJson>(cartFile)

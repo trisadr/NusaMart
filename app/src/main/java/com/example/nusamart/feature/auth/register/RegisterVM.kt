@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 class RegisterVM(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
     companion object {
         val Factory = viewModelFactory {
             initializer {
@@ -29,19 +28,13 @@ class RegisterVM(
             }
         }
     }
-
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
-
     private val _successEvent = MutableSharedFlow<Unit>()
     val successEvent = _successEvent.asSharedFlow()
-
     fun updateUsername(value: String) = _uiState.update { it.copy(username = value) }
     fun updateEmail(value: String) = _uiState.update { it.copy(email = value) }
-
-    // --- Update Phone dengan Filter Angka ---
     fun updatePhone(value: String) {
-        // Hanya ambil karakter yang merupakan angka
         val filteredValue = value.filter { it.isDigit() }
         // Batasi maksimal panjang string menjadi 12 digit
         if (filteredValue.length <= 12) {
@@ -58,27 +51,21 @@ class RegisterVM(
 
     fun register() = viewModelScope.launch {
         val state = _uiState.value
-
         // --- Validasi Input ---
         if (state.username.isBlank()) return@launch showErrorDialog("Username wajib diisi.")
         if (state.email.isBlank()) return@launch showErrorDialog("Email wajib diisi.")
-
         // Validasi panjang no telepon (minimal 11 digit, maksimal sudah dibatasi 12 di fungsi updatePhone)
         if (state.phone.length < 11) {
             return@launch showErrorDialog("Nomor telepon tidak valid. Pastikan berisi 11-12 digit angka.")
         }
-
         if (state.password.isBlank()) return@launch showErrorDialog("Password wajib diisi.")
         if (state.confirmPassword.isBlank()) return@launch showErrorDialog("Konfirmasi password wajib diisi.")
         if (!isEmailValid(state.email)) return@launch showErrorDialog("Format email tidak valid. Pastikan mengandung '@' dan domain yang benar.")
-
         if (state.password != state.confirmPassword) {
             _uiState.update { it.copy(dialogState = RegisterDialogState.PasswordMismatch) }
             return@launch
         }
-
         _uiState.update { it.copy(isLoading = true) }
-
         val result = userRepository.register(
             username = state.username,
             email = state.email,
@@ -86,7 +73,6 @@ class RegisterVM(
             password = state.password,
             isSeller = state.isSeller
         )
-
         when (result) {
             is RegisterResult.Success -> {
                 _uiState.update { it.copy(isLoading = false) }

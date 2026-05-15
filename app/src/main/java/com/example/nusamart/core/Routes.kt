@@ -32,7 +32,7 @@ object Routes {
         val keyword: String
     ) : NavKey
 
-    // Membawa ID Product dari HomePage
+    // Membawa ID Product dari HomePage / Search Result
     @Serializable
     data class ProductPageRoute(
         val productId: String

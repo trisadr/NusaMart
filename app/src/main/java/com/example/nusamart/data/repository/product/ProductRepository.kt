@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// ─── JSON-Friendly Models ─────────────────────────────────────────────────────
+// JSON-Friendly Models
 
 data class CategoryJson(
     val idCategory: String,
@@ -68,14 +68,14 @@ data class ProductSubcategoryJson(
     val idSubCategory: String
 )
 
-// ─── Hasil Operasi ───────────────────────────────────────────────────────────
+// Hasil Operasi
 
 sealed class ProductResult {
     data class Success(val productId: String) : ProductResult()
     data class Error(val message: String) : ProductResult()
 }
 
-// ─── Repository ──────────────────────────────────────────────────────────────
+// Repository
 
 class ProductRepository(private val context: Context) {
 
@@ -89,12 +89,12 @@ class ProductRepository(private val context: Context) {
     private val productVariationFile = "product_variation.json"
     private val productSubcatFile = "product_subcategory.json"
 
-    // ─── Helper Baca/Tulis JSON ───────────────────────────────────────────────
+    // Helper Baca/Tulis JSON
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
         if (!file.exists()) {
-            // Jika file belum ada di internal storage, coba ambil dari assets (sebagai data awal)
+            // Jika file belum ada di internal storage, coba ambil dari assets (json sebagai data awal)
             try {
                 context.assets.open(fileName).use { inputStream ->
                     val json = inputStream.bufferedReader().readText()
@@ -115,9 +115,8 @@ class ProductRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // ==========================================
+
     // KATEGORI & SUB KATEGORI
-    // ==========================================
 
     suspend fun getAllProducts(): List<ProductJson> = withContext(Dispatchers.IO) {
         return@withContext readJson<ProductJson>(productFile).filter { it.productStatus == "ACTIVE" }
@@ -131,9 +130,8 @@ class ProductRepository(private val context: Context) {
         return@withContext readJson<SubCategoryJson>(subCategoryFile).filter { it.idCategory == categoryId }
     }
 
-    // ==========================================
+
     // MANAJEMEN PRODUK
-    // ==========================================
 
     suspend fun getProductsByStore(storeId: String): List<ProductJson> = withContext(Dispatchers.IO) {
         val products = readJson<ProductJson>(productFile)
@@ -159,9 +157,8 @@ class ProductRepository(private val context: Context) {
         return@withContext variations.filter { it.idItem == itemId }
     }
 
-    // ==========================================
+
     // TAMBAH PRODUK BARU (KOMPLEKS)
-    // ==========================================
 
     suspend fun addProduct(
         storeId: String,
@@ -177,7 +174,7 @@ class ProductRepository(private val context: Context) {
 
         val products = readJson<ProductJson>(productFile)
 
-        // 1. Generate Product ID (PRD-000001)
+        // Generate Product ID (PRD-000001)
         val maxPrdNum = products.maxOfOrNull { it.idProduct.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newProductId = String.format("PRD-%06d", maxPrdNum + 1)
         val now = LocalDateTime.now().toString()
@@ -196,7 +193,7 @@ class ProductRepository(private val context: Context) {
         products.add(newProduct)
         writeJson(productFile, products)
 
-        // 2. Simpan Relasi Subkategori (Many-to-Many)
+        // Simpan Relasi Subkategori (Many-to-Many)
         if (subCategoryIds.isNotEmpty()) {
             val productSubcats = readJson<ProductSubcategoryJson>(productSubcatFile)
             var maxPscNum = productSubcats.maxOfOrNull { it.idProductSubCat.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
@@ -214,7 +211,7 @@ class ProductRepository(private val context: Context) {
             writeJson(productSubcatFile, productSubcats)
         }
 
-        // 3. Simpan Base Item (Harga & Stok utama)
+        // Simpan Base Item (Harga & Stok utama)
         val items = readJson<ProductItemJson>(productItemFile)
         val maxItmNum = items.maxOfOrNull { it.idItem.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newItemId = String.format("ITM-%06d", maxItmNum + 1)
@@ -230,7 +227,7 @@ class ProductRepository(private val context: Context) {
         items.add(newItem)
         writeJson(productItemFile, items)
 
-        // 4. Simpan Gambar Utama
+        // Simpan Gambar Utama
         val images = readJson<ProductImageJson>(productImageFile)
         val maxImgNum = images.maxOfOrNull { it.idImage.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newImageId = String.format("IMG-%06d", maxImgNum + 1)
@@ -247,9 +244,8 @@ class ProductRepository(private val context: Context) {
         return@withContext ProductResult.Success(newProductId)
     }
 
-    // ==========================================
+
     // TAMBAH VARIASI PRODUK
-    // ==========================================
 
     suspend fun addProductVariation(
         itemId: String,
