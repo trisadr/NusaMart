@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter
 
 data class OrderJson(
     val idOrder: String,
+    val idPayment: String,
     val idUser: String,
     val idStore: String,
     val idAddress: String,
@@ -83,7 +84,7 @@ class OrderRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-   // Mengambil semua pesanan milik seorang Pembeli (Buyer)
+    // Mengambil semua pesanan milik seorang Pembeli (Buyer)
     suspend fun getOrdersByUser(userId: String): List<OrderJson> = withContext(Dispatchers.IO) {
         val orders = readJson<OrderJson>(orderFile)
         return@withContext orders.filter { it.idUser == userId }
@@ -113,6 +114,7 @@ class OrderRepository(private val context: Context) {
         userId: String,
         storeId: String,
         addressId: String,
+        paymentId: String,
         items: List<OrderItemInput>,
         shippingCost: Double,
         servicePrice: Double,
@@ -141,6 +143,7 @@ class OrderRepository(private val context: Context) {
 
         val newOrder = OrderJson(
             idOrder = newOrderId,
+            idPayment = paymentId,
             idUser = userId,
             idStore = storeId,
             idAddress = addressId,

@@ -17,8 +17,9 @@ import java.time.LocalDateTime
 
 data class PaymentJson(
     val idPayment: String,
-    val idOrder: String,
+    val idUser: String,
     val idMethod: String,
+    val totalAmount: Double,
     val transactionIdGateway: String? = null,
     val snapToken: String? = null,
     val paymentStatus: String,
@@ -101,7 +102,6 @@ class TransactionRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-
     // MANAJEMEN PEMBAYARAN (PAYMENT)
 
     suspend fun getActivePaymentMethods(): List<PaymentMethodJson> = withContext(Dispatchers.IO) {
@@ -109,31 +109,29 @@ class TransactionRepository(private val context: Context) {
         return@withContext methods.filter { it.isActive }
     }
 
-    suspend fun getPaymentByOrderId(orderId: String): PaymentJson? = withContext(Dispatchers.IO) {
+    suspend fun getPaymentById(paymentId: String): PaymentJson? = withContext(Dispatchers.IO) {
         val payments = readJson<PaymentJson>(paymentFile)
-        return@withContext payments.find { it.idOrder == orderId }
+        return@withContext payments.find { it.idPayment == paymentId }
     }
 
     suspend fun createPayment(
-        orderId: String,
+        userId: String,
         methodId: String,
+        totalAmount: Double,
         transactionIdGateway: String? = null,
         snapToken: String? = null
     ): TransactionResult = withContext(Dispatchers.IO) {
         delay(500)
         val payments = readJson<PaymentJson>(paymentFile)
 
-        if (payments.any { it.idOrder == orderId }) {
-            return@withContext TransactionResult.Error("Pembayaran untuk pesanan ini sudah ada.")
-        }
-
         val maxPayNum = payments.maxOfOrNull { it.idPayment.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newPaymentId = String.format("PAY-%06d", maxPayNum + 1)
 
         val newPayment = PaymentJson(
             idPayment = newPaymentId,
-            idOrder = orderId,
+            idUser = userId,
             idMethod = methodId,
+            totalAmount = totalAmount,
             transactionIdGateway = transactionIdGateway,
             snapToken = snapToken,
             paymentStatus = Payment.PaymentStatus.PENDING.name,
@@ -164,7 +162,6 @@ class TransactionRepository(private val context: Context) {
         }
         return@withContext false
     }
-
 
     // MANAJEMEN DOMPET TOKO (STORE WALLET)
 
@@ -217,7 +214,6 @@ class TransactionRepository(private val context: Context) {
         return@withContext false
     }
 
-
     // MUTASI TRANSAKSI DOMPET (WALLET TRANSACTION)
 
     suspend fun getWalletTransactions(walletId: String): List<WalletTransactionJson> = withContext(Dispatchers.IO) {
@@ -251,7 +247,6 @@ class TransactionRepository(private val context: Context) {
 
         return@withContext TransactionResult.Success(newTransactionId)
     }
-
 
     // PENARIKAN DANA (WITHDRAWAL)
 
@@ -340,5 +335,31 @@ class TransactionRepository(private val context: Context) {
             return@withContext true
         }
         return@withContext false
+    }
+
+    suspend fun getPaymentByOrderId(orderId: String): PaymentJson? = withContext(Dispatchers.IO) {
+        try {
+            // 1. Baca file order.json terlebih dahulu
+            val orderFile = File(context.filesDir, "order.json")
+            if (!orderFile.exists()) return@withContext null
+
+            val json = orderFile.readText()
+
+            // Baca sebagai Map generik karena OrderJson ada di repository lain
+            val type = object : TypeToken<List<Map<String, Any>>>() {}.type
+            val orders: List<Map<String, Any>> = gson.fromJson(json, type) ?: emptyList()
+
+            // 2. Cari idPayment yang cocok dengan orderId
+            val paymentId = orders.find { it["idOrder"] == orderId }?.get("idPayment") as? String
+
+            // 3. Jika ketemu, gunakan fungsi getPaymentById yang sudah ada
+            if (paymentId != null) {
+                return@withContext getPaymentById(paymentId)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return@withContext null
     }
 }

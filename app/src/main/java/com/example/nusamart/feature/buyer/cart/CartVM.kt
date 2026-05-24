@@ -34,6 +34,12 @@ class CartVM(
         }
     }
 
+    fun refreshCart() {
+        viewModelScope.launch {
+            loadCart()
+        }
+    }
+
     private val _uiState = MutableStateFlow(CartUiState())
     val uiState = _uiState.asStateFlow()
 

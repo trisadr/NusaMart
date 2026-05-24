@@ -35,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -58,6 +59,9 @@ fun CartScreen(vm: CartVM = viewModel(factory = CartVM.Factory)) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
+    LaunchedEffect(Unit) {
+        vm.refreshCart()
+    }
     Scaffold(
         topBar = {
             TopAppBar(

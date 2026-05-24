@@ -2,6 +2,7 @@ package com.example.nusamart.data.model.order
 
 data class Order(
     val idOrder: String,                // PK
+    val idPayment: String,              // FK (Payment) -> BARU
     val idUser: String,                 // FK (User)
     val idStore: String,                // FK (Store)
     val idAddress: String,              // FK (UserAddress)
@@ -18,10 +19,6 @@ data class Order(
     val updateAt: java.time.LocalDateTime
 ) {
     enum class OrderStatus {
-        PENDING,
-        PROCESSED,
-        SHIPPED,
-        DELIVERED,
-        CANCELLED
+        PENDING, PROCESSED, SHIPPED, DELIVERED, CANCELLED
     }
 }

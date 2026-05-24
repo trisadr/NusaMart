@@ -35,7 +35,7 @@ fun LandingScreen() {
 
     LaunchedEffect(Unit) {
         // 1. Tunggu 3 detik untuk menampilkan logo
-        delay(3000L)
+        delay(1500L)
 
         // 2. Ambil instance aplikasi untuk mengakses DataStore
         val app = context.applicationContext as MyApplication
