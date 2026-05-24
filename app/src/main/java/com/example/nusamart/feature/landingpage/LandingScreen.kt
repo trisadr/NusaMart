@@ -1,4 +1,4 @@
-package com.example.nusamart.feature.landingpage 
+package com.example.nusamart.feature.landingpage
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,25 +14,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
+import com.example.nusamart.core.MyApplication
 import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
 import com.example.nusamart.ui.theme.RedPrimary
 import com.example.nusamart.ui.theme.WhiteSurface
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun LandingScreen() {
     val backStack = LocalBackStack.current
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
+        // 1. Tunggu 3 detik untuk menampilkan logo
         delay(3000L)
+
+        // 2. Ambil instance aplikasi untuk mengakses DataStore
+        val app = context.applicationContext as MyApplication
+
+        // 3. Baca status sesi user HANYA SATU KALI saat delay selesai
+        val session = app.userPreference.getSession().first()
+
+        // 4. Bersihkan riwayat agar tidak bisa di-back ke LandingScreen
         backStack.clear()
-        backStack.add(Routes.LoginPageRoute)
+
+        // 5. Arahkan rute berdasarkan status isLogin dan role-nya
+        if (session.isLogin && session.role == "BUYER") {
+            backStack.add(Routes.HomeRoute)
+        }
+        /* else if (session.isLogin && session.role == "SELLER") {
+            backStack.add(Routes.SellerHomeRoute)
+        }
+        */
+        else {
+            // Jika belum login, atau datanya kosong, arahkan ke Login
+            backStack.add(Routes.LoginPageRoute)
+        }
     }
 
     Content()

@@ -4,16 +4,18 @@ import android.content.Context
 import com.example.nusamart.data.model.user.SellerJson
 import com.example.nusamart.data.model.user.UserAddressJson
 import com.example.nusamart.data.model.user.UserJson
+import com.example.nusamart.data.preference.UserPreference
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
 
-// Hasil Operasi
+// --- Hasil Operasi ---
 
 sealed class RegisterResult {
     object Success : RegisterResult()
@@ -25,14 +27,14 @@ sealed class LoginResult {
     data class Error(val message: String) : LoginResult()
 }
 
-// Repository
+// --- Repository ---
 
-class UserRepository(private val context: Context) {
+class UserRepository(
+    private val context: Context,
+    private val userPreference: UserPreference
+) {
 
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
-
-    private var currentActiveUserId: String? = null
-    private var currentActiveUserRole: String? = null
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -59,7 +61,19 @@ class UserRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // Fitur Login & Logout
+    // --- Helper Session DataStore ---
+
+    suspend fun getActiveUserId(): String? {
+        val session = userPreference.getSession().first()
+        return if (session.isLogin) session.userId else null
+    }
+
+    suspend fun getActiveUserRole(): String? {
+        val session = userPreference.getSession().first()
+        return if (session.isLogin) session.role else null
+    }
+
+    // --- Fitur Login & Logout ---
 
     suspend fun login(emailOrUsername: String, password: String): LoginResult = withContext(Dispatchers.IO) {
         delay(1000)
@@ -70,34 +84,31 @@ class UserRepository(private val context: Context) {
                     it.password == password
         }
         if (matchedUser != null) {
-            currentActiveUserId = matchedUser.idUser
-            currentActiveUserRole = matchedUser.role
+            // Simpan ke DataStore saat berhasil login
+            userPreference.saveSession(userId = matchedUser.idUser, role = matchedUser.role)
             return@withContext LoginResult.Success(role = matchedUser.role, userId = matchedUser.idUser)
         } else {
             return@withContext LoginResult.Error("Username/email atau password yang kamu masukkan salah. Periksa kembali dan coba lagi.")
         }
     }
 
-    fun logout() {
-        currentActiveUserId = null
-        currentActiveUserRole = null
+    suspend fun logout() = withContext(Dispatchers.IO) {
+        // Hapus sesi dari DataStore
+        userPreference.logout()
     }
 
-    fun getActiveUserId(): String? = currentActiveUserId
-    fun getActiveUserRole(): String? = currentActiveUserRole
-
-    // Fitur Profile & Address
+    // --- Fitur Profile & Address ---
 
     suspend fun getCurrentUser(): UserJson? = withContext(Dispatchers.IO) {
-        if (currentActiveUserId == null) return@withContext null
+        val activeUserId = getActiveUserId() ?: return@withContext null
         val users = readJson<UserJson>("user.json")
-        return@withContext users.find { it.idUser == currentActiveUserId }
+        return@withContext users.find { it.idUser == activeUserId }
     }
 
     suspend fun getUserAddresses(): List<UserAddressJson> = withContext(Dispatchers.IO) {
-        if (currentActiveUserId == null) return@withContext emptyList()
+        val activeUserId = getActiveUserId() ?: return@withContext emptyList()
         val addresses = readJson<UserAddressJson>("userAddress.json")
-        return@withContext addresses.filter { it.idUser == currentActiveUserId }
+        return@withContext addresses.filter { it.idUser == activeUserId }
     }
 
     suspend fun addAddress(
@@ -110,12 +121,12 @@ class UserRepository(private val context: Context) {
         postalCode: String,
         isDefault: Boolean
     ) = withContext(Dispatchers.IO) {
-        if (currentActiveUserId == null) return@withContext
+        val activeUserId = getActiveUserId() ?: return@withContext
         val addresses = readJson<UserAddressJson>("userAddress.json")
 
         if (isDefault) {
             for (i in addresses.indices) {
-                if (addresses[i].idUser == currentActiveUserId) {
+                if (addresses[i].idUser == activeUserId) {
                     addresses[i] = addresses[i].copy(isDefault = false)
                 }
             }
@@ -126,7 +137,7 @@ class UserRepository(private val context: Context) {
 
         val newAddress = UserAddressJson(
             idAddress = newId,
-            idUser = currentActiveUserId!!,
+            idUser = activeUserId,
             label = label,
             receiver = receiver,
             phone = phone,
@@ -140,7 +151,6 @@ class UserRepository(private val context: Context) {
         writeJson("userAddress.json", addresses)
     }
 
-    // Fungsi untuk meng-update alamat
     suspend fun updateAddress(
         addressId: String,
         label: String,
@@ -152,12 +162,12 @@ class UserRepository(private val context: Context) {
         postalCode: String,
         isDefault: Boolean
     ) = withContext(Dispatchers.IO) {
-        if (currentActiveUserId == null) return@withContext
+        val activeUserId = getActiveUserId() ?: return@withContext
         val addresses = readJson<UserAddressJson>("userAddress.json")
 
         if (isDefault) {
             for (i in addresses.indices) {
-                if (addresses[i].idUser == currentActiveUserId && addresses[i].idAddress != addressId) {
+                if (addresses[i].idUser == activeUserId && addresses[i].idAddress != addressId) {
                     addresses[i] = addresses[i].copy(isDefault = false)
                 }
             }
@@ -185,7 +195,7 @@ class UserRepository(private val context: Context) {
         writeJson("userAddress.json", addresses)
     }
 
-    // Fitur Register
+    // --- Fitur Register ---
 
     suspend fun register(
         username: String,
@@ -200,18 +210,21 @@ class UserRepository(private val context: Context) {
         val users = readJson<UserJson>(userFile)
         val usernameLower = username.lowercase().trim()
         val emailLower = email.lowercase().trim()
+
         if (users.any { it.username.lowercase() == usernameLower }) {
             return@withContext RegisterResult.ErrorDuplicate("Username \"$username\" sudah digunakan. Silakan pilih username lain.")
         }
         if (users.any { it.email.lowercase() == emailLower }) {
             return@withContext RegisterResult.ErrorDuplicate("Email \"$email\" sudah terdaftar. Silakan gunakan email lain atau login.")
         }
+
         val prefix = if (isSeller) "SLR-" else "BYR-"
         val filteredUsers = users.filter { it.idUser.startsWith(prefix) }
         val maxIdNum = filteredUsers.maxOfOrNull { it.idUser.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
         val newId = String.format("%s%06d", prefix, maxIdNum + 1)
         val now = LocalDateTime.now().toString()
         val role = if (isSeller) "SELLER" else "BUYER"
+
         val newUser = UserJson(
             idUser = newId, username = username.trim(), email = email.trim(),
             password = password, phone = phone.trim(), role = role,
@@ -219,6 +232,7 @@ class UserRepository(private val context: Context) {
         )
         users.add(newUser)
         writeJson(userFile, users)
+
         if (isSeller) {
             val sellers = readJson<SellerJson>(sellerFile)
             val newSeller = SellerJson(

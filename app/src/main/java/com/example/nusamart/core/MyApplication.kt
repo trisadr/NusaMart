@@ -1,6 +1,8 @@
 package com.example.nusamart.core
 
 import android.app.Application
+import com.example.nusamart.data.preference.UserPreference
+import com.example.nusamart.data.preference.dataStore
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.example.nusamart.data.repository.order.OrderRepository
@@ -12,7 +14,10 @@ import com.example.nusamart.data.repository.transaction.TransactionRepository
 import com.example.nusamart.data.repository.user.UserRepository
 
 class MyApplication : Application() {
-    // berguna untuk inisialisasi repository repository
+
+    lateinit var userPreference: UserPreference
+        private set
+
     lateinit var userRepository: UserRepository
         private set
 
@@ -28,21 +33,26 @@ class MyApplication : Application() {
     lateinit var shippingRepository: ShippingRepository
         private set
 
-    lateinit var  transactionRepository: TransactionRepository
+    lateinit var transactionRepository: TransactionRepository
         private set
 
-    lateinit var  cartRepository: CartRepository
+    lateinit var cartRepository: CartRepository
         private set
 
-    lateinit var  reviewRepository: ReviewRepository
+    lateinit var reviewRepository: ReviewRepository
         private set
 
-    lateinit var   notificationRepository:  NotificationRepository
+    lateinit var notificationRepository: NotificationRepository
         private set
 
     override fun onCreate() {
         super.onCreate()
-        userRepository = UserRepository(this)
+
+        // 1. Inisialisasi Preference DataStore
+        userPreference = UserPreference(this.dataStore)
+
+        // 2. Inisialisasi Repositories (Masukkan userPreference ke UserRepository)
+        userRepository = UserRepository(this, userPreference)
         storeRepository = StoreRepository(this)
         productRepository = ProductRepository(this)
         orderRepository = OrderRepository(this)

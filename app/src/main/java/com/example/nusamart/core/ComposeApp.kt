@@ -32,7 +32,6 @@ import com.example.nusamart.ui.theme.NusaMartTheme
 fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.LandingPageRoute)
 
-    // Menyediakan backStack secara global ke seluruh halaman di bawahnya
     CompositionLocalProvider(LocalBackStack provides backStack) {
         NusaMartTheme {
             NavDisplay(
@@ -43,7 +42,7 @@ fun ComposeApp() {
                 ),
                 entryProvider = entryProvider {
 
-                    // ================== AUTH & LANDING ==================
+                    // AUTH & LANDING
                     entry<Routes.LandingPageRoute> { LandingScreen() }
                     entry<Routes.RegisterRoute> { RegisterScreen() }
                     entry<Routes.LoginPageRoute> { LoginScreen() }
@@ -53,9 +52,8 @@ fun ComposeApp() {
 //                        Text("Ini Halaman Beranda Penjual")
 //                    }
 
-                    // ================== BUYER ==================
-
-                    // --- Cart & Home---
+                    // BUYER
+                    // Cart & Home
                     entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
@@ -68,18 +66,18 @@ fun ComposeApp() {
                         ProductPageScreen(productId = route.productId)
                     }
 
-                    // --- Notification ---
+                    // Notification
                     entry<Routes.NotificationRoute> { NotificationScreen() }
 
                     entry<Routes.NotificationDetailRoute> { route ->
                         NotificationDetailScreen(notificationId = route.notificationId)
                     }
 
-                    // --- Profile & Address ---
+                    // Profile & Address
                     entry<Routes.ProfileRoute> { ProfileScreen() }
                     entry<Routes.AddressListRoute> { AddressScreen() }
 
-                    // --- Transaction / Checkout Flow ---
+                    // Transaction / Checkout Flow
                     entry<Routes.CheckoutRoute> { route ->
                         CheckoutScreen(route = route)
                     }
@@ -103,14 +101,14 @@ fun ComposeApp() {
                         )
                     }
 
-                    // --- Order History ---
+                    // Order History
                     entry<Routes.OrderListRoute> { OrderListScreen() }
 
                     entry<Routes.OrderDetailRoute> { route ->
                         OrderDetailScreen(orderId = route.orderId)
                     }
 
-                    // --- Review ---
+                    // Review
                     entry<Routes.ReviewRoute> { route ->
                         ReviewScreen(orderId = route.orderId)
                     }

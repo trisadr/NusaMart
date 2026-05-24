@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

@@ -38,6 +38,8 @@ class ProfileVM(
     }
 
     fun logout() {
-        userRepository.logout()
+        viewModelScope.launch {
+            userRepository.logout()
+        }
     }
 }
