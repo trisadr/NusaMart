@@ -86,7 +86,7 @@ fun CheckoutSuccessScreen(
                     // Tampilan QRIS
                     Card(
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Scan QRIS Berikut", style = MaterialTheme.typography.labelLarge)
@@ -105,7 +105,7 @@ fun CheckoutSuccessScreen(
                     // Tampilan Transfer Bank
                     Card(
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Kode Pembayaran ${uiState.bankName}", style = MaterialTheme.typography.labelLarge)
@@ -121,7 +121,7 @@ fun CheckoutSuccessScreen(
             }
 
             // ID Pesanan tetap ditampilkan untuk semua metode
-            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("ID Pesanan", color = Color.Gray)
                     Text(orderId, fontWeight = FontWeight.SemiBold)
@@ -130,7 +130,7 @@ fun CheckoutSuccessScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
             OutlinedButton(
-                onClick = { backStack.add(Routes.OrderDetailRoute(orderId)) },
+                onClick = { backStack.add(Routes.OrderListRoute) },
                 modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)
             ) { Text("Lihat Pesanan") }
         }

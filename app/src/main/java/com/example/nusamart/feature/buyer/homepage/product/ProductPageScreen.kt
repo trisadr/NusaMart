@@ -117,7 +117,7 @@ fun ProductPageScreen(
         bottomBar = {
             BottomAppBar(
                 modifier = Modifier.height(72.dp),
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                containerColor = MaterialTheme.colorScheme.tertiary
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { Toast.makeText(context, "Fitur chat segera hadir", Toast.LENGTH_SHORT).show() }) {
@@ -171,7 +171,7 @@ fun ProductPageScreen(
                 }
             }
 
-            Column(modifier = Modifier.padding(16.dp).background(MaterialTheme.colorScheme.surface)) {
+            Column(modifier = Modifier.padding(16.dp).background(MaterialTheme.colorScheme.background)) {
                 // --- Price ---
                 val priceText = if (uiState.minPrice == uiState.maxPrice) formatPrice(uiState.minPrice)
                 else "${formatPrice(uiState.minPrice)} - ${formatPrice(uiState.maxPrice)}"
@@ -308,13 +308,13 @@ fun ProductPageScreen(
                             Surface(
                                 onClick = { vm.selectItem(item.idItem) },
                                 shape = RoundedCornerShape(8.dp),
-                                border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                                border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                color = if (isSelected) MaterialTheme.colorScheme.tertiary else Color.Transparent
                             ) {
                                 Text(
                                     text = item.variationName,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
