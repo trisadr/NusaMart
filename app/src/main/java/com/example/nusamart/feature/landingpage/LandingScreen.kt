@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -23,8 +24,6 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.MyApplication
 import com.example.nusamart.core.Routes
 import com.example.nusamart.ui.theme.NusaMartTheme
-import com.example.nusamart.ui.theme.RedPrimary
-import com.example.nusamart.ui.theme.WhiteSurface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
@@ -68,7 +67,7 @@ private fun Content() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WhiteSurface)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier.align(Alignment.Center),
@@ -88,7 +87,7 @@ private fun Content() {
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 64.dp)
                 .size(40.dp),
-            color = RedPrimary,
+            color = MaterialTheme.colorScheme.primary,
             strokeWidth = 4.dp
         )
     }
@@ -97,7 +96,7 @@ private fun Content() {
 @Preview(showBackground = true)
 @Composable
 private fun LandingPagePreview() {
-    NusaMartTheme() {
+    NusaMartTheme {
         Content()
     }
 }

@@ -10,14 +10,13 @@ import androidx.compose.ui.graphics.Color
 //val PurpleGrey40 = Color(0xFF625b71)
 //val Pink40 = Color(0xFF7D5260)
 
-val RedLight = Color(0xFFF07F7D)
-val RedPrimary = Color(0xFFEF5350)
-val RedDark = Color(0xFFC64543)
-val YellowPrimary = Color(0xFFFBC02D)
-val OrangePrimary = Color(0xFFF9A825)
-val BlueLight = Color(0xFF7FCBF0)
-val BluePrimary = Color(0xFF27A2DB)
-val BlueDark = Color(0xFF1E78B7)
-val GrayBackground = Color(0xFFF2F2F2)
-val BlackText = Color(0xFF1E1E1E)
-val WhiteSurface = Color(0xFFFFFFFF)
+val TealDark = Color(0xFF00736B)
+val TealPrimary = Color(0xFF008B81)
+val TealLight = Color(0xFFE0F2F1)
+val DarkBackground = Color(0xFF191A23)
+val LightBackground = Color(0xFFF3F3F3)
+
+// Warna Pendukung Kontras
+val White = Color(0xFFFFFFFF)
+
+

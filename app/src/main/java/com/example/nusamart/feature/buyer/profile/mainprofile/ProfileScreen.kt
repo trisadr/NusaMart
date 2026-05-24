@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,7 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,11 +54,7 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
-import com.example.nusamart.ui.theme.BlackText
-import com.example.nusamart.ui.theme.GrayBackground
-import com.example.nusamart.ui.theme.RedLight
-import com.example.nusamart.ui.theme.RedPrimary
-import com.example.nusamart.ui.theme.WhiteSurface
+import com.example.nusamart.ui.theme.NusaMartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,13 +65,24 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profil Saya", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BlackText) },
+                title = {
+                    Text(
+                        text = "Profil Saya",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = BlackText)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WhiteSurface)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
         bottomBar = {
@@ -91,11 +98,11 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
                 }
             )
         },
-        containerColor = GrayBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             val user = uiState.user
@@ -107,22 +114,39 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
             ) {
                 // --- HEADER PROFIL ---
                 Box(
-                    modifier = Modifier.fillMaxWidth().background(WhiteSurface).padding(24.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(24.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             modifier = Modifier.size(72.dp).clip(CircleShape),
-                            color = RedLight.copy(alpha = 0.2f)
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         ) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = RedPrimary, modifier = Modifier.padding(16.dp))
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(16.dp)
+                            )
                         }
 
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column {
-                            Text(text = user?.username ?: "Pengguna", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BlackText)
+                            Text(
+                                text = user?.username ?: "Pengguna",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = user?.email ?: "-", fontSize = 14.sp, color = Color.Gray)
+                            Text(
+                                text = user?.email ?: "-",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -130,28 +154,28 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // --- MENU PESANAN & ALAMAT ---
-                Column(modifier = Modifier.fillMaxWidth().background(WhiteSurface)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                     ProfileMenuItem(
                         icon = Icons.Default.ShoppingCart,
                         title = "Pesanan Saya",
                         onClick = { backStack.add(Routes.OrderListRoute) }
                     )
-                    HorizontalDivider(color = GrayBackground, thickness = 1.dp)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
                     ProfileMenuItem(
                         icon = Icons.Default.LocationOn,
                         title = "Alamat Pengiriman",
                         subtitle = "Atur alamat pengirimanmu",
-                        onClick = { backStack.add(Routes.AddressListRoute) } // Arahkan ke Layar Alamat
+                        onClick = { backStack.add(Routes.AddressListRoute) }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // --- MENU PENGATURAN ---
-                Column(modifier = Modifier.fillMaxWidth().background(WhiteSurface)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                     ProfileMenuItem(icon = Icons.Default.Settings, title = "Pengaturan Akun", onClick = {})
-                    HorizontalDivider(color = GrayBackground, thickness = 1.dp)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                     ProfileMenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, title = "Pusat Bantuan", onClick = {})
                 }
 
@@ -166,8 +190,8 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
                     },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).height(50.dp),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, RedPrimary),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = RedPrimary)
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ExitToApp, null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
@@ -183,18 +207,36 @@ fun ProfileScreen(vm: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
 @Composable
 private fun ProfileMenuItem(icon: ImageVector, title: String, subtitle: String? = null, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title, tint = Color.Gray, modifier = Modifier.size(24.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, fontSize = 16.sp, color = BlackText)
+            Text(text = title, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(text = subtitle, fontSize = 13.sp, color = Color.Gray, lineHeight = 16.sp)
+                Text(
+                    text = subtitle,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 16.sp
+                )
             }
         }
-        Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.LightGray, modifier = Modifier.size(24.dp))
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }

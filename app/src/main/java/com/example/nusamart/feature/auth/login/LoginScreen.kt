@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,10 +50,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.ui.theme.BlackText
 import com.example.nusamart.ui.theme.NusaMartTheme
-import com.example.nusamart.ui.theme.RedPrimary
-import com.example.nusamart.ui.theme.WhiteSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,13 +81,15 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                         text = "Log In",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = BlackText
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WhiteSurface)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         },
-        containerColor = WhiteSurface
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -131,13 +131,17 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                     .height(50.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RedPrimary,
-                    contentColor = WhiteSurface,
-                    disabledContainerColor = RedPrimary.copy(alpha = 0.6f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                 )
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(color = WhiteSurface, modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 3.dp
+                    )
                 } else {
                     Text("Log In", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
@@ -148,12 +152,17 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextButton(onClick = { backStack.add(Routes.RegisterRoute) }, enabled = !uiState.isLoading) {
+                TextButton(
+                    onClick = { backStack.add(Routes.RegisterRoute) },
+                    enabled = !uiState.isLoading,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
                     Text("Daftar")
                 }
                 TextButton(
                     onClick = { Toast.makeText(context, "Fitur lupa password belum tersedia", Toast.LENGTH_SHORT).show() },
-                    enabled = !uiState.isLoading
+                    enabled = !uiState.isLoading,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text("Lupa Password?")
                 }

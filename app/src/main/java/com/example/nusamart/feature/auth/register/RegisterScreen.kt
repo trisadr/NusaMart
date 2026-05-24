@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -41,8 +42,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,10 +59,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.ui.theme.BlackText
-import com.example.nusamart.ui.theme.BluePrimary
-import com.example.nusamart.ui.theme.RedPrimary
-import com.example.nusamart.ui.theme.WhiteSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,16 +78,27 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Daftar", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BlackText) },
+                title = {
+                    Text(
+                        text = "Daftar",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }, enabled = !uiState.isLoading) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = BlackText)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WhiteSurface)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
-        containerColor = WhiteSurface
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -102,26 +110,36 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Buat Akun", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = BlackText)
             Text(
-                "Pilih peranmu dan lengkapi data di bawah ini!",
-                fontSize = 14.sp, color = Color.Gray, textAlign = TextAlign.Center,
+                text = "Buat Akun",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Pilih peranmu dan lengkapi data di bawah ini!",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
             )
 
-            // Pilihan Role
+            // Pilihan Role (Pembeli / Penjual)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                val pembeliBgColor = if (!uiState.isSeller) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent
+                val pembeliContentColor = if (!uiState.isSeller) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
                 OutlinedButton(
                     onClick = { vm.toggleRole(false) },
                     enabled = !uiState.isLoading,
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (!uiState.isSeller) BluePrimary.copy(alpha = 0.1f) else Color.Transparent,
-                        contentColor = if (!uiState.isSeller) BluePrimary else Color.Gray
+                        containerColor = pembeliBgColor,
+                        contentColor = pembeliContentColor
                     )
                 ) {
                     Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -129,14 +147,17 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
                     Text("Pembeli", fontWeight = if (!uiState.isSeller) FontWeight.Bold else FontWeight.Normal)
                 }
 
+                val penjualBgColor = if (uiState.isSeller) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent
+                val penjualContentColor = if (uiState.isSeller) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
                 OutlinedButton(
                     onClick = { vm.toggleRole(true) },
                     enabled = !uiState.isLoading,
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (uiState.isSeller) BluePrimary.copy(alpha = 0.1f) else Color.Transparent,
-                        contentColor = if (uiState.isSeller) BluePrimary else Color.Gray
+                        containerColor = penjualBgColor,
+                        contentColor = penjualContentColor
                     )
                 ) {
                     Icon(Icons.Default.Store, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -161,7 +182,6 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // keyboard angka untuk nomor telepon
             MyOutlinedTextField(
                 value = uiState.phone,
                 onValueChange = vm::updatePhone,
@@ -191,41 +211,51 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Button Submit
+            // Button Submit (Buat Akun)
             Button(
                 onClick = vm::register,
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RedPrimary,
-                    contentColor = WhiteSurface,
-                    disabledContainerColor = RedPrimary.copy(alpha = 0.6f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                 )
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(color = WhiteSurface, modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 3.dp
+                    )
                 } else {
                     Text("Buat Akun", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
+            // Bagian Bawah (Sudah punya akun?)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 32.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Sudah punya akun?", color = Color.Gray, fontSize = 14.sp)
-                TextButton(onClick = {
-                    backStack.clear()
-                    backStack.add(Routes.LoginPageRoute)
-                }, enabled = !uiState.isLoading) {
-                    Text("Log In", color = BluePrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("Sudah punya akun?", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                TextButton(
+                    onClick = {
+                        backStack.clear()
+                        backStack.add(Routes.LoginPageRoute)
+                    },
+                    enabled = !uiState.isLoading,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Log In", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 
+    // Manajemen Dialog
     when (val state = uiState.dialogState) {
         is RegisterDialogState.FormError -> {
             FormErrorDialog(message = state.message, onDismissRequest = vm::clearDialog)
@@ -274,7 +304,7 @@ fun MyOutlinedTextField(
             }
         },
         visualTransformation = if (isPassword && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = keyboardOptions, // Pasang parameter keyboardOptions di sini
+        keyboardOptions = keyboardOptions,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         singleLine = true
@@ -287,7 +317,11 @@ private fun FormErrorDialog(message: String, onDismissRequest: () -> Unit) {
         onDismissRequest = onDismissRequest,
         title = { Text("Form Tidak Lengkap", fontWeight = FontWeight.Bold) },
         text = { Text(message) },
-        confirmButton = { TextButton(onClick = onDismissRequest) { Text("OK") } }
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("OK", color = MaterialTheme.colorScheme.primary)
+            }
+        }
     )
 }
 
@@ -297,7 +331,11 @@ private fun PasswordMismatchDialog(onDismissRequest: () -> Unit) {
         onDismissRequest = onDismissRequest,
         title = { Text("Password Tidak Cocok", fontWeight = FontWeight.Bold) },
         text = { Text("Password dan konfirmasi password yang kamu masukkan tidak sama. Periksa kembali dan coba lagi.") },
-        confirmButton = { TextButton(onClick = onDismissRequest) { Text("Perbaiki") } }
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Perbaiki", color = MaterialTheme.colorScheme.primary)
+            }
+        }
     )
 }
 
@@ -307,7 +345,15 @@ private fun DuplicateAccountDialog(message: String, onDismissRequest: () -> Unit
         onDismissRequest = onDismissRequest,
         title = { Text("Akun Sudah Terdaftar", fontWeight = FontWeight.Bold) },
         text = { Text(message) },
-        confirmButton = { TextButton(onClick = onLoginClick) { Text("Login", fontWeight = FontWeight.Bold, color = BluePrimary) } },
-        dismissButton = { TextButton(onClick = onDismissRequest) { Text("Tutup") } }
+        confirmButton = {
+            TextButton(onClick = onLoginClick) {
+                Text("Login", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Tutup", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     )
 }

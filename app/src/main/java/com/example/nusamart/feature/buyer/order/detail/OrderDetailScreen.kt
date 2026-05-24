@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,26 +63,33 @@ fun OrderDetailScreen(
         vm.loadOrderDetail(orderId)
     }
 
-    val primaryOrange = Color(0xFFFF6D00)
     val order = uiState.order
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Rincian Pesanan", fontWeight = FontWeight.Bold) },
+                title = { Text("Rincian Pesanan", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onSurface)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
         bottomBar = {
             if (order != null) {
                 val canReview = order.orderStatus == "DELIVERED" && !uiState.isReviewed
-                Surface(modifier = Modifier.fillMaxWidth(), shadowElevation = 8.dp) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .navigationBarsPadding(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (canReview) {
@@ -89,70 +97,117 @@ fun OrderDetailScreen(
                                 onClick = { backStack.add(Routes.ReviewRoute(orderId)) },
                                 modifier = Modifier.fillMaxWidth().height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = primaryOrange)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             ) {
-                                Text("Beri Ulasan", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text("Beri Ulasan", fontWeight = FontWeight.Bold)
                             }
                         }
 
                         OutlinedButton(
                             onClick = { /* TODO: Chat Penjual */ },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
                             Text("Tanyakan Penjual", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = primaryOrange)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else if (order == null) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text(uiState.errorMessage ?: "Terjadi kesalahan")
+                Text(
+                    text = uiState.errorMessage ?: "Terjadi kesalahan",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .verticalScroll(rememberScrollState())
                     .padding(20.dp)
             ) {
-                Text(text = "Status Pesanan", color = Color.Gray, style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = "Status Pesanan",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium
+                )
                 Text(
                     text = mapStatusToIndonesian(order.orderStatus),
-                    color = primaryOrange, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 if (order.orderStatus == "DELIVERED" && uiState.isReviewed) {
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "✓ Sudah diulas", color = Color(0xFF4CAF50), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = "✓ Sudah diulas",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // --- KARTU INFORMASI PENGIRIMAN (KUSTOM TEAL 4DB6AC) ---
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1))
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF4DB6AC)
+                    )
                 ) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
-                        Icon(Icons.Default.LocalShipping, null, tint = primaryOrange)
+                        Icon(
+                            imageVector = Icons.Default.LocalShipping,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("Informasi Pengiriman", fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "Informasi Pengiriman",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("No. Resi: ${uiState.resiNumber}", fontSize = 13.sp)
-                            Text("ID Toko: ${order.idStore}", fontSize = 13.sp, color = Color.DarkGray)
-                            Text("Tanggal Order: ${order.orderDate}", fontSize = 13.sp, color = Color.DarkGray)
+                            Text(
+                                text = "No. Resi: ${uiState.resiNumber}",
+                                fontSize = 13.sp,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "ID Toko: ${order.idStore}",
+                                fontSize = 13.sp,
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
+                            Text(
+                                text = "Tanggal Order: ${order.orderDate}",
+                                fontSize = 13.sp,
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
                             if (order.arrivedDate != null) {
-                                Text("Tiba: ${order.arrivedDate}", fontSize = 13.sp, color = Color.DarkGray)
+                                Text(
+                                    text = "Tiba: ${order.arrivedDate}",
+                                    fontSize = 13.sp,
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
                             }
                         }
                     }
@@ -160,47 +215,60 @@ fun OrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text("Detail Produk", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp)
+                Text(
+                    text = "Detail Produk",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
 
                 uiState.orderItems.forEach { item ->
                     OrderItemRow(item = item)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                HorizontalDivider(thickness = 0.5.dp)
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Rincian Pembayaran
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Total Harga Produk", fontSize = 14.sp)
-                    Text("Rp ${order.productTotalPrice.toLong()}", fontSize = 14.sp)
+                    Text("Total Harga Produk", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Rp ${order.productTotalPrice.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Ongkos Kirim", fontSize = 14.sp)
-                    Text("Rp ${order.shippingCost.toLong()}", fontSize = 14.sp)
+                    Text("Ongkos Kirim", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Rp ${order.shippingCost.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Biaya Layanan", fontSize = 14.sp)
-                    Text("Rp ${order.servicePrice.toLong()}", fontSize = 14.sp)
+                    Text("Biaya Layanan", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Rp ${order.servicePrice.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-                HorizontalDivider(thickness = 0.5.dp)
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Total Pembayaran", fontWeight = FontWeight.Bold)
-                    Text("Rp ${order.grandTotal.toLong()}", fontWeight = FontWeight.ExtraBold, color = primaryOrange)
+                    Text("Total Pembayaran", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(
+                        text = "Rp ${order.grandTotal.toLong()}",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
 
                 if (!order.buyerNote.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Catatan", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Catatan", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(order.buyerNote, fontSize = 13.sp, color = Color.DarkGray)
+                    Text(order.buyerNote, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -209,13 +277,30 @@ fun OrderDetailScreen(
 
 @Composable
 private fun OrderItemRow(item: OrderItemJson) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
         Column(modifier = Modifier.weight(1f)) {
-            // menggunakan nameSnapshot yang direkam saat checkout
-            Text(text = item.nameSnapshot, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                text = item.nameSnapshot,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = "${item.quantity} barang × Rp ${item.priceSnapshot.toLong()}", fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = "${item.quantity} barang × Rp ${item.priceSnapshot.toLong()}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        Text(text = "Rp ${(item.quantity * item.priceSnapshot).toLong()}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(
+            text = "Rp ${(item.quantity * item.priceSnapshot).toLong()}",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

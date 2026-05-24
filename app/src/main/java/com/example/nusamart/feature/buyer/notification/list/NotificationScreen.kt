@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -65,13 +66,20 @@ fun NotificationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifikasi", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        text = "Notifikasi",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex) }) {
-                        Icon(Icons.Default.ArrowBack, "Kembali")
+                        Icon(Icons.Default.ArrowBack, "Kembali", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
         bottomBar = {
@@ -87,12 +95,16 @@ fun NotificationScreen(
                 }
             )
         },
-        containerColor = Color(0xFFF5F5F5)
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
-            Box(Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            Box(Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
         } else if (uiState.notifications.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) { Text("Belum ada notifikasi", color = Color.Gray) }
+            Box(Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                Text("Belum ada notifikasi", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
 
@@ -102,7 +114,8 @@ fun NotificationScreen(
                         NotificationItem(
                             notif = notif,
                             icon = Icons.Default.Campaign,
-                            iconColor = Color(0xFF2196F3),
+                            containerIconColor = Color(0xFF4DB6AC), // Mint/Teal Terang kustom
+                            iconTint = Color.White,
                             onClick = { backStack.add(Routes.NotificationDetailRoute(notif.idNotif)) }
                         )
                     }
@@ -112,18 +125,32 @@ fun NotificationScreen(
                 if (orderNotifs.isNotEmpty()) {
                     item {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Status Pesanan", fontSize = 14.sp, color = Color.DarkGray, fontWeight = FontWeight.SemiBold)
-                            Text("Tandai Semua Dibaca", fontSize = 12.sp, color = Color(0xFFFF6D00), modifier = Modifier.clickable { vm.markAllAsRead() })
+                            Text(
+                                text = "Status Pesanan",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Tandai Semua Dibaca",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable { vm.markAllAsRead() }
+                            )
                         }
                     }
                     itemsIndexed(orderNotifs) { _, notif ->
                         NotificationItem(
                             notif = notif,
                             icon = Icons.Default.Inventory,
-                            iconColor = Color(0xFFFF9800),
+                            containerIconColor = Color(0xFF00736B), // Deep Teal kustom untuk pesanan
+                            iconTint = Color.White,
                             onClick = { backStack.add(Routes.NotificationDetailRoute(notif.idNotif)) }
                         )
                     }
@@ -137,26 +164,55 @@ fun NotificationScreen(
 private fun NotificationItem(
     notif: NotificationJson,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconColor: Color,
+    containerIconColor: androidx.compose.ui.graphics.Color,
+    iconTint: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
-    val bgColor = if (notif.isRead) Color.White else Color(0xFFFFF8E1) // Warna beda jika belum dibaca
+    val bgColor = if (notif.isRead) {
+        MaterialTheme.colorScheme.surface
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+    }
 
     Column(modifier = Modifier.fillMaxWidth().background(bgColor).clickable(onClick = onClick)) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Surface(modifier = Modifier.size(48.dp), shape = RoundedCornerShape(8.dp), color = iconColor) {
-                Icon(icon, null, tint = Color.White, modifier = Modifier.padding(10.dp))
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = containerIconColor
+            ) {
+                Icon(icon, null, tint = iconTint, modifier = Modifier.padding(10.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(notif.title, fontSize = 15.sp, fontWeight = if (notif.isRead) FontWeight.Normal else FontWeight.Bold)
+                Text(
+                    text = notif.title,
+                    fontSize = 15.sp,
+                    fontWeight = if (notif.isRead) FontWeight.Normal else FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(notif.body, fontSize = 13.sp, color = Color.DarkGray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = notif.body,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(notif.createAt, fontSize = 11.sp, color = Color.Gray)
+                Text(
+                    text = notif.createAt,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
-            Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.LightGray, modifier = Modifier.align(Alignment.CenterVertically))
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
         }
-        HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
     }
 }

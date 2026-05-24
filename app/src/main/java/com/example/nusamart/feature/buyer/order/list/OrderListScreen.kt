@@ -45,7 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -60,15 +59,12 @@ fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) 
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
-    // Memastikan daftar order di-refresh setiap kali layar dibuka
     LaunchedEffect(Unit) {
         vm.loadOrders()
     }
 
-    val primaryOrange = Color(0xFFFF6D00)
     val filterOptions = listOf("Semua", "MENUNGGU", "DIPROSES", "DIKIRIM", "SELESAI", "DIBATALKAN")
 
-    // Filter berdasarkan status dari model `uiState.orders.order`
     val filteredOrders = remember(uiState.selectedFilter, uiState.orders) {
         if (uiState.selectedFilter == "Semua") {
             uiState.orders
@@ -80,23 +76,38 @@ fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Pesanan Saya", fontWeight = FontWeight.ExtraBold, color = primaryOrange) },
+                title = {
+                    Text(
+                        text = "Pesanan Saya",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFFAFAFA))
         ) {
-            Surface(shadowElevation = 2.dp, color = Color.White) {
+            Surface(
+                shadowElevation = 2.dp,
+                color = MaterialTheme.colorScheme.surface
+            ) {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -112,35 +123,41 @@ fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) 
                             } else null,
                             shape = RoundedCornerShape(20.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = primaryOrange.copy(alpha = 0.15f),
-                                selectedLabelColor = primaryOrange,
-                                selectedLeadingIconColor = primaryOrange
+                                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         )
                     }
                 }
             }
 
-            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
 
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = primaryOrange)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else if (filteredOrders.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Tidak ada pesanan \"${uiState.selectedFilter}\"", color = Color.Gray)
+                    Text(
+                        text = "Tidak ada pesanan \"${uiState.selectedFilter}\"",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(filteredOrders) { orderUiModel ->
                         OrderListItem(
                             model = orderUiModel,
-                            primaryOrange = primaryOrange,
                             onClick = { backStack.add(Routes.OrderDetailRoute(orderUiModel.order.idOrder)) }
                         )
                     }
@@ -151,23 +168,27 @@ fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) 
 }
 
 @Composable
-private fun OrderListItem(model: OrderListUiModel, primaryOrange: Color, onClick: () -> Unit) {
-    val lightOrange = Color(0xFFFFF3E0)
+private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
     val statusIndo = mapStatusToIndonesian(model.order.orderStatus)
 
+    // Warna status disesuaikan dengan palet Teal dan semantic M3
     val statusColor = when (statusIndo) {
-        "SELESAI" -> Color(0xFF4CAF50)
-        "DIKIRIM" -> Color(0xFF2196F3)
-        "DIPROSES" -> primaryOrange
-        "MENUNGGU" -> Color(0xFFFF9800)
-        "DIBATALKAN" -> Color(0xFFF44336)
-        else -> Color.Gray
+        "SELESAI" -> MaterialTheme.colorScheme.primary
+        "DIKIRIM" -> MaterialTheme.colorScheme.tertiary
+        "DIPROSES" -> MaterialTheme.colorScheme.secondary
+        "MENUNGGU" -> MaterialTheme.colorScheme.outline
+        "DIBATALKAN" -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -178,25 +199,51 @@ private fun OrderListItem(model: OrderListUiModel, primaryOrange: Color, onClick
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Storefront, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+                    Icon(
+                        imageVector = Icons.Default.Storefront,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = model.storeName, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.DarkGray)
+                    Text(
+                        text = model.storeName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                Text(text = statusIndo, style = MaterialTheme.typography.labelSmall, color = statusColor, fontWeight = FontWeight.Bold)
+                Text(
+                    text = statusIndo,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = statusColor,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp, color = Color(0xFFF0F0F0))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
 
             // Body: Nama Produk & Total Harga
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(modifier = Modifier.size(52.dp), shape = RoundedCornerShape(12.dp), color = lightOrange) {
-                    // Ikon sebagai pengganti gambar produk
-                    Icon(Icons.Default.Storefront, null, modifier = Modifier.padding(12.dp), tint = primaryOrange)
+                Surface(
+                    modifier = Modifier.size(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Storefront,
+                        contentDescription = null,
+                        modifier = Modifier.padding(12.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
                 Spacer(modifier = Modifier.width(14.dp))
                 Column(modifier = Modifier.weight(1f)) {
 
-                    // Menampilkan "+ x produk lain" jika lebih dari 1 barang
                     val productText = if (model.additionalItemCount > 0) {
                         "${model.firstItemName} (+${model.additionalItemCount} barang lainnya)"
                     } else {
@@ -207,20 +254,27 @@ private fun OrderListItem(model: OrderListUiModel, primaryOrange: Color, onClick
                         text = productText,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
-                        color = Color(0xFF212121),
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Total: Rp ${model.order.grandTotal.toLong()}", color = Color.Gray, fontSize = 13.sp)
+                    Text(
+                        text = "Total: Rp ${model.order.grandTotal.toLong()}",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp
+                    )
                 }
-                Icon(Icons.Default.ChevronRight, null, tint = Color.LightGray)
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline
+                )
             }
         }
     }
 }
 
-// Helper Mapping Status
 fun mapStatusToIndonesian(status: String): String {
     return when (status) {
         "PENDING" -> "MENUNGGU"

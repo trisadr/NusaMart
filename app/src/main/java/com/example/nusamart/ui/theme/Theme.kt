@@ -12,49 +12,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = RedLight,
-    secondary = YellowPrimary,
-    tertiary = BlueLight,
+    primary = TealPrimary,
+    secondary = TealLight,
+    tertiary = TealDark,
 
-    background = BlackText,
-    surface = BlackText,
+    background = DarkBackground,
+    surface = DarkBackground,
 
-    onPrimary = BlackText,
-    onSecondary = BlackText,
-    onTertiary = BlackText,
-    onBackground = GrayBackground,
-    onSurface = GrayBackground
+    onPrimary = DarkBackground,
+    onSecondary = DarkBackground,
+    onTertiary = LightBackground,
+    onBackground = LightBackground,
+    onSurface = LightBackground
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = RedPrimary,
-    secondary = OrangePrimary,
-    tertiary = BluePrimary,
+    primary = TealPrimary,
+    secondary = TealDark,
+    tertiary = TealLight,
 
-    background = GrayBackground,
-    surface = WhiteSurface,
+    background = LightBackground,
+    surface = White,
 
-    onPrimary = WhiteSurface,
-    onSecondary = WhiteSurface,
-    onTertiary = WhiteSurface,
-    onBackground = BlackText,
-    onSurface = BlackText
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onPrimary = White,
+    onSecondary = White,
+    onTertiary = DarkBackground,
+    onBackground = DarkBackground,
+    onSurface = DarkBackground
 )
 
 @Composable
 fun NusaMartTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    // Dynamic color dimatikan (false) agar warna kustom di atas selalu diterapkan
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

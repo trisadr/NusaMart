@@ -19,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -27,11 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.data.model.user.UserAddressJson
-import com.example.nusamart.ui.theme.BlackText
-import com.example.nusamart.ui.theme.BluePrimary
-import com.example.nusamart.ui.theme.GrayBackground
-import com.example.nusamart.ui.theme.RedPrimary
-import com.example.nusamart.ui.theme.WhiteSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,25 +42,40 @@ fun AddressScreen(vm: AddressVM = viewModel(factory = AddressVM.Factory)) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(topBarTitle, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BlackText) },
+                title = {
+                    Text(
+                        text = topBarTitle,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         if (uiState.isFormVisible) vm.hideForm() else backStack.removeAt(backStack.lastIndex)
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = BlackText)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WhiteSurface)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
         floatingActionButton = {
             if (!uiState.isFormVisible) {
-                FloatingActionButton(onClick = vm::showAddForm, containerColor = BluePrimary, contentColor = Color.White) {
+                FloatingActionButton(
+                    onClick = vm::showAddForm,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah Alamat")
                 }
             }
         },
-        containerColor = GrayBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading) {
@@ -92,7 +101,7 @@ private fun AddressList(
 ) {
     if (addresses.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Belum ada alamat tersimpan.", color = Color.Gray)
+            Text("Belum ada alamat tersimpan.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         LazyColumn(
@@ -103,7 +112,7 @@ private fun AddressList(
             items(addresses) { address ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = WhiteSurface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Row(
@@ -113,32 +122,68 @@ private fun AddressList(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = address.label, fontWeight = FontWeight.Bold, color = BluePrimary)
+                                Text(
+                                    text = address.label,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                                 if (address.isDefault) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Surface(
-                                        color = RedPrimary.copy(alpha = 0.1f),
+                                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                                         shape = RoundedCornerShape(4.dp)
                                     ) {
-                                        Text("Utama", color = RedPrimary, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                        Text(
+                                            text = "Utama",
+                                            color = MaterialTheme.colorScheme.error,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
                                     }
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = address.receiver, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Text(text = address.phone, color = Color.Gray, fontSize = 14.sp)
+                            Text(
+                                text = address.receiver,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = address.phone,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = address.completeAddress, fontSize = 14.sp, lineHeight = 20.sp)
-                            Text(text = "${address.city}, ${address.province} ${address.postalCode}", fontSize = 14.sp, color = Color.DarkGray)
+                            Text(
+                                text = address.completeAddress,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "${address.city}, ${address.province} ${address.postalCode}",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
 
                         // Tombol Aksi (Edit & Delete)
                         Column(horizontalAlignment = Alignment.End) {
                             IconButton(onClick = { onEdit(address) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             IconButton(onClick = { onDelete(address.idAddress) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = RedPrimary)
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Hapus",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
                     }
@@ -153,7 +198,7 @@ private fun AddOrEditAddressForm(uiState: AddressUiState, vm: AddressVM) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WhiteSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(24.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -216,9 +261,13 @@ private fun AddOrEditAddressForm(uiState: AddressUiState, vm: AddressVM) {
             Checkbox(
                 checked = uiState.formIsDefault,
                 onCheckedChange = vm::updateIsDefault,
-                colors = CheckboxDefaults.colors(checkedColor = BluePrimary)
+                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
             )
-            Text("Jadikan sebagai Alamat Utama", fontSize = 14.sp)
+            Text(
+                text = "Jadikan sebagai Alamat Utama",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -226,9 +275,12 @@ private fun AddOrEditAddressForm(uiState: AddressUiState, vm: AddressVM) {
         Button(
             onClick = vm::saveAddress,
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
-            Text("Simpan Alamat", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text("Simpan Alamat", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(32.dp))

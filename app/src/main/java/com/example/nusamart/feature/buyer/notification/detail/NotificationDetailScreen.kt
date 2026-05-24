@@ -71,7 +71,7 @@ fun NotificationDetailScreen(
                         onClick = { backStack.add(Routes.OrderDetailRoute(notif.referenceId)) },
                         modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding(),
                         shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00))
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text("Lihat Pesanan", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
