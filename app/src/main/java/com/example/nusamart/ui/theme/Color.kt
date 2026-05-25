@@ -16,7 +16,6 @@ val TealLight = Color(0xFFE0F2F1)
 val DarkBackground = Color(0xFF191A23)
 val LightBackground = Color(0xFFF3F3F3)
 
-// Warna Pendukung Kontras
 val White = Color(0xFFFFFFFF)
 
 
