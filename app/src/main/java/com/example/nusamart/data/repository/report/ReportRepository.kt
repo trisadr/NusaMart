@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID
-// class repository ini belum dipakai, kalau mau makai mungin bisa dicek ulang nantinya
+// class repository ini belum dipakai, kalau mau makai mungin bisa dicek ulang nantinya, soalnya strukturnya aga beda dari yang lain
 // JSON model
 
 data class ReportJson(

@@ -6,7 +6,7 @@ data class User(
     val idUser: String,
     val username: String,
     val email: String,
-    val password: String, // Diubah menjadi password biasa (tanpa hash)
+    val password: String, // Sementara password biasa (tanpa hash)
     val phone: String,
     val role: Role,
     val createAt: LocalDateTime,
