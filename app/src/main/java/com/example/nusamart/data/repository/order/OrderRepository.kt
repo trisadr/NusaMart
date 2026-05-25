@@ -84,14 +84,14 @@ class OrderRepository(private val context: Context) {
         file.writeText(gson.toJson(data))
     }
 
-    // Mengambil semua pesanan milik seorang Pembeli (Buyer)
+    // Mengambil semua pesanan buyer tertentu dengan id
     suspend fun getOrdersByUser(userId: String): List<OrderJson> = withContext(Dispatchers.IO) {
         val orders = readJson<OrderJson>(orderFile)
         return@withContext orders.filter { it.idUser == userId }
             .sortedByDescending { it.createAt } // Urutkan dari yang terbaru
     }
 
-    // Mengambil semua pesanan yang masuk ke sebuah Toko (Seller)
+    // Mengambil semua pesanan yang masuk ke sebuah Toko
     suspend fun getOrdersByStore(storeId: String): List<OrderJson> = withContext(Dispatchers.IO) {
         val orders = readJson<OrderJson>(orderFile)
         return@withContext orders.filter { it.idStore == storeId }

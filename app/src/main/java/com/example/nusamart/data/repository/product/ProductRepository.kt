@@ -153,7 +153,7 @@ class ProductRepository(private val context: Context) {
     }
 
 
-    // TAMBAH PRODUK BARU (KOMPLEKS)
+    // TAMBAH PRODUK BARU
 
     suspend fun addProduct(
         storeId: String,
@@ -241,7 +241,6 @@ class ProductRepository(private val context: Context) {
 
 
     // TAMBAH VARIASI PRODUK
-
     suspend fun addProductVariation(
         itemId: String,
         typeVariation: String,
@@ -262,9 +261,7 @@ class ProductRepository(private val context: Context) {
         writeJson(productVariationFile, variations)
     }
 
-    // Tambahkan fungsi ini di dalam class ProductRepository
     suspend fun getProductVariations(itemId: String): List<ProductVariationJson> = withContext(Dispatchers.IO) {
-        // Pastikan nama file JSON-nya sesuai dengan milikmu, misalnya "product_variation.json"
         val variations = readJson<ProductVariationJson>("product_variation.json")
         return@withContext variations.filter { it.idItem == itemId }
     }

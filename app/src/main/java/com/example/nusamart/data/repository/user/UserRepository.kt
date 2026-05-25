@@ -61,8 +61,7 @@ class UserRepository(
         file.writeText(gson.toJson(data))
     }
 
-    // --- Helper Session DataStore ---
-
+    // Session DataStore
     suspend fun getActiveUserId(): String? {
         val session = userPreference.getSession().first()
         return if (session.isLogin) session.userId else null
@@ -73,8 +72,7 @@ class UserRepository(
         return if (session.isLogin) session.role else null
     }
 
-    // --- Fitur Login & Logout ---
-
+    // Login & Logout
     suspend fun login(emailOrUsername: String, password: String): LoginResult = withContext(Dispatchers.IO) {
         delay(1000)
         val users = readJson<UserJson>("user.json")
@@ -97,7 +95,7 @@ class UserRepository(
         userPreference.logout()
     }
 
-    // --- Fitur Profile & Address ---
+    // Fitur Profile & Address
 
     suspend fun getCurrentUser(): UserJson? = withContext(Dispatchers.IO) {
         val activeUserId = getActiveUserId() ?: return@withContext null
@@ -195,8 +193,7 @@ class UserRepository(
         writeJson("userAddress.json", addresses)
     }
 
-    // --- Fitur Register ---
-
+    // Register
     suspend fun register(
         username: String,
         email: String,

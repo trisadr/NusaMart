@@ -53,7 +53,7 @@ class CheckoutVM(
 
         val userId = userRepository.getActiveUserId()
 
-        // 1. Load Alamat
+        // Load Alamat
         val addresses = userRepository.getUserAddresses()
         val address = if (route.selectedAddressId != null) {
             addresses.find { it.idAddress == route.selectedAddressId }
@@ -61,14 +61,14 @@ class CheckoutVM(
             addresses.find { it.isDefault } ?: addresses.firstOrNull()
         }
 
-        // 2. Load Kurir
+        // Load Kurir
         var cName = "Pilih Kurir Pengiriman"
         if (route.selectedCourierId != null) {
             val courier = shippingRepository.getCourierById(route.selectedCourierId)
             if (courier != null) cName = "${courier.courierName} (${courier.timeEstimation})"
         }
 
-        // 3. Load Metode Pembayaran
+        // Load Metode Pembayaran
         var pName = "Pilih Metode Pembayaran"
         if (route.selectedPaymentMethodId != null) {
             val methods = transactionRepository.getActivePaymentMethods()
@@ -76,12 +76,12 @@ class CheckoutVM(
             if (method != null) pName = method.methodName
         }
 
-        // 4. Inisialisasi Variabel
+        // Inisialisasi Variabel
         val itemsInput = mutableListOf<OrderItemInput>()
         var subTotal = 0.0
         var mainStoreId = "STR-000001"
 
-        // 5. LOGIKA BARANG (DARI KERANJANG ATAU BELI LANGSUNG)
+        // LOGIKA BARANG (DARI KERANJANG ATAU BELI LANGSUNG)
         if (route.fromCart) {
             if (userId != null) {
                 val cart = cartRepository.getOrCreateCart(userId)
@@ -99,10 +99,8 @@ class CheckoutVM(
                             val storeId = product.idStore
                             mainStoreId = storeId
 
-                            // --- AMBIL DATA VARIASI ---
                             val variations = productRepository.getProductVariations(matchedItem.idItem)
 
-                            // Gabungkan value variasi (Misal jika ada Ukuran M dan Warna Merah -> "M, Merah")
                             val variantValues = variations.joinToString(", ") { it.value }
 
                             val displayName = if (variantValues.isNotEmpty()) {
@@ -133,7 +131,6 @@ class CheckoutVM(
                 groupedOrderItems = tempGroup
             }
         } else if (route.productId != null) {
-            // PROSES JIKA BELI LANGSUNG (Bukan dari keranjang)
             val product = productRepository.getAllProducts().find { it.idProduct == route.productId }
             if (product != null) {
                 val storeId = product.idStore
@@ -141,7 +138,6 @@ class CheckoutVM(
                 val itemData = productRepository.getProductItems(route.productId).firstOrNull()
                 val price = itemData?.price ?: 50000.0
 
-                // --- AMBIL DATA VARIASI ---
                 var displayName = product.productName
                 if (itemData != null) {
                     val variations = productRepository.getProductVariations(itemData.idItem)
@@ -166,7 +162,7 @@ class CheckoutVM(
             }
         }
 
-        // 6. Update UI State
+        // Update UI State
         _uiState.update {
             it.copy(
                 isLoading = false,

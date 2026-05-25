@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.nusamart.core.MyApplication
-import com.example.nusamart.data.repository.order.OrderJson
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.user.UserRepository
@@ -18,7 +17,7 @@ import kotlinx.coroutines.launch
 class OrderListVM(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
-    private val storeRepository: StoreRepository // Tambahkan Store Repository
+    private val storeRepository: StoreRepository
 ) : ViewModel() {
 
     companion object {
@@ -28,7 +27,7 @@ class OrderListVM(
                 OrderListVM(
                     app.orderRepository,
                     app.userRepository,
-                    app.storeRepository // Pass dependency-nya
+                    app.storeRepository
                 )
             }
         }
@@ -41,7 +40,6 @@ class OrderListVM(
         loadOrders()
     }
 
-    // Ubah jadi public (hapus 'private') agar bisa dipanggil LaunchedEffect jika butuh refresh
     fun loadOrders() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
         val userId = userRepository.getActiveUserId()
@@ -50,7 +48,6 @@ class OrderListVM(
             val userOrders = orderRepository.getOrdersByUser(userId)
             val allStores = storeRepository.getAllStores() // Ambil daftar toko
 
-            // Gabungkan data Order, Store, dan OrderItem
             val uiModels = userOrders.map { order ->
                 val store = allStores.find { it.idStore == order.idStore }
                 val items = orderRepository.getOrderItems(order.idOrder)

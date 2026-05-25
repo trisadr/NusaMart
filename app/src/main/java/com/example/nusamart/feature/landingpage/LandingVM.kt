@@ -44,7 +44,6 @@ class LandingViewModel(
         }
     }
 
-    // Dipanggil setelah navigasi selesai, agar tidak navigate ulang saat recomposition
     fun onNavigated() {
         _uiState.update { it.copy(navigateTo = null) }
     }

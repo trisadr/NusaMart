@@ -339,7 +339,7 @@ class TransactionRepository(private val context: Context) {
 
     suspend fun getPaymentByOrderId(orderId: String): PaymentJson? = withContext(Dispatchers.IO) {
         try {
-            // 1. Baca file order.json terlebih dahulu
+            // Baca file order.json
             val orderFile = File(context.filesDir, "order.json")
             if (!orderFile.exists()) return@withContext null
 
@@ -349,10 +349,10 @@ class TransactionRepository(private val context: Context) {
             val type = object : TypeToken<List<Map<String, Any>>>() {}.type
             val orders: List<Map<String, Any>> = gson.fromJson(json, type) ?: emptyList()
 
-            // 2. Cari idPayment yang cocok dengan orderId
+            // Cari idPayment yang cocok dengan orderId
             val paymentId = orders.find { it["idOrder"] == orderId }?.get("idPayment") as? String
 
-            // 3. Jika ketemu, gunakan fungsi getPaymentById yang sudah ada
+            // Jika ketemu, gunakan fungsi getPaymentById yang sudah ada
             if (paymentId != null) {
                 return@withContext getPaymentById(paymentId)
             }

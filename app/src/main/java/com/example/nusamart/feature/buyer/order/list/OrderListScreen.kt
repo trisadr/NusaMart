@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.order.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -171,7 +170,6 @@ fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) 
 private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
     val statusIndo = mapStatusToIndonesian(model.order.orderStatus)
 
-    // Warna status disesuaikan dengan palet Teal dan semantic M3
     val statusColor = when (statusIndo) {
         "SELESAI" -> MaterialTheme.colorScheme.primary
         "DIKIRIM" -> MaterialTheme.colorScheme.tertiary
@@ -192,7 +190,7 @@ private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Nama Toko & Status
+            // Header berisi Nama Toko & Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -227,7 +225,7 @@ private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.outlineVariant
             )
 
-            // Body: Nama Produk & Total Harga
+            // Nama Produk & Total Harga
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     modifier = Modifier.size(52.dp),

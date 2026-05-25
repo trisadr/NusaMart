@@ -48,10 +48,10 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Inisialisasi Preference DataStore
+        // Inisialisasi Preference DataStore
         userPreference = UserPreference(this.dataStore)
 
-        // 2. Inisialisasi Repositories (Masukkan userPreference ke UserRepository)
+        // Inisialisasi Repositories
         userRepository = UserRepository(this, userPreference)
         storeRepository = StoreRepository(this)
         productRepository = ProductRepository(this)
