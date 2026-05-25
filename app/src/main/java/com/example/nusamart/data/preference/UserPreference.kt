@@ -2,7 +2,7 @@ package com.example.nusamart.data.preference
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences // Import yang ini wajib ada
+import androidx.datastore.preferences.core.Preferences 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -10,17 +10,15 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// Tambahkan <Preferences> setelah DataStore
+
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-// Model Sesi
 data class UserSession(
     val userId: String,
     val role: String,
     val isLogin: Boolean
 )
 
-// Tambahkan <Preferences> di parameter constructor
 class UserPreference(private val dataStore: DataStore<Preferences>) {
 
     private companion object {
@@ -29,7 +27,6 @@ class UserPreference(private val dataStore: DataStore<Preferences>) {
         val IS_LOGIN_KEY = booleanPreferencesKey("is_login")
     }
 
-    // Tambahkan <UserSession> pada return type Flow
     fun getSession(): Flow<UserSession> {
         return dataStore.data.map { preferences ->
             UserSession(
@@ -40,7 +37,7 @@ class UserPreference(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    // Menyimpan sesi saat login berhasil
+    // Menyimpan session saat user berhasil login
     suspend fun saveSession(userId: String, role: String) {
         dataStore.edit { preferences ->
             preferences[USER_ID_KEY] = userId
@@ -49,7 +46,7 @@ class UserPreference(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    // Menghapus sesi saat logout
+    // Menghapus session saat user logout
     suspend fun logout() {
         dataStore.edit { preferences ->
             preferences.clear()
