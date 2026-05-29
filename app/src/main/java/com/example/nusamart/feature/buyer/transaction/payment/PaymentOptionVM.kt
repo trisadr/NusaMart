@@ -1,22 +1,20 @@
 package com.example.nusamart.feature.buyer.transaction.payment
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.data.repository.transaction.PaymentMethodJson
 import com.example.nusamart.data.repository.transaction.TransactionRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PaymentOptionVM(private val transactionRepository: TransactionRepository) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory { initializer { PaymentOptionVM((this[APPLICATION_KEY] as MyApplication).transactionRepository) } }
-    }
+@HiltViewModel
+class PaymentOptionVM @Inject constructor(
+    private val transactionRepository: TransactionRepository,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PaymentOptionUiState())
     val uiState = _uiState.asStateFlow()
 

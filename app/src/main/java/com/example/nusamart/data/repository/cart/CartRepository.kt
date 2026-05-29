@@ -4,6 +4,9 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -25,8 +28,10 @@ data class CartItemJson(
 )
 
 // Repository
-
-class CartRepository(private val context: Context) {
+@Singleton
+class CartRepository @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
 
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     private val cartFile = "cart.json"

@@ -20,11 +20,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @Composable
@@ -32,11 +31,7 @@ fun LandingScreen() {
     val context = LocalContext.current
     val backStack = LocalBackStack.current
 
-    val viewModel: LandingViewModel = viewModel(
-        factory = LandingViewModel.provideFactory(
-            (context.applicationContext as MyApplication).userPreference
-        )
-    )
+    val viewModel: LandingViewModel = hiltViewModel()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

@@ -44,7 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.data.repository.order.OrderItemJson
@@ -54,7 +54,7 @@ import com.example.nusamart.feature.buyer.order.list.mapStatusToIndonesian
 @Composable
 fun OrderDetailScreen(
     orderId: String,
-    vm: OrderDetailVM = viewModel(factory = OrderDetailVM.Factory)
+    vm: OrderDetailVM = hiltViewModel()
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()

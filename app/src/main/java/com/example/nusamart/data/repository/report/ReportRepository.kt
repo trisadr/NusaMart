@@ -4,12 +4,15 @@ import android.content.Context
 import com.example.nusamart.data.model.report.Report
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID
-// class repository ini belum dipakai, kalau mau makai mungin bisa dicek ulang nantinya, soalnya strukturnya aga beda dari yang lain
-// JSON model
+import javax.inject.Inject
+import javax.inject.Singleton
 
+// JSON model
 data class ReportJson(
     val idReport: String,
     val reporterId: String,
@@ -23,44 +26,37 @@ data class ReportJson(
     val updateAt: String? = null
 )
 
-data class ReportDatabase(
-    val reports: MutableList<ReportJson> = mutableListOf()
-)
-
-// Local Data Source
-
-class ReportLocalDataSource(private val context: Context) {
-
-    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
-    private val fileName = "reports.json"
-
-    private val localFile: File
-        get() = File(context.filesDir, fileName)
-
-    fun initializeIfNeeded() {
-        if (!localFile.exists()) {
-            val seedJson = context.assets.open(fileName).bufferedReader().readText()
-            localFile.writeText(seedJson)
-        }
-    }
-
-    fun readDatabase(): ReportDatabase {
-        initializeIfNeeded()
-        val json = localFile.readText()
-        return gson.fromJson(json, ReportDatabase::class.java) ?: ReportDatabase()
-    }
-
-    fun writeDatabase(db: ReportDatabase) {
-        localFile.writeText(gson.toJson(db))
-    }
-}
-
 // Repository
+@Singleton
+class ReportRepository @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    private val reportFile = "reports.json"
 
-class ReportRepository(private val dataSource: ReportLocalDataSource) {
+    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
+        val file = File(context.filesDir, fileName)
+        if (!file.exists()) {
+            try {
+                context.assets.open(fileName).use { inputStream ->
+                    val json = inputStream.bufferedReader().readText()
+                    file.writeText(json)
+                }
+            } catch (e: Exception) {
+                return mutableListOf()
+            }
+        }
+        val json = file.readText()
+        val type = object : TypeToken<List<T>>() {}.type
+        return gson.fromJson(json, type) ?: mutableListOf()
+    }
+
+    private fun <T> writeJson(fileName: String, data: List<T>) {
+        val file = File(context.filesDir, fileName)
+        file.writeText(gson.toJson(data))
+    }
 
     // Mapper
-
     private fun ReportJson.toReport() = Report(
         idReport = idReport,
         reporterId = reporterId,
@@ -74,22 +70,7 @@ class ReportRepository(private val dataSource: ReportLocalDataSource) {
         updateAt = updateAt?.let { LocalDateTime.parse(it) }
     )
 
-    private fun Report.toJson() = ReportJson(
-        idReport = idReport,
-        reporterId = reporterId,
-        reportedUserId = reportedUserId,
-        reportedProductId = reportedProductId,
-        reportedReviewId = reportedReviewId,
-        reason = reason,
-        status = status.name,
-        adminNote = adminNote,
-        createAt = createAt.toString(),
-        updateAt = updateAt?.toString()
-    )
-
-    // Operasi User
-
-    // Kirim laporan baru
+    // Operasi
     fun submitReport(
         reporterId: String,
         reason: String,
@@ -97,13 +78,11 @@ class ReportRepository(private val dataSource: ReportLocalDataSource) {
         reportedProductId: String? = null,
         reportedReviewId: String? = null
     ): Report {
-        // Minimal salah satu target harus diisi
         require(reportedUserId != null || reportedProductId != null || reportedReviewId != null) {
             "Harus ada target laporan (user, product, atau review)"
         }
 
-        val db = dataSource.readDatabase()
-
+        val reports = readJson<ReportJson>(reportFile)
         val newReport = ReportJson(
             idReport = "rep-${UUID.randomUUID()}",
             reporterId = reporterId,
@@ -114,24 +93,20 @@ class ReportRepository(private val dataSource: ReportLocalDataSource) {
             status = Report.ReportStatus.OPEN.name,
             createAt = LocalDateTime.now().toString()
         )
-
-        db.reports.add(newReport)
-        dataSource.writeDatabase(db)
-
+        reports.add(newReport)
+        writeJson(reportFile, reports)
         return newReport.toReport()
     }
 
-    // Semua laporan milik user tertentu
     fun getMyReports(userId: String): List<Report> {
-        return dataSource.readDatabase().reports
+        return readJson<ReportJson>(reportFile)
             .filter { it.reporterId == userId }
             .map { it.toReport() }
-            .sortedByDescending { it.createAt }   // terbaru duluan
+            .sortedByDescending { it.createAt }
     }
 
-    // Detail satu laporan
     fun getReportById(reportId: String): Report? {
-        return dataSource.readDatabase().reports
+        return readJson<ReportJson>(reportFile)
             .find { it.idReport == reportId }
             ?.toReport()
     }

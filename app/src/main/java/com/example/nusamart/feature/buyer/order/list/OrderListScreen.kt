@@ -48,13 +48,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderListScreen(vm: OrderListVM = viewModel(factory = OrderListVM.Factory)) {
+fun OrderListScreen(vm: OrderListVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 

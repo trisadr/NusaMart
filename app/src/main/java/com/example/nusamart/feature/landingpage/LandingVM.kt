@@ -1,18 +1,20 @@
 package com.example.nusamart.feature.landingpage
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.nusamart.core.Routes
 import com.example.nusamart.data.preference.UserPreference
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LandingViewModel(
+@HiltViewModel
+class LandingViewModel @Inject constructor(
     private val userPreference: UserPreference
 ) : ViewModel() {
 
@@ -26,36 +28,18 @@ class LandingViewModel(
     private fun checkSession() {
         viewModelScope.launch {
             delay(1500L)
-
             val session = userPreference.getSession().first()
-
             val route = when {
                 session.isLogin && session.role == "BUYER" -> Routes.HomeRoute
-                // session.isLogin && session.role == "SELLER" -> Routes.SellerHomeRoute
                 else -> Routes.LoginPageRoute
             }
-
             _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    navigateTo = route
-                )
+                it.copy(isLoading = false, navigateTo = route)
             }
         }
     }
 
     fun onNavigated() {
         _uiState.update { it.copy(navigateTo = null) }
-    }
-
-    companion object {
-        fun provideFactory(userPreference: UserPreference): ViewModelProvider.Factory {
-            return object : ViewModelProvider.NewInstanceFactory() {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return LandingViewModel(userPreference) as T
-                }
-            }
-        }
     }
 }

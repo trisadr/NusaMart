@@ -42,8 +42,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,13 +56,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
+fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsState()

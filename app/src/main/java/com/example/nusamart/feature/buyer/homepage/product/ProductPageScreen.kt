@@ -63,7 +63,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
@@ -74,7 +74,7 @@ import java.util.Locale
 @Composable
 fun ProductPageScreen(
     productId: String,
-    vm: ProductPageVM = viewModel(factory = ProductPageVM.Factory)
+    vm: ProductPageVM = hiltViewModel()
 ) {
     val context = LocalContext.current
     val backStack = LocalBackStack.current

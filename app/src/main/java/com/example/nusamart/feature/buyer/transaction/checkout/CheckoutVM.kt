@@ -1,11 +1,7 @@
 package com.example.nusamart.feature.buyer.transaction.checkout
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.core.Routes
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.order.OrderItemInput
@@ -14,34 +10,22 @@ import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.shipping.ShippingRepository
 import com.example.nusamart.data.repository.transaction.TransactionRepository
 import com.example.nusamart.data.repository.user.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CheckoutVM(
-    private val userRepository: UserRepository,
-    private val productRepository: ProductRepository,
+@HiltViewModel
+class CheckoutVM @Inject constructor(
+    private val orderRepository: OrderRepository,
     private val shippingRepository: ShippingRepository,
     private val transactionRepository: TransactionRepository,
-    private val orderRepository: OrderRepository,
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val userRepository: UserRepository,
+    private val productRepository: ProductRepository,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                CheckoutVM(
-                    app.userRepository,
-                    app.productRepository,
-                    app.shippingRepository,
-                    app.transactionRepository,
-                    app.orderRepository,
-                    app.cartRepository
-                )
-            }
-        }
-    }
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState = _uiState.asStateFlow()

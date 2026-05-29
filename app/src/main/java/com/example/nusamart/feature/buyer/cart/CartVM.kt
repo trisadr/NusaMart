@@ -1,38 +1,28 @@
 package com.example.nusamart.feature.buyer.cart
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.nusamart.R
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.product.ProductItemJson
 import com.example.nusamart.data.repository.product.ProductJson
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.user.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CartVM(
+@HiltViewModel
+class CartVM @Inject constructor(
     private val cartRepository: CartRepository,
     private val productRepository: ProductRepository,
     private val storeRepository: StoreRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
-
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                CartVM(app.cartRepository, app.productRepository, app.storeRepository, app.userRepository)
-            }
-        }
-    }
 
     fun refreshCart() {
         viewModelScope.launch {

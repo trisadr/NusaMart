@@ -2,13 +2,16 @@ package com.example.nusamart.data.preference
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences 
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
@@ -19,7 +22,11 @@ data class UserSession(
     val isLogin: Boolean
 )
 
-class UserPreference(private val dataStore: DataStore<Preferences>) {
+@Singleton
+class UserPreference @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    private val dataStore = context.dataStore
 
     private companion object {
         val USER_ID_KEY = stringPreferencesKey("user_id")

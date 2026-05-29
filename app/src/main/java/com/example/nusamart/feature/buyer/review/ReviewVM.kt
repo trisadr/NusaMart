@@ -1,39 +1,26 @@
 package com.example.nusamart.feature.buyer.review
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.nusamart.R
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.review.ReviewRepository
 import com.example.nusamart.data.repository.user.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ReviewVM(
-    private val reviewRepository: ReviewRepository,
+@HiltViewModel
+class ReviewVM @Inject constructor(
     private val orderRepository: OrderRepository,
+    private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
-    private val userRepository: UserRepository
+    private val reviewRepository: ReviewRepository,
 ) : ViewModel() {
-
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                ReviewVM(
-                    app.reviewRepository, app.orderRepository,
-                    app.productRepository, app.userRepository
-                )
-            }
-        }
-    }
 
     private val _uiState = MutableStateFlow(ReviewUiState())
     val uiState = _uiState.asStateFlow()

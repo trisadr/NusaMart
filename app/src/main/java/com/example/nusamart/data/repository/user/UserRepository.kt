@@ -8,12 +8,15 @@ import com.example.nusamart.data.preference.UserPreference
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
 
 // --- Hasil Operasi ---
 
@@ -28,11 +31,12 @@ sealed class LoginResult {
 }
 
 // --- Repository ---
-
-class UserRepository(
-    private val context: Context,
+@Singleton
+class UserRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val userPreference: UserPreference
 ) {
+
 
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 

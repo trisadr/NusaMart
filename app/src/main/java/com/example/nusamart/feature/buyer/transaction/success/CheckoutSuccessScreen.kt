@@ -35,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
@@ -44,7 +44,7 @@ import com.example.nusamart.core.Routes
 fun CheckoutSuccessScreen(
     paymentId: String,
     orderId: String,
-    vm: CheckoutSuccessVM = viewModel(factory = CheckoutSuccessVM.Factory)
+    vm: CheckoutSuccessVM = hiltViewModel()
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()

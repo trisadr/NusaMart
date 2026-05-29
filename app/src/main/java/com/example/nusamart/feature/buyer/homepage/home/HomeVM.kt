@@ -1,36 +1,23 @@
 package com.example.nusamart.feature.buyer.homepage.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.nusamart.R
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.feature.buyer.homepage.ProductCardUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeVM(
+@HiltViewModel
+class HomeVM @Inject constructor(
     private val productRepository: ProductRepository,
-    private val storeRepository: StoreRepository
+    private val storeRepository: StoreRepository,
 ) : ViewModel() {
-
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                HomeVM(
-                    productRepository = app.productRepository,
-                    storeRepository = app.storeRepository
-                )
-            }
-        }
-    }
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()

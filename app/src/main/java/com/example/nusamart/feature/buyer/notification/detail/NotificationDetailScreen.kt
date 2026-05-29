@@ -35,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 
@@ -43,7 +43,7 @@ import com.example.nusamart.core.Routes
 @Composable
 fun NotificationDetailScreen(
     notificationId: String,
-    vm: NotificationDetailVM = viewModel(factory = NotificationDetailVM.Factory)
+    vm: NotificationDetailVM = hiltViewModel()
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()

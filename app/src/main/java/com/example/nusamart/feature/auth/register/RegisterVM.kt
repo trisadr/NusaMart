@@ -1,33 +1,22 @@
 package com.example.nusamart.feature.auth.register
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.nusamart.core.MyApplication
 import com.example.nusamart.data.repository.user.RegisterResult
 import com.example.nusamart.data.repository.user.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RegisterVM(
+@HiltViewModel
+class RegisterVM @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                RegisterVM(
-                    userRepository = app.userRepository
-                )
-            }
-        }
-    }
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
     private val _successEvent = MutableSharedFlow<Unit>()

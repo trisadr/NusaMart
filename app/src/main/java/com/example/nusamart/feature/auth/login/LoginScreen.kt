@@ -46,7 +46,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
@@ -54,7 +54,7 @@ import com.example.nusamart.ui.theme.NusaMartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
+fun LoginScreen(vm: LoginVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsState()

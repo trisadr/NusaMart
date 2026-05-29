@@ -47,7 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.BottomMenu
@@ -55,7 +55,7 @@ import com.example.nusamart.feature.components.NusaMartBottomNavigation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(vm: CartVM = viewModel(factory = CartVM.Factory)) {
+fun CartScreen(vm: CartVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 

@@ -54,7 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 
@@ -62,7 +62,7 @@ import com.example.nusamart.core.LocalBackStack
 @Composable
 fun ReviewScreen(
     orderId: String,
-    vm: ReviewVM = viewModel(factory = ReviewVM.Factory)
+    vm: ReviewVM = hiltViewModel()
 ) {
     val context = LocalContext.current
     val backStack = LocalBackStack.current

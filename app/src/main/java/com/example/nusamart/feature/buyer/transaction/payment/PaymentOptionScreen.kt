@@ -27,7 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.nusamart.core.LocalBackStack
@@ -39,7 +39,7 @@ import com.example.nusamart.feature.buyer.transaction.components.PaymentSectionH
 @Composable
 fun PaymentOptionScreen(
     currentRoute: Routes.CheckoutRoute,
-    vm: PaymentOptionVM = viewModel(factory = PaymentOptionVM.Factory)
+    vm: PaymentOptionVM = hiltViewModel()
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
