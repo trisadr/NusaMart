@@ -59,11 +59,9 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsState()
 
-    // listener event sukses dari ViewModel
     LaunchedEffect(Unit) {
         vm.successEvent.collect { role ->
             backStack.clear()
-            // Arahkan berdasarkan Role
             if (role == "SELLER") {
                 // seller belum diimplementasikan
                 //backStack.add(Routes.SellerHomeRoute)
