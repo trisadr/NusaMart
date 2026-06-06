@@ -73,7 +73,8 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
 
     LaunchedEffect(Unit) {
         vm.successEvent.collect {
-            Toast.makeText(context, "Akun berhasil dibuat! Silakan Login.", Toast.LENGTH_LONG).show()
+            // Toast diubah untuk mensimulasikan email terkirim
+            Toast.makeText(context, "Akun berhasil dibuat! Email konfirmasi telah dikirim ke alamatmu. Silakan Login.", Toast.LENGTH_LONG).show()
             backStack.clear()
             backStack.add(Routes.LoginPageRoute)
         }

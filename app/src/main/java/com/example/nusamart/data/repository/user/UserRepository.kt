@@ -2,6 +2,7 @@ package com.example.nusamart.data.repository.user
 
 import android.content.Context
 import com.example.nusamart.data.preference.UserPreference
+import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -11,7 +12,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.security.MessageDigest
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,9 +59,14 @@ sealed class LoginResult {
 @Singleton
 class UserRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userPreference: UserPreference
+    private val userPreference: UserPreference,
+    private val notificationRepository: NotificationRepository
 ) {
-
+    // FUNGSI UNTUK HASHING PASSWORD (SHA-256)
+    private fun hashPassword(password: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
     // =========================================================================
@@ -142,10 +150,13 @@ class UserRepository @Inject constructor(
             delay(1000)
             val users = readUserJson()
 
+            // Hash password input sebelum dicocokkan dengan database
+            val hashedInput = hashPassword(password.trim())
+
             val matchedUser = users.find {
-                ((it.email ?: "").lowercase().trim() == emailOrUsername.lowercase().trim() ||
-                        (it.username ?: "").lowercase().trim() == emailOrUsername.lowercase().trim()) &&
-                        (it.password ?: "").trim() == password.trim()
+                ((it.email).lowercase().trim() == emailOrUsername.lowercase().trim() ||
+                        (it.username).lowercase().trim() == emailOrUsername.lowercase().trim()) &&
+                        (it.password) == hashedInput // Cocokkan Hash dengan Hash
             }
 
             if (matchedUser != null) {
@@ -219,7 +230,7 @@ class UserRepository @Inject constructor(
         writeJson("userAddress.json", addresses)
     }
 
-    // Register yang Dibungkus Try-Catch (Anti-Crash)
+    // Register
     suspend fun register(
         username: String, email: String, phone: String, password: String, isSeller: Boolean,
         nik: String? = null, bankName: String? = null, accountNumber: String? = null
@@ -228,23 +239,28 @@ class UserRepository @Inject constructor(
             delay(1000)
             val users = readUserJson()
 
-            if (users.any { (it.username ?: "").lowercase().trim() == username.lowercase().trim() }) {
+            if (users.any { (it.username).lowercase().trim() == username.lowercase().trim() }) {
                 return@withContext RegisterResult.ErrorDuplicate("Username sudah digunakan.")
             }
-            if (users.any { (it.email ?: "").lowercase().trim() == email.lowercase().trim() }) {
+            if (users.any { (it.email).lowercase().trim() == email.lowercase().trim() }) {
                 return@withContext RegisterResult.ErrorDuplicate("Email sudah terdaftar.")
             }
 
             val prefix = if (isSeller) "SLR-" else "BYR-"
-            val filteredUsers = users.filter { (it.idUser ?: "").startsWith(prefix) }
-            val maxIdNum = filteredUsers.maxOfOrNull { (it.idUser ?: "").substringAfter("-").toIntOrNull() ?: 0 } ?: 0
+            val filteredUsers = users.filter { (it.idUser).startsWith(prefix) }
+            val maxIdNum = filteredUsers.maxOfOrNull { (it.idUser).substringAfter("-").toIntOrNull() ?: 0 } ?: 0
             val newId = String.format("%s%06d", prefix, maxIdNum + 1)
-            val now = LocalDateTime.now().toString()
+
+            // Format waktu untuk createAt agar lebih rapi
+            val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             val role = if (isSeller) "SELLER" else "BUYER"
 
-            users.add(UserJson(newId, username.trim(), email.trim(), password.trim(), phone.trim(), role, now, now))
+            // 1. HASH PASSWORD SEBELUM DISIMPAN
+            val hashedPassword = hashPassword(password.trim())
+            users.add(UserJson(newId, username.trim(), email.trim(), hashedPassword, phone.trim(), role, now, now))
             writeJson("user.json", users)
 
+            // 2. SIMPAN DATA SELLER
             if (isSeller) {
                 val sellers = readSellerJson()
                 sellers.add(
@@ -258,11 +274,17 @@ class UserRepository @Inject constructor(
                 writeJson("seller.json", sellers)
             }
 
+            // 3. BUAT NOTIFIKASI SISTEM (WELCOME MESSAGE)
+            notificationRepository.addSystemNotification(
+                userId = newId,
+                username = username.trim(),
+                isSeller = isSeller
+            )
+
             return@withContext RegisterResult.Success
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Kalau ada error tidak akan force close, melainkan mengirim peringatan ke layar HP
             return@withContext RegisterResult.ErrorDuplicate("Gagal memproses data: ${e.message}")
         }
     }
@@ -280,5 +302,10 @@ class UserRepository @Inject constructor(
             writeJson("seller.json", sellers)
         }
         return@withContext true
+    }
+
+    suspend fun getUserById(userId: String): UserJson? = withContext(Dispatchers.IO) {
+        val users = readUserJson()
+        return@withContext users.find { it.idUser == userId }
     }
 }

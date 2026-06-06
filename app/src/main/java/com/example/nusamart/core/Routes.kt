@@ -30,6 +30,14 @@ object Routes {
     @Serializable
     data object SellerChatListRoute : NavKey
 
+    @Serializable
+    data class IncomingOrderDetailRoute(
+        val orderId : String
+    ) : NavKey {
+        companion object {
+        }
+    }
+
     // BUYER
     // Keranjang
     @Serializable

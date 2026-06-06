@@ -28,6 +28,8 @@ import com.example.nusamart.feature.buyer.transaction.success.CheckoutSuccessScr
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.feature.seller.homepage.SellerHomeScreen
 import com.example.nusamart.feature.seller.notif.list.SellerNotifListScreen
+import com.example.nusamart.feature.seller.order.detail.IncomingOrderDetailScreen
+import com.example.nusamart.feature.seller.order.list.IncomingOrderListScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @Composable
@@ -56,6 +58,13 @@ fun ComposeApp() {
 
                     entry<Routes.SellerNotifListRoute> {
                         SellerNotifListScreen()
+                    }
+
+                    entry<Routes.SellerOrderListRoute> {
+                        IncomingOrderListScreen() }
+
+                    entry<Routes.IncomingOrderDetailRoute> { route ->
+                        IncomingOrderDetailScreen(orderId = route.orderId)
                     }
 
                     // BUYER

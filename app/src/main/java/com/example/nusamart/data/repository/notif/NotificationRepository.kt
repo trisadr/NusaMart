@@ -3,16 +3,16 @@ package com.example.nusamart.data.repository.notif
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
 // JSON-Friendly Models
-
 data class NotificationJson(
     val idNotif: String,
     val idUser: String,
@@ -25,8 +25,6 @@ data class NotificationJson(
     val referenceType: String? = null
 )
 
-// Repository
-
 @Singleton
 class NotificationRepository @Inject constructor(
     @ApplicationContext private val context: Context
@@ -35,53 +33,89 @@ class NotificationRepository @Inject constructor(
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     private val notifFile = "notification.json"
 
-    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
-        val file = File(context.filesDir, fileName)
+    // Fungsi baca internal yang aman dari crash (FilesDir prioritized)
+    private fun readNotifJson(): MutableList<NotificationJson> {
+        val file = File(context.filesDir, notifFile)
 
         if (!file.exists()) {
             try {
-                context.assets.open(fileName).use { inputStream ->
-                    val json = inputStream.bufferedReader().readText()
-                    file.writeText(json)
+                context.assets.open(notifFile).use { inputStream ->
+                    file.writeText(inputStream.bufferedReader().readText())
                 }
             } catch (e: Exception) {
                 return mutableListOf()
             }
         }
 
-        val json = file.readText()
-        val type = object : TypeToken<List<T>>() {}.type
-        return gson.fromJson(json, type) ?: mutableListOf()
+        return try {
+            val json = file.readText()
+            if (json.isBlank()) return mutableListOf()
+            val array = gson.fromJson(json, Array<NotificationJson>::class.java)
+            array?.toMutableList() ?: mutableListOf()
+        } catch (e: Exception) {
+            mutableListOf()
+        }
     }
 
-    private fun <T> writeJson(fileName: String, data: List<T>) {
-        val file = File(context.filesDir, fileName)
-        file.writeText(gson.toJson(data))
+    private fun writeJson(data: List<NotificationJson>) {
+        try {
+            // Dipastikan menulis ke filesDir yang memiliki akses write penuh
+            val file = File(context.filesDir, notifFile)
+            file.writeText(gson.toJson(data))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // FUNGSI BARU: Dipanggil oleh UserRepository saat registrasi berhasil
+    suspend fun addSystemNotification(userId: String, username: String, isSeller: Boolean) = withContext(Dispatchers.IO) {
+        try {
+            val notifications = readNotifJson()
+            val notifId = "NTF-${System.currentTimeMillis()}"
+            val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            val userTypeStr = if (isSeller) "Toko" else "Akun"
+
+            val newNotif = NotificationJson(
+                idNotif = notifId,
+                idUser = userId,
+                title = "Selamat Datang di NusaMart!",
+                body = "Halo $username, $userTypeStr kamu berhasil dibuat. Jangan lupa cek email kamu untuk info lebih lanjut ya!",
+                type = "SISTEM",
+                isRead = false,
+                createAt = now,
+                referenceId = null,
+                referenceType = null
+            )
+
+            notifications.add(newNotif)
+            writeJson(notifications)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     suspend fun getNotificationsByUser(userId: String): List<NotificationJson> = withContext(Dispatchers.IO) {
-        val notifications = readJson<NotificationJson>(notifFile)
-        // Urutkan dari yang terbaru
+        val notifications = readNotifJson()
         return@withContext notifications.filter { it.idUser == userId }
             .sortedByDescending { it.createAt }
     }
 
     suspend fun getNotificationById(notifId: String): NotificationJson? = withContext(Dispatchers.IO) {
-        val notifications = readJson<NotificationJson>(notifFile)
+        val notifications = readNotifJson()
         return@withContext notifications.find { it.idNotif == notifId }
     }
 
     suspend fun markAsRead(notifId: String) = withContext(Dispatchers.IO) {
-        val notifications = readJson<NotificationJson>(notifFile)
+        val notifications = readNotifJson()
         val index = notifications.indexOfFirst { it.idNotif == notifId }
         if (index != -1 && !notifications[index].isRead) {
             notifications[index] = notifications[index].copy(isRead = true)
-            writeJson(notifFile, notifications)
+            writeJson(notifications)
         }
     }
 
     suspend fun markAllAsRead(userId: String) = withContext(Dispatchers.IO) {
-        val notifications = readJson<NotificationJson>(notifFile)
+        val notifications = readNotifJson()
         var isUpdated = false
         for (i in notifications.indices) {
             if (notifications[i].idUser == userId && !notifications[i].isRead) {
@@ -90,7 +124,7 @@ class NotificationRepository @Inject constructor(
             }
         }
         if (isUpdated) {
-            writeJson(notifFile, notifications)
+            writeJson(notifications)
         }
     }
 }
