@@ -120,8 +120,18 @@ fun ProductPageScreen(
                 containerColor = MaterialTheme.colorScheme.tertiary
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { Toast.makeText(context, "Fitur chat segera hadir", Toast.LENGTH_SHORT).show() }) {
-                        Icon(Icons.Default.MailOutline, "Chat Penjual", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    IconButton(
+                        onClick = {
+                            vm.startChatWithSeller { roomId ->
+                                backStack.add(Routes.ChatDetailRoute(roomId))
+                            }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.MailOutline,
+                            "Chat Penjual",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     IconButton(onClick = { vm.openSheet(SheetMode.CART) }) {
                         Icon(Icons.Default.ShoppingCart, "Tambah ke Keranjang", tint = MaterialTheme.colorScheme.onSurfaceVariant)

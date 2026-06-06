@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nusamart.R
 import com.example.nusamart.data.repository.cart.CartRepository
+import com.example.nusamart.data.repository.chat.ChatRepository
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.user.UserRepository
@@ -16,10 +17,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductPageVM @Inject constructor(
-    private val cartRepository: CartRepository,
     private val productRepository: ProductRepository,
-    private val storeRepository: StoreRepository,
-    private val userRepository: UserRepository
+    private val cartRepository: CartRepository,
+    private val chatRepository: ChatRepository,
+    private val userRepository: UserRepository,
+    private val storeRepository: StoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProductPageUiState())
@@ -107,5 +109,26 @@ class ProductPageVM @Inject constructor(
         cartRepository.addCartItem(cart.idCart, state.selectedItemId, state.quantity)
         closeSheet()
         onSuccess("${state.quantity} ${state.productName} masuk ke keranjang")
+    }
+
+    fun startChatWithSeller(onNavigateToChat: (String) -> Unit) {
+        viewModelScope.launch {
+            val myId = userRepository.getActiveUserId()
+
+            // Kita ambil data toko dari produk yang sedang dibuka
+            val product = productRepository.getProductById(_uiState.value.productId)
+            val store = storeRepository.getStoreById(product?.idStore ?: "")
+            val sellerId = store?.idSeller
+
+            if (myId != null && sellerId != null) {
+                // Di sini fungsi ini akan mencari room yang ada ATAU membuat baru
+                val room = chatRepository.getOrCreateRoom(myId, sellerId)
+
+                // Panggil navigasi ke layar chat
+                onNavigateToChat(room.idRoom)
+            } else {
+                // Handle jika user belum login atau seller tidak ditemukan
+            }
+        }
     }
 }

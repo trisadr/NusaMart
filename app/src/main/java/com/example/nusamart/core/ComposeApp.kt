@@ -25,6 +25,9 @@ import com.example.nusamart.feature.buyer.transaction.checkout.CheckoutScreen
 import com.example.nusamart.feature.buyer.transaction.courier.CourierOptionScreen
 import com.example.nusamart.feature.buyer.transaction.payment.PaymentOptionScreen
 import com.example.nusamart.feature.buyer.transaction.success.CheckoutSuccessScreen
+import com.example.nusamart.feature.chat.detail.ChatDetailScreen
+import com.example.nusamart.feature.chat.list.BuyerChatListScreen
+import com.example.nusamart.feature.chat.list.SellerChatListScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
 import com.example.nusamart.feature.seller.homepage.SellerHomeScreen
 import com.example.nusamart.feature.seller.notif.list.SellerNotifListScreen
@@ -65,6 +68,12 @@ fun ComposeApp() {
 
                     entry<Routes.IncomingOrderDetailRoute> { route ->
                         IncomingOrderDetailScreen(orderId = route.orderId)
+                    }
+
+                    entry<Routes.BuyerChatListRoute> { BuyerChatListScreen() }
+                    entry<Routes.SellerChatListRoute> { SellerChatListScreen() }
+                    entry<Routes.ChatDetailRoute> { route ->
+                        ChatDetailScreen(roomId = route.roomId)
                     }
 
                     // BUYER

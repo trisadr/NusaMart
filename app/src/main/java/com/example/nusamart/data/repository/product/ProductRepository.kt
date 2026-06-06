@@ -148,6 +148,11 @@ class ProductRepository @Inject constructor(
         val items = readJson<ProductItemJson>("product_item.json")
         return@withContext items.find { it.idItem == itemId }
     }
+
+    suspend fun getProductById(productId: String): ProductJson? = withContext(Dispatchers.IO) {
+        val products = readJson<ProductJson>("product.json")
+        return@withContext products.find { it.idProduct == productId }
+    }
     suspend fun getProductItems(productId: String): List<ProductItemJson> = withContext(Dispatchers.IO) {
         val items = readJson<ProductItemJson>(productItemFile)
         return@withContext items.filter { it.idProduct == productId }

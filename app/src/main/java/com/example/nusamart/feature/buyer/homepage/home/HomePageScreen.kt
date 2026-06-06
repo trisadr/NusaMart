@@ -1,15 +1,19 @@
 package com.example.nusamart.feature.buyer.homepage.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -17,10 +21,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,21 +64,45 @@ fun HomePageScreen(vm: HomeVM = hiltViewModel()) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
-                    value = uiState.searchQuery,
-                    onValueChange = vm::updateSearchQuery,
-                    placeholder = { Text("Cari produk lokal...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        if (uiState.searchQuery.isNotBlank()) {
-                            backStack.add(Routes.SearchResultRoute(uiState.searchQuery))
-                        }
-                    })
-                )
+                // ← UBAH: bungkus search bar + tombol chat dalam Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = vm::updateSearchQuery,
+                        placeholder = { Text("Cari produk lokal...") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            if (uiState.searchQuery.isNotBlank()) {
+                                backStack.add(Routes.SearchResultRoute(uiState.searchQuery))
+                            }
+                        })
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Tombol chat dengan border mirip search bar
+                    OutlinedIconButton(
+                        onClick = { backStack.add(Routes.BuyerChatListRoute) },
+                        modifier = Modifier.size(56.dp),   // tinggi sama dengan OutlinedTextField default
+                        shape = RoundedCornerShape(12.dp), // radius sama dengan search bar
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Chat,
+                            contentDescription = "Chat"
+                        )
+                    }
+                }
             }
         },
         bottomBar = {
