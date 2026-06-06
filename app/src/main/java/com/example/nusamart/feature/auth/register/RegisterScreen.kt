@@ -17,7 +17,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -30,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -166,48 +170,75 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
                 }
             }
 
-            // Input Form
+            // Input Form Akun Utama
             MyOutlinedTextField(
-                value = uiState.username,
-                onValueChange = vm::updateUsername,
+                value = uiState.username, onValueChange = vm::updateUsername,
                 label = "Username", icon = Icons.Default.AccountCircle
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             MyOutlinedTextField(
-                value = uiState.email,
-                onValueChange = vm::updateEmail,
+                value = uiState.email, onValueChange = vm::updateEmail,
                 label = "Email", icon = Icons.Default.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             MyOutlinedTextField(
-                value = uiState.phone,
-                onValueChange = vm::updatePhone,
+                value = uiState.phone, onValueChange = vm::updatePhone,
                 label = "Nomor Telepon", icon = Icons.Default.Phone,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             MyOutlinedTextField(
-                value = uiState.password,
-                onValueChange = vm::updatePassword,
+                value = uiState.password, onValueChange = vm::updatePassword,
                 label = "Password", icon = Icons.Default.Lock,
-                isPassword = true,
-                isPasswordVisible = uiState.isPasswordVisible,
+                isPassword = true, isPasswordVisible = uiState.isPasswordVisible,
                 onPasswordVisibilityChange = vm::togglePasswordVisibility
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             MyOutlinedTextField(
-                value = uiState.confirmPassword,
-                onValueChange = vm::updateConfirmPassword,
+                value = uiState.confirmPassword, onValueChange = vm::updateConfirmPassword,
                 label = "Konfirmasi Password", icon = Icons.Default.Lock,
-                isPassword = true,
-                isPasswordVisible = uiState.isConfirmPasswordVisible,
+                isPassword = true, isPasswordVisible = uiState.isConfirmPasswordVisible,
                 onPasswordVisibilityChange = vm::toggleConfirmPasswordVisibility
             )
+
+            // Form Tambahan Khusus Penjual
+            if (uiState.isSeller) {
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Data Rekening Pencairan Dana",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                MyOutlinedTextField(
+                    value = uiState.nik, onValueChange = vm::updateNik,
+                    label = "NIK (16 Digit)", icon = Icons.Default.Badge,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                MyOutlinedTextField(
+                    value = uiState.bankName, onValueChange = vm::updateBankName,
+                    label = "Nama Bank (Cth: BCA, Mandiri)", icon = Icons.Default.AccountBalance
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                MyOutlinedTextField(
+                    value = uiState.accountNumber, onValueChange = vm::updateAccountNumber,
+                    label = "Nomor Rekening", icon = Icons.Default.CreditCard,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -226,8 +257,7 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 3.dp
+                        modifier = Modifier.size(24.dp), strokeWidth = 3.dp
                     )
                 } else {
                     Text("Buat Akun", fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -257,12 +287,8 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
 
     // Manajemen Dialog
     when (val state = uiState.dialogState) {
-        is RegisterDialogState.FormError -> {
-            FormErrorDialog(message = state.message, onDismissRequest = vm::clearDialog)
-        }
-        is RegisterDialogState.PasswordMismatch -> {
-            PasswordMismatchDialog(onDismissRequest = vm::clearDialog)
-        }
+        is RegisterDialogState.FormError -> { FormErrorDialog(message = state.message, onDismissRequest = vm::clearDialog) }
+        is RegisterDialogState.PasswordMismatch -> { PasswordMismatchDialog(onDismissRequest = vm::clearDialog) }
         is RegisterDialogState.DuplicateAccount -> {
             DuplicateAccountDialog(
                 message = state.message,
@@ -318,9 +344,7 @@ private fun FormErrorDialog(message: String, onDismissRequest: () -> Unit) {
         title = { Text("Form Tidak Lengkap", fontWeight = FontWeight.Bold) },
         text = { Text(message) },
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("OK", color = MaterialTheme.colorScheme.primary)
-            }
+            TextButton(onClick = onDismissRequest) { Text("OK", color = MaterialTheme.colorScheme.primary) }
         }
     )
 }
@@ -332,9 +356,7 @@ private fun PasswordMismatchDialog(onDismissRequest: () -> Unit) {
         title = { Text("Password Tidak Cocok", fontWeight = FontWeight.Bold) },
         text = { Text("Password dan konfirmasi password yang kamu masukkan tidak sama. Periksa kembali dan coba lagi.") },
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Perbaiki", color = MaterialTheme.colorScheme.primary)
-            }
+            TextButton(onClick = onDismissRequest) { Text("Perbaiki", color = MaterialTheme.colorScheme.primary) }
         }
     )
 }
@@ -346,14 +368,10 @@ private fun DuplicateAccountDialog(message: String, onDismissRequest: () -> Unit
         title = { Text("Akun Sudah Terdaftar", fontWeight = FontWeight.Bold) },
         text = { Text(message) },
         confirmButton = {
-            TextButton(onClick = onLoginClick) {
-                Text("Login", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            }
+            TextButton(onClick = onLoginClick) { Text("Login", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Tutup", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            TextButton(onClick = onDismissRequest) { Text("Tutup", color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     )
 }

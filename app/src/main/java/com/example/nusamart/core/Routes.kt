@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 
 object Routes {
 
-    // ================== LANDING PAGE ==================
+    // LANDING PAGE
     @Serializable
     data object LandingPageRoute : NavKey
 
-    // ================== AUTH ==================
+    // AUTH
     @Serializable
 
     data object RegisterRoute : NavKey
@@ -17,13 +17,25 @@ object Routes {
     @Serializable
     data object LoginPageRoute : NavKey
 
-    // ================== BUYER ==================
+    // SELLER
+    @Serializable
+    data object SellerHomeScreenRoute : NavKey
 
-    // --- Keranjang ---
+    @Serializable
+    data object SellerNotifListRoute : NavKey
+
+    @Serializable
+    data object SellerOrderListRoute : NavKey
+
+    @Serializable
+    data object SellerChatListRoute : NavKey
+
+    // BUYER
+    // Keranjang
     @Serializable
     data object CartRoute : NavKey
 
-    // --- HomePage ---
+    // HomePage
     @Serializable
     data object HomeRoute : NavKey
 
@@ -38,7 +50,7 @@ object Routes {
         val productId: String
     ) : NavKey
 
-    // --- Notification ---
+    // Notification
     @Serializable
     data object NotificationRoute : NavKey
 
@@ -48,14 +60,14 @@ object Routes {
         val notificationId: String,
     ) : NavKey
 
-    // --- Profile ---
+    // Profile
     @Serializable
     data object ProfileRoute : NavKey
     @Serializable
     data object AddressListRoute : NavKey
 
 
-// ================== TRANSACTION ==================
+// TRANSACTION
     @Serializable
     data class CheckoutRoute(
         val orderId: String? = null,

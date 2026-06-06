@@ -1,6 +1,6 @@
 package com.example.nusamart.feature.buyer.transaction.address
 
-import com.example.nusamart.data.model.user.UserAddressJson
+import com.example.nusamart.data.repository.user.UserAddressJson
 
 data class AddressOptionUiState(
     val addresses: List<UserAddressJson> = emptyList(),

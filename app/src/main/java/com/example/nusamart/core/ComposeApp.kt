@@ -26,6 +26,8 @@ import com.example.nusamart.feature.buyer.transaction.courier.CourierOptionScree
 import com.example.nusamart.feature.buyer.transaction.payment.PaymentOptionScreen
 import com.example.nusamart.feature.buyer.transaction.success.CheckoutSuccessScreen
 import com.example.nusamart.feature.landingpage.LandingScreen
+import com.example.nusamart.feature.seller.homepage.SellerHomeScreen
+import com.example.nusamart.feature.seller.notif.list.SellerNotifListScreen
 import com.example.nusamart.ui.theme.NusaMartTheme
 
 @Composable
@@ -47,10 +49,14 @@ fun ComposeApp() {
                     entry<Routes.RegisterRoute> { RegisterScreen() }
                     entry<Routes.LoginPageRoute> { LoginScreen() }
 
-                    // ================== SELLER ==================
-//                    entry<Routes.SellerHomeRoute> {
-//                        Text("Ini Halaman Beranda Penjual")
-//                    }
+                    // SELLER
+                    entry<Routes.SellerHomeScreenRoute> {
+                        SellerHomeScreen()
+                    }
+
+                    entry<Routes.SellerNotifListRoute> {
+                        SellerNotifListScreen()
+                    }
 
                     // BUYER
                     // Cart & Home

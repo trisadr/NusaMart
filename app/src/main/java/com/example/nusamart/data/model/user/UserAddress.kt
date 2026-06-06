@@ -14,15 +14,3 @@ data class UserAddress(
 )
 
 // JSON-friendly version -- mungkin bisa pindah di repository aja entar
-data class UserAddressJson(
-    val idAddress: String,
-    val idUser: String,
-    val label: String,
-    val receiver: String,
-    val phone: String,
-    val completeAddress: String,
-    val city: String,
-    val province: String,
-    val postalCode: String,
-    val isDefault: Boolean
-)

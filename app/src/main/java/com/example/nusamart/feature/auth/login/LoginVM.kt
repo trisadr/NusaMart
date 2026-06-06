@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// --- Navigasi Login ---
+sealed class LoginNavigation {
+    object ToBuyerHome : LoginNavigation()
+    object ToSellerHome : LoginNavigation()
+}
+
 @HiltViewModel
 class LoginVM @Inject constructor(
     private val userRepository: UserRepository
@@ -21,8 +27,7 @@ class LoginVM @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    // Event sukses akan mengirimkan ROLE
-    private val _successEvent = MutableSharedFlow<String>()
+    private val _successEvent = MutableSharedFlow<LoginNavigation>()
     val successEvent = _successEvent.asSharedFlow()
 
     fun updateEmailOrUsername(value: String) = _uiState.update { it.copy(emailOrUsername = value) }
@@ -53,8 +58,13 @@ class LoginVM @Inject constructor(
         when (result) {
             is LoginResult.Success -> {
                 _uiState.update { it.copy(isLoading = false) }
-                // Kirim role ke UI agar bisa diarahkan ke halaman yang tepat
-                _successEvent.emit(result.role)
+
+                // Cek Role dan Arahkan Navigasi Langsung
+                if (result.role == "SELLER") {
+                    _successEvent.emit(LoginNavigation.ToSellerHome)
+                } else {
+                    _successEvent.emit(LoginNavigation.ToBuyerHome)
+                }
             }
             is LoginResult.Error -> {
                 _uiState.update {

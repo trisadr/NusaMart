@@ -19,17 +19,23 @@ class RegisterVM @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
+
     private val _successEvent = MutableSharedFlow<Unit>()
     val successEvent = _successEvent.asSharedFlow()
+
     fun updateUsername(value: String) = _uiState.update { it.copy(username = value) }
     fun updateEmail(value: String) = _uiState.update { it.copy(email = value) }
     fun updatePhone(value: String) {
         val filteredValue = value.filter { it.isDigit() }
-        // Batasi maksimal panjang string menjadi 12 digit
-        if (filteredValue.length <= 12) {
+        if (filteredValue.length <= 13) {
             _uiState.update { it.copy(phone = filteredValue) }
         }
     }
+
+    // --- State Khusus Penjual ---
+    fun updateNik(value: String) = _uiState.update { it.copy(nik = value.filter { char -> char.isDigit() }.take(16)) }
+    fun updateBankName(value: String) = _uiState.update { it.copy(bankName = value) }
+    fun updateAccountNumber(value: String) = _uiState.update { it.copy(accountNumber = value.filter { char -> char.isDigit() }.take(20)) }
 
     fun updatePassword(value: String) = _uiState.update { it.copy(password = value) }
     fun updateConfirmPassword(value: String) = _uiState.update { it.copy(confirmPassword = value) }
@@ -40,28 +46,40 @@ class RegisterVM @Inject constructor(
 
     fun register() = viewModelScope.launch {
         val state = _uiState.value
-        // --- Validasi Input ---
+
+        // --- Validasi Input Umum ---
         if (state.username.isBlank()) return@launch showErrorDialog("Username wajib diisi.")
         if (state.email.isBlank()) return@launch showErrorDialog("Email wajib diisi.")
-        // Validasi panjang no telepon (minimal 11 digit, maksimal sudah dibatasi 12 di fungsi updatePhone)
-        if (state.phone.length < 11) {
-            return@launch showErrorDialog("Nomor telepon tidak valid. Pastikan berisi 11-12 digit angka.")
-        }
+        if (state.phone.length < 10) return@launch showErrorDialog("Nomor telepon tidak valid.")
         if (state.password.isBlank()) return@launch showErrorDialog("Password wajib diisi.")
         if (state.confirmPassword.isBlank()) return@launch showErrorDialog("Konfirmasi password wajib diisi.")
-        if (!isEmailValid(state.email)) return@launch showErrorDialog("Format email tidak valid. Pastikan mengandung '@' dan domain yang benar.")
+        if (!isEmailValid(state.email)) return@launch showErrorDialog("Format email tidak valid.")
         if (state.password != state.confirmPassword) {
             _uiState.update { it.copy(dialogState = RegisterDialogState.PasswordMismatch) }
             return@launch
         }
+
+        // --- Validasi Khusus Penjual ---
+        if (state.isSeller) {
+            if (state.nik.length != 16) return@launch showErrorDialog("NIK harus 16 digit angka.")
+            if (state.bankName.isBlank()) return@launch showErrorDialog("Nama Bank wajib diisi.")
+            if (state.accountNumber.length < 10) return@launch showErrorDialog("Nomor Rekening minimal 10 digit angka.")
+        }
+
         _uiState.update { it.copy(isLoading = true) }
+
+        // Panggil ke Repository (mengirim data bank jika role-nya Seller)
         val result = userRepository.register(
             username = state.username,
             email = state.email,
             phone = state.phone,
             password = state.password,
-            isSeller = state.isSeller
+            isSeller = state.isSeller,
+            nik = if (state.isSeller) state.nik else null,
+            bankName = if (state.isSeller) state.bankName else null,
+            accountNumber = if (state.isSeller) state.accountNumber else null
         )
+
         when (result) {
             is RegisterResult.Success -> {
                 _uiState.update { it.copy(isLoading = false) }
@@ -69,10 +87,7 @@ class RegisterVM @Inject constructor(
             }
             is RegisterResult.ErrorDuplicate -> {
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        dialogState = RegisterDialogState.DuplicateAccount(result.message)
-                    )
+                    it.copy(isLoading = false, dialogState = RegisterDialogState.DuplicateAccount(result.message))
                 }
             }
         }

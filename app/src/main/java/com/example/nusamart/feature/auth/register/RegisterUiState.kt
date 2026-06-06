@@ -7,6 +7,12 @@ data class RegisterUiState(
     val password: String = "",
     val confirmPassword: String = "",
     val isSeller: Boolean = false,
+
+    // Data tambahan khusus penjual
+    val nik: String = "",
+    val bankName: String = "",
+    val accountNumber: String = "",
+
     val isPasswordVisible: Boolean = false,
     val isConfirmPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,

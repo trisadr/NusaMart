@@ -2,7 +2,7 @@ package com.example.nusamart.feature.buyer.profile.address
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.data.model.user.UserAddressJson
+import com.example.nusamart.data.repository.user.UserAddressJson
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

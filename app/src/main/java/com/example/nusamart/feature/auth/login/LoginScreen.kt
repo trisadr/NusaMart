@@ -60,17 +60,14 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        vm.successEvent.collect { role ->
+        vm.successEvent.collect { nav ->
             backStack.clear()
-            if (role == "SELLER") {
-                // seller belum diimplementasikan
-                //backStack.add(Routes.SellerHomeRoute)
-            } else {
-                backStack.add(Routes.HomeRoute)
+            when (nav) {
+                is LoginNavigation.ToBuyerHome -> backStack.add(Routes.HomeRoute)
+                is LoginNavigation.ToSellerHome -> backStack.add(Routes.SellerHomeScreenRoute)
             }
         }
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -231,7 +228,7 @@ private fun LoginErrorDialog(
     )
 }
 
-// ─── Preview ───
+// Preview
 @Preview(showBackground = true)
 @Composable
 private fun LoginScreenPreview() {

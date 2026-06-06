@@ -19,16 +19,3 @@ data class User(
         ADMIN
     }
 }
-
-// JSON-friendly version -- mungkin bisa pindah di repository aja entar
-data class UserJson(
-    val idUser: String,
-    val username: String,
-    val email: String,
-    val password: String, // Tanpa hash
-    val phone: String,
-    val role: String,
-    val createAt: String,
-    val updateAt: String,
-    val imageURL: Int? = null
-)

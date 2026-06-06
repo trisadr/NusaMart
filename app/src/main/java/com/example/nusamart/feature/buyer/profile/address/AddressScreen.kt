@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
-import com.example.nusamart.data.model.user.UserAddressJson
+import com.example.nusamart.data.repository.user.UserAddressJson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
