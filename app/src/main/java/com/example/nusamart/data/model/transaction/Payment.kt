@@ -8,7 +8,8 @@ data class Payment(
     val transactionIdGateway: String? = null,
     val snapToken: String? = null,
     val paymentStatus: PaymentStatus,
-    val paymentTime: java.time.LocalDateTime? = null
+    val paymentTime: java.time.LocalDateTime? = null,
+    val imageURL: String? = null
 ) {
     enum class PaymentStatus {
         PENDING, APPROVED, CANCELED

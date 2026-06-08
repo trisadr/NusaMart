@@ -19,7 +19,6 @@ import javax.inject.Singleton
 data class CategoryJson(
     val idCategory: String,
     val categoryName: String,
-    val iconURL: Int? = null,
     val isActive: Boolean
 )
 
@@ -35,11 +34,12 @@ data class ProductJson(
     val idStore: String,
     val productName: String,
     val description: String? = null,
-    val weightGram: Double,
+    val weightGram: Int,
     val productStatus: String, // String mapping untuk enum
     val createAt: String,
     val updateAt: String,
-    val avgRating: Double? = null
+    val avgRating: Double? = null,
+    val sold: Int = 0
 )
 
 data class ProductItemJson(
@@ -170,11 +170,12 @@ class ProductRepository @Inject constructor(
         storeId: String,
         productName: String,
         description: String,
-        weightGram: Double,
+        weightGram: Int,
         subCategoryIds: List<String>,
         basePrice: Double,
         baseStock: Int,
-        primaryImageRes: Int
+        primaryImageRes: Int,
+        soldProduct: Int
     ): ProductResult = withContext(Dispatchers.IO) {
         delay(500) // Simulasi loading jaringan
 
@@ -194,7 +195,8 @@ class ProductRepository @Inject constructor(
             productStatus = Product.ProductStatus.ACTIVE.name,
             createAt = now,
             updateAt = now,
-            avgRating = null
+            avgRating = null,
+            sold = soldProduct
         )
         products.add(newProduct)
         writeJson(productFile, products)

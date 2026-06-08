@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nusamart.core.Routes
 import com.example.nusamart.data.repository.cart.CartRepository
+import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.example.nusamart.data.repository.order.OrderItemInput
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.shipping.ShippingRepository
+import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.transaction.TransactionRepository
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +27,8 @@ class CheckoutVM @Inject constructor(
     private val cartRepository: CartRepository,
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
+    private val storeRepository: StoreRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
@@ -180,7 +184,8 @@ class CheckoutVM @Inject constructor(
             val payRes = transactionRepository.createPayment(
                 userId = userId,
                 methodId = route.selectedPaymentMethodId!!,
-                totalAmount = totalPaymentAmount
+                totalAmount = totalPaymentAmount,
+                imageURL = null
             )
 
             if (payRes is com.example.nusamart.data.repository.transaction.TransactionResult.Success) {
@@ -201,6 +206,21 @@ class CheckoutVM @Inject constructor(
                         val orderId = orderRes.orderId
                         createdOrderIds.add(orderId)
                         shippingRepository.createShipping(orderId, route.selectedCourierId!!)
+
+                        // --- TAMBAHAN KODE NOTIFIKASI KE SELLER ---
+                        // 1. Cari siapa pemilik tokonya
+                        val store = storeRepository.getStoreById(storeId)
+                        val sellerId = store?.idSeller
+
+                        // 2. Jika ketemu, gabungkan nama barang dan kirim notifikasi
+                        if (sellerId != null) {
+                            val productNames = items.joinToString(", ") { it.nameSnapshot }
+                            notificationRepository.addNewOrderNotificationForSeller(
+                                sellerId = sellerId,
+                                orderId = orderId,
+                                productNames = productNames
+                            )
+                        }
                     }
                 }
 

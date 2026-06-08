@@ -26,7 +26,8 @@ data class PaymentJson(
     val transactionIdGateway: String? = null,
     val snapToken: String? = null,
     val paymentStatus: String,
-    val paymentTime: String? = null
+    val paymentTime: String? = null,
+    val imageURL: String ? = null
 )
 
 data class PaymentMethodJson(
@@ -124,7 +125,8 @@ class TransactionRepository @Inject constructor(
         methodId: String,
         totalAmount: Double,
         transactionIdGateway: String? = null,
-        snapToken: String? = null
+        snapToken: String? = null,
+        imageURL: String? = null
     ): TransactionResult = withContext(Dispatchers.IO) {
         delay(500)
         val payments = readJson<PaymentJson>(paymentFile)
@@ -140,7 +142,8 @@ class TransactionRepository @Inject constructor(
             transactionIdGateway = transactionIdGateway,
             snapToken = snapToken,
             paymentStatus = Payment.PaymentStatus.PENDING.name,
-            paymentTime = null
+            paymentTime = null,
+            imageURL = imageURL
         )
 
         payments.add(newPayment)

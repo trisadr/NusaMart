@@ -1,5 +1,6 @@
 package com.example.nusamart.data.repository.report
 
+// HAPUS import android.R.attr.type yang bikin error!
 import android.content.Context
 import com.example.nusamart.data.model.report.Report
 import com.google.gson.Gson
@@ -12,21 +13,19 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// JSON model
+// 1. TAMBAHKAN referenceID di JSON Model agar sinkron dengan model utama
 data class ReportJson(
     val idReport: String,
     val reporterId: String,
-    val reportedUserId: String? = null,
-    val reportedProductId: String? = null,
-    val reportedReviewId: String? = null,
     val reason: String,
     val status: String,
     val adminNote: String? = null,
     val createAt: String,
-    val updateAt: String? = null
+    val updateAt: String? = null,
+    val type: String,
+    val referenceID: String // <-- Tambahan wajib
 )
 
-// Repository
 @Singleton
 class ReportRepository @Inject constructor(
     @ApplicationContext private val context: Context
@@ -47,6 +46,7 @@ class ReportRepository @Inject constructor(
             }
         }
         val json = file.readText()
+        if (json.isBlank()) return mutableListOf() // Cegah crash jika file kosong
         val type = object : TypeToken<List<T>>() {}.type
         return gson.fromJson(json, type) ?: mutableListOf()
     }
@@ -56,18 +56,17 @@ class ReportRepository @Inject constructor(
         file.writeText(gson.toJson(data))
     }
 
-    // Mapper
+    // 2. MAPPER JUGA HARUS MENGAMBIL referenceID
     private fun ReportJson.toReport() = Report(
         idReport = idReport,
         reporterId = reporterId,
-        reportedUserId = reportedUserId,
-        reportedProductId = reportedProductId,
-        reportedReviewId = reportedReviewId,
         reason = reason,
         status = Report.ReportStatus.valueOf(status),
         adminNote = adminNote,
         createAt = LocalDateTime.parse(createAt),
-        updateAt = updateAt?.let { LocalDateTime.parse(it) }
+        updateAt = updateAt?.let { LocalDateTime.parse(it) },
+        type = Report.ReferenceType.valueOf(type),
+        referenceID = referenceID // <-- Tambahan wajib
     )
 
     // Operasi
@@ -83,18 +82,28 @@ class ReportRepository @Inject constructor(
         }
 
         val reports = readJson<ReportJson>(reportFile)
+
+        // 3. LOGIKA PENENTUAN TIPE & ID REFERENSI
+        val (determinedType, determinedRefId) = when {
+            reportedUserId != null -> Report.ReferenceType.USER.name to reportedUserId
+            reportedProductId != null -> Report.ReferenceType.PRODUCT.name to reportedProductId
+            reportedReviewId != null -> Report.ReferenceType.REVIEW.name to reportedReviewId
+            else -> Report.ReferenceType.OTHERS.name to "UNKNOWN"
+        }
+
         val newReport = ReportJson(
             idReport = "rep-${UUID.randomUUID()}",
             reporterId = reporterId,
-            reportedUserId = reportedUserId,
-            reportedProductId = reportedProductId,
-            reportedReviewId = reportedReviewId,
             reason = reason,
             status = Report.ReportStatus.OPEN.name,
-            createAt = LocalDateTime.now().toString()
+            createAt = LocalDateTime.now().toString(),
+            type = determinedType, // <-- Menggunakan variabel yang sudah dihitung
+            referenceID = determinedRefId // <-- Menggunakan ID yang sudah dihitung
         )
+
         reports.add(newReport)
         writeJson(reportFile, reports)
+
         return newReport.toReport()
     }
 

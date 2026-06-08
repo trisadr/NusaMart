@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nusamart.data.model.order.Order
 import com.example.nusamart.data.model.shipping.Shipping
+import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.shipping.ShippingRepository
 import com.example.nusamart.data.repository.user.UserRepository
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class IncomingOrderDetailVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
-    private val shippingRepository: ShippingRepository
+    private val shippingRepository: ShippingRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomingOrderDetailUiState())
@@ -44,9 +46,16 @@ class IncomingOrderDetailVM @Inject constructor(
     fun processOrder(orderId: String, courierId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // PERBAIKAN: Gunakan .name agar pasti tersimpan sebagai String "PROCESSED"
         orderRepository.updateOrderStatus(orderId, Order.OrderStatus.PROCESSED)
         shippingRepository.createShipping(orderId, courierId)
+
+        // AMBIL DATA & KIRIM NOTIFIKASI KE BUYER
+        val order = orderRepository.getOrderById(orderId)
+        if (order != null) {
+            val items = orderRepository.getOrderItems(orderId)
+            val productNames = items.joinToString(", ") { it.nameSnapshot }
+            notificationRepository.addOrderStatusNotification(order.idUser, orderId, productNames, "PROCESSED")
+        }
 
         loadOrderDetail(orderId)
     }
@@ -55,7 +64,26 @@ class IncomingOrderDetailVM @Inject constructor(
     fun cancelOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
+        // Update status order
         orderRepository.updateOrderStatus(orderId, Order.OrderStatus.CANCELLED)
+
+        // AMBIL DATA ORDER UNTUK MENDAPATKAN ID BUYER
+        val order = orderRepository.getOrderById(orderId)
+        if (order != null) {
+
+            // 1. AMBIL NAMA-NAMA PRODUK DARI PESANAN INI
+            val items = orderRepository.getOrderItems(orderId)
+            // Gabungkan semua nama produk menjadi satu teks (misal: "Kopi Lokal, Gula Aren")
+            val productNames = items.joinToString(", ") { it.nameSnapshot }
+
+            // 2. KIRIM NOTIFIKASI PEMBATALAN BESERTA NAMA PRODUK
+            notificationRepository.addOrderCancelledNotification(
+                userId = order.idUser,
+                orderId = orderId,
+                productNames = productNames // <-- KIRIMKAN KE SINI
+            )
+        }
+
         loadOrderDetail(orderId)
     }
 
@@ -78,6 +106,14 @@ class IncomingOrderDetailVM @Inject constructor(
                 location = "Toko Penjual",
                 description = "Paket telah diserahkan ke pihak kurir dengan resi $dummyResi"
             )
+        }
+
+        // AMBIL DATA & KIRIM NOTIFIKASI KE BUYER
+        val order = orderRepository.getOrderById(orderId)
+        if (order != null) {
+            val items = orderRepository.getOrderItems(orderId)
+            val productNames = items.joinToString(", ") { it.nameSnapshot }
+            notificationRepository.addOrderStatusNotification(order.idUser, orderId, productNames, "SHIPPED")
         }
 
         loadOrderDetail(orderId)

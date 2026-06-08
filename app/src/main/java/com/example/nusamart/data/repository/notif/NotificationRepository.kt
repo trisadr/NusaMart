@@ -127,4 +127,96 @@ class NotificationRepository @Inject constructor(
             writeJson(notifications)
         }
     }
+
+    // FUNGSI BARU: Dipanggil saat pesanan dibatalkan
+    // FUNGSI BARU: Dipanggil saat pesanan dibatalkan
+    suspend fun addOrderCancelledNotification(
+        userId: String,
+        orderId: String,
+        productNames: String, // <-- TAMBAHAN PARAMETER INI
+        reason: String = "Dibatalkan oleh penjual"
+    ) = withContext(Dispatchers.IO) {
+        try {
+            val notifications = readNotifJson()
+            val notifId = "NTF-${System.currentTimeMillis()}"
+            val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+            val newNotif = NotificationJson(
+                idNotif = notifId,
+                idUser = userId,
+                title = "Pesanan Dibatalkan",
+                // UBAH TEKS BODY AGAR MENAMPILKAN NAMA PRODUK
+                body = "Pesanan kamu untuk $productNames telah dibatalkan. Alasan: $reason.",
+                type = "ORDER",
+                isRead = false,
+                createAt = now,
+                referenceId = orderId, // Reference ID tetap dikirim agar tombol "Lihat Pesanan" tetap berfungsi
+                referenceType = "ORDER"
+            )
+
+            notifications.add(newNotif)
+            writeJson(notifications)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // 1. NOTIFIKASI UNTUK SELLER: Ada Pesanan Baru
+    suspend fun addNewOrderNotificationForSeller(sellerId: String, orderId: String, productNames: String) = withContext(Dispatchers.IO) {
+        try {
+            val notifications = readNotifJson()
+            val notifId = "NTF-${System.currentTimeMillis()}"
+            val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+            val newNotif = NotificationJson(
+                idNotif = notifId,
+                idUser = sellerId, // Target: Seller
+                title = "Pesanan Baru Masuk! 🎉",
+                body = "Hore! Ada pesanan baru untuk $productNames. Segera proses pesanannya ya!",
+                type = "ORDER",
+                isRead = false,
+                createAt = now,
+                referenceId = orderId,
+                referenceType = "ORDER"
+            )
+
+            notifications.add(newNotif)
+            writeJson(notifications)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // 2. NOTIFIKASI UNTUK BUYER: Status Berubah (Diproses / Dikirim)
+    suspend fun addOrderStatusNotification(userId: String, orderId: String, productNames: String, status: String) = withContext(Dispatchers.IO) {
+        try {
+            val notifications = readNotifJson()
+            val notifId = "NTF-${System.currentTimeMillis()}"
+            val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+            val (title, bodyText) = when (status.uppercase()) {
+                "PROCESSED" -> "Pesanan Diproses 📦" to "Pesanan kamu untuk $productNames sedang dipersiapkan oleh penjual."
+                "SHIPPED" -> "Pesanan Dikirim 🚚" to "Pesanan kamu untuk $productNames sudah diserahkan ke kurir dan sedang dalam perjalanan!"
+                "DELIVERED" -> "Pesanan Selesai ✅" to "Pesanan kamu untuk $productNames telah tiba. Terima kasih telah berbelanja!"
+                else -> "Update Pesanan" to "Ada pembaruan pada pesanan kamu untuk $productNames."
+            }
+
+            val newNotif = NotificationJson(
+                idNotif = notifId,
+                idUser = userId, // Target: Buyer
+                title = title,
+                body = bodyText,
+                type = "ORDER",
+                isRead = false,
+                createAt = now,
+                referenceId = orderId,
+                referenceType = "ORDER"
+            )
+
+            notifications.add(newNotif)
+            writeJson(notifications)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
