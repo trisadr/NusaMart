@@ -1,4 +1,3 @@
-```
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -27,7 +26,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://lantern-ample-widen.ngrok-free.dev/api\"")
         }
         release {
             isMinifyEnabled = false

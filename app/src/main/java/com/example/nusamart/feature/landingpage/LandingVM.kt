@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.nusamart.core.Routes
 import com.example.nusamart.data.preference.TokenPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,6 +28,9 @@ class LandingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
+            // 1. Tambahkan delay 1,5 detik (1500 milidetik)
+            delay(1500L)
+
             val isLoggedIn = tokenPrefs.isLoggedIn()
 
             if (isLoggedIn) {
@@ -34,14 +38,16 @@ class LandingViewModel @Inject constructor(
                 val destination = when (role) {
                     "seller" -> Routes.SellerHomeScreenRoute
                     "buyer"  -> Routes.HomeRoute
-                    else     -> null // role tidak dikenal, tetap di landing
+                    // Fallback: Jika role tidak dikenali, lempar kembali ke Login
+                    else     -> Routes.LoginPageRoute
                 }
                 _uiState.update {
                     it.copy(isLoading = false, navigateTo = destination)
                 }
             } else {
+                // 2. PERBAIKAN: Arahkan ke LoginPageRoute jika belum login
                 _uiState.update {
-                    it.copy(isLoading = false, navigateTo = null)
+                    it.copy(isLoading = false, navigateTo = Routes.LoginPageRoute)
                 }
             }
         }

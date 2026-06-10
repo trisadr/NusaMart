@@ -176,7 +176,7 @@ fun SellerHomeScreen(vm: SellerHomeVM = hiltViewModel()) {
 
                 // Kartu Metrik
                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    Text("Ringkasan Hari Ini", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                    Text("Performa Toko", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -184,13 +184,20 @@ fun SellerHomeScreen(vm: SellerHomeVM = hiltViewModel()) {
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.LocalShipping,
                             title = "Pesanan Baru",
-                            value = "0"
+                            value = uiState.newOrdersCount.toString() // Ambil dari uiState
                         )
                         MetricCard(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.Inventory,
-                            title = "Total Produk",
-                            value = "0"
+                            title = "Pesanan Sukses", // Saya sesuaikan labelnya
+                            value = uiState.productsSold.toString() // Ambil dari uiState
+                        )
+                        MetricCard(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.AccountBalanceWallet, // Ikon lebih cocok untuk uang
+                            title = "Pendapatan",
+                            // Sederhana format Rupiah (tanpa decimal)
+                            value = "Rp${uiState.totalRevenue.toLong()}"
                         )
                     }
                 }

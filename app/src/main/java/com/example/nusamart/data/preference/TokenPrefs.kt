@@ -19,53 +19,39 @@ class TokenPrefs @Inject constructor(
 ) {
     companion object {
         private val KEY_TOKEN = stringPreferencesKey("auth_token")
-        private val KEY_ROLE = stringPreferencesKey("user_role")  // ← tambah
+        private val KEY_ROLE = stringPreferencesKey("user_role")
+        private val KEY_USER_ID = stringPreferencesKey("user_id")
     }
 
-    // ── Token ──────────────────────────────────────────────
-    val tokenFlow: Flow<String?> = context.tokenDataStore.data
-        .map { prefs -> prefs[KEY_TOKEN] }
-
-    suspend fun getToken(): String? {
-        return context.tokenDataStore.data
-            .map { prefs -> prefs[KEY_TOKEN] }
-            .firstOrNull()
+    // Dipakai untuk OkHttp Interceptor (ambil data secara langsung/blocking)
+    suspend fun getTokenSync(): String? {
+        return context.tokenDataStore.data.map { it[KEY_TOKEN] }.firstOrNull()
     }
 
-    suspend fun saveToken(token: String) {
-        context.tokenDataStore.edit { prefs ->
-            prefs[KEY_TOKEN] = token
-        }
+    fun getToken(): Flow<String?> {
+        return context.tokenDataStore.data.map { it[KEY_TOKEN] }
     }
 
-    // ── Role ───────────────────────────────────────────────
     suspend fun getRole(): String? {
-        return context.tokenDataStore.data
-            .map { prefs -> prefs[KEY_ROLE] }
-            .firstOrNull()
+        return context.tokenDataStore.data.map { it[KEY_ROLE] }.firstOrNull()
     }
 
-    suspend fun saveRole(role: String) {
-        context.tokenDataStore.edit { prefs ->
-            prefs[KEY_ROLE] = role
-        }
-    }
-
-    // ── Save keduanya sekaligus setelah login ──────────────
-    suspend fun saveSession(token: String, role: String) {
+    suspend fun saveSession(token: String, role: String, userId: String) {
         context.tokenDataStore.edit { prefs ->
             prefs[KEY_TOKEN] = token
-            prefs[KEY_ROLE] = role
+            prefs[KEY_ROLE] = role.lowercase() // samakan case dengan routing mobile (buyer/seller)
+            prefs[KEY_USER_ID] = userId
         }
     }
 
-    // ── Clear semua saat logout ────────────────────────────
     suspend fun clearSession() {
         context.tokenDataStore.edit { prefs ->
-            prefs.remove(KEY_TOKEN)
-            prefs.remove(KEY_ROLE)
+            prefs.clear()
         }
     }
 
-    suspend fun isLoggedIn(): Boolean = getToken() != null
+    suspend fun isLoggedIn(): Boolean {
+        val token = getTokenSync()
+        return !token.isNullOrEmpty()
+    }
 }

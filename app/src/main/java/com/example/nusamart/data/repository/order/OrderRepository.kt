@@ -8,6 +8,9 @@ import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDateTime
@@ -64,6 +67,17 @@ class OrderRepository @Inject constructor(
 
     private val orderFile = "order.json"
     private val orderItemFile = "order_item.json"
+
+    // 1. StateFlow internal untuk menyimpan data pesanan di memori secara real-time
+    private val _ordersFlow = MutableStateFlow<List<OrderJson>>(emptyList())
+
+    init {
+        // Load data awal dari file JSON saat Repository pertama kali diinisialisasi
+        _ordersFlow.value = readJson(orderFile)
+    }
+
+    // 2. Fungsi untuk mengekspos aliran data pesanan ke ViewModel
+    fun getOrdersFlow(): Flow<List<OrderJson>> = _ordersFlow.asStateFlow()
 
     private inline fun <reified T> readJson(fileName: String): MutableList<T> {
         val file = File(context.filesDir, fileName)
@@ -168,6 +182,9 @@ class OrderRepository @Inject constructor(
         orders.add(newOrder)
         writeJson(orderFile, orders)
 
+        // 3. TRIGGER UPDATE: Perbarui StateFlow setelah data baru sukses ditulis ke JSON
+        _ordersFlow.value = orders.toList()
+
         var maxOitNum = orderItems.maxOfOrNull { it.idOrderItem.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
 
         items.forEach { inputItem ->
@@ -205,6 +222,10 @@ class OrderRepository @Inject constructor(
             )
 
             writeJson(orderFile, orders)
+
+            // 4. TRIGGER UPDATE: Perbarui StateFlow setelah status pesanan berubah di JSON
+            _ordersFlow.value = orders.toList()
+
             return@withContext true
         }
         return@withContext false
