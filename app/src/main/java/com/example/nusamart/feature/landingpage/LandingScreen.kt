@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.ui.theme.NusaMartTheme
@@ -38,7 +39,7 @@ fun LandingScreen() {
     LaunchedEffect(uiState.navigateTo) {
         uiState.navigateTo?.let { route ->
             backStack.clear()
-            backStack.add(route)
+            backStack.add(route as NavKey)
             viewModel.onNavigated() // reset agar tidak navigate ulang
         }
     }
