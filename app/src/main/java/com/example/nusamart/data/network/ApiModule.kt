@@ -1,13 +1,12 @@
 package com.example.nusamart.data.network
 
+import com.example.nusamart.data.interfaceapi.StoreApi
 import com.example.nusamart.data.preference.TokenPrefs
 import com.example.nusamart.feature.auth.login.AuthAndUserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -42,5 +41,12 @@ object ApiModule {
     @Singleton
     fun provideAuthAndUserApi(retrofit: Retrofit): AuthAndUserApi {
         return retrofit.create(AuthAndUserApi::class.java)
+    }
+
+    // Tambahkan di dalam object ApiModule
+    @Provides
+    @Singleton
+    fun provideStoreApi(retrofit: Retrofit): StoreApi {
+        return retrofit.create(StoreApi::class.java)
     }
 }

@@ -16,7 +16,7 @@ import javax.inject.Inject
 class IncomingOrderListVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
-    private val storeRepository: StoreRepository // INJEKSI STORE REPOSITORY
+    private val storeRepository: StoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomingOrderListUiState())
@@ -29,41 +29,35 @@ class IncomingOrderListVM @Inject constructor(
     fun loadIncomingOrders() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        val sellerId = userRepository.getActiveUserId()
+        // 1. LANGSUNG PANGGIL TOKO MILIK SELLER DARI API
+        // Tidak perlu lagi mem-passing sellerId karena API sudah membacanya dari Token
+        val myStore = storeRepository.getMyStore()
 
-        if (sellerId != null) {
+        // 2. JIKA TOKO DITEMUKAN, AMBIL DAFTAR PESANANNYA
+        if (myStore != null) {
+            val incomingOrders = orderRepository.getOrdersByStore(myStore.idStore)
 
-            // 1. CARI TOKO MILIK SELLER INI TERLEBIH DAHULU
-            val myStore = storeRepository.getStoreBySellerId(sellerId)
+            val uiModels = incomingOrders.map { order ->
+                val items = orderRepository.getOrderItems(order.idOrder)
+                val firstItemName = items.firstOrNull()?.nameSnapshot ?: "Memuat produk..."
+                val additionalCount = if (items.size > 1) items.size - 1 else 0
 
-            // 2. JIKA DIA PUNYA TOKO, AMBIL PESANAN BERDASARKAN ID TOKO TERSEBUT
-            if (myStore != null) {
-                val incomingOrders = orderRepository.getOrdersByStore(myStore.idStore)
+                val buyer = userRepository.getUserById(order.idUser)
+                val buyerNameDisplay = buyer?.username ?: order.idUser
 
-                val uiModels = incomingOrders.map { order ->
-                    val items = orderRepository.getOrderItems(order.idOrder)
-                    val firstItemName = items.firstOrNull()?.nameSnapshot ?: "Memuat produk..."
-                    val additionalCount = if (items.size > 1) items.size - 1 else 0
-
-                    val buyer = userRepository.getUserById(order.idUser)
-                    val buyerNameDisplay = buyer?.username ?: order.idUser
-
-                    IncomingOrderListUiModel(
-                        order = order,
-                        buyerName = buyerNameDisplay,
-                        firstItemName = firstItemName,
-                        additionalItemCount = additionalCount
-                    )
-                }
-
-                val sortedModels = uiModels.sortedByDescending { it.order.orderDate }
-                _uiState.update { it.copy(orders = sortedModels, isLoading = false) }
-            } else {
-                // Jika seller belum buat toko
-                _uiState.update { it.copy(isLoading = false, orders = emptyList()) }
+                IncomingOrderListUiModel(
+                    order = order,
+                    buyerName = buyerNameDisplay,
+                    firstItemName = firstItemName,
+                    additionalItemCount = additionalCount
+                )
             }
+
+            val sortedModels = uiModels.sortedByDescending { it.order.orderDate }
+            _uiState.update { it.copy(orders = sortedModels, isLoading = false) }
         } else {
-            _uiState.update { it.copy(isLoading = false) }
+            // Jika API merespons kosong (seller belum buat toko)
+            _uiState.update { it.copy(isLoading = false, orders = emptyList()) }
         }
     }
 
