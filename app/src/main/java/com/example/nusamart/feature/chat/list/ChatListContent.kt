@@ -1,6 +1,7 @@
 package com.example.nusamart.feature.chat.list
 
-import androidx.compose.foundation.Image
+// Tambahkan import AsyncImage dari Coil
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,23 +35,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.nusamart.R
 
 @Composable
 fun ChatListContent(
-    paddingValues: PaddingValues,    // ← TAMBAH: terima padding dari Scaffold
+    paddingValues: PaddingValues,
     vm: ChatListVM = hiltViewModel(),
     onRoomClick: (String) -> Unit
 ) {
     val uiState by vm.uiState.collectAsState()
 
-    // Gunakan key(Unit) + selalu reload saat composable masuk
     LaunchedEffect(Unit) { vm.loadChatRooms() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)  // ← PENTING: apply padding Scaffold
+            .padding(paddingValues)
     ) {
         when {
             uiState.isLoading -> {
@@ -90,13 +91,12 @@ private fun ChatRoomItem(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar — sama persis dengan pola di ChatDetailScreen
-        val photoRes = if (model.partnerPhotoResId != 0) model.partnerPhotoResId
-        else R.drawable.nm_logo
-
-        Image(
-            painter = painterResource(id = photoRes),
+        // UBAH: Menggunakan AsyncImage dari Coil untuk meload URL gambar
+        AsyncImage(
+            model = model.partnerImageUrl, // Menggunakan properti String URL dari Model yang baru
             contentDescription = "Foto ${model.partnerName}",
+            placeholder = painterResource(id = R.drawable.nm_logo), // Ditampilkan saat loading
+            error = painterResource(id = R.drawable.nm_logo),       // Ditampilkan jika URL kosong atau gagal load
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(48.dp)

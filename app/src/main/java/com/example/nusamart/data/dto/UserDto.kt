@@ -1,12 +1,20 @@
-package com.example.nusamart.data.network.dto
+package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
 // Response untuk Login / Register (Sesuaikan dengan return AuthController Laravel-mu)
 data class AuthResponse(
+    @SerializedName("message") val message: String,
     @SerializedName("token") val token: String,
-    @SerializedName("role") val role: String,
-    @SerializedName("idUser") val idUser: String
+    @SerializedName("user") val user: UserDto // <-- Laravel membungkusnya di sini!
+)
+
+// TAMBAHKAN data class ini di file yang sama
+data class UserDto(
+    @SerializedName("idUser") val idUser: String,
+    @SerializedName("username") val username: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("role") val role: String
 )
 
 // Response untuk GET /api/user/profile

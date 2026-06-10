@@ -73,7 +73,6 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
 
     LaunchedEffect(Unit) {
         vm.successEvent.collect {
-            // Toast diubah untuk mensimulasikan email terkirim
             Toast.makeText(context, "Akun berhasil dibuat! Email konfirmasi telah dikirim ke alamatmu. Silakan Login.", Toast.LENGTH_LONG).show()
             backStack.clear()
             backStack.add(Routes.LoginPageRoute)
@@ -288,10 +287,18 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
 
     // Manajemen Dialog
     when (val state = uiState.dialogState) {
-        is RegisterDialogState.FormError -> { FormErrorDialog(message = state.message, onDismissRequest = vm::clearDialog) }
-        is RegisterDialogState.PasswordMismatch -> { PasswordMismatchDialog(onDismissRequest = vm::clearDialog) }
-        is RegisterDialogState.DuplicateAccount -> {
-            DuplicateAccountDialog(
+        is RegisterDialogState.FormError -> {
+            FormErrorDialog(message = state.message, onDismissRequest = vm::clearDialog)
+        }
+        is RegisterDialogState.PasswordMismatch -> {
+            PasswordMismatchDialog(onDismissRequest = vm::clearDialog)
+        }
+        // <-- TAMBAHAN PEMANGGILAN DIALOG BARU DI SINI -->
+        is RegisterDialogState.PasswordTooShort -> {
+            PasswordTooShortDialog(onDismissRequest = vm::clearDialog)
+        }
+        is RegisterDialogState.ApiError -> {
+            ApiErrorDialog(
                 message = state.message,
                 onDismissRequest = vm::clearDialog,
                 onLoginClick = {
@@ -362,17 +369,38 @@ private fun PasswordMismatchDialog(onDismissRequest: () -> Unit) {
     )
 }
 
+// <-- TAMBAHAN KOMPONEN DIALOG BARU -->
 @Composable
-private fun DuplicateAccountDialog(message: String, onDismissRequest: () -> Unit, onLoginClick: () -> Unit) {
+private fun PasswordTooShortDialog(onDismissRequest: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Akun Sudah Terdaftar", fontWeight = FontWeight.Bold) },
+        title = { Text("Password Terlalu Pendek", fontWeight = FontWeight.Bold) },
+        text = { Text("Demi keamanan akunmu, password harus terdiri dari minimal 8 karakter. Silakan buat password yang lebih panjang.") },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) { Text("Mengerti", color = MaterialTheme.colorScheme.primary) }
+        }
+    )
+}
+
+@Composable
+fun ApiErrorDialog(
+    message: String,
+    onDismissRequest: () -> Unit,
+    onLoginClick: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Registrasi Gagal") },
         text = { Text(message) },
         confirmButton = {
-            TextButton(onClick = onLoginClick) { Text("Login", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
+            TextButton(onClick = onDismissRequest) {
+                Text("Tutup")
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) { Text("Tutup", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            TextButton(onClick = onLoginClick) {
+                Text("Ke Halaman Login")
+            }
         }
     )
 }

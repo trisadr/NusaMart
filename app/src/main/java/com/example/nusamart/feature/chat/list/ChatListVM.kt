@@ -2,7 +2,6 @@ package com.example.nusamart.feature.chat.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.R
 import com.example.nusamart.data.repository.chat.ChatRepository
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,8 +37,8 @@ class ChatListVM @Inject constructor(
             ChatRoomUiModel(
                 roomId = room.idRoom,
                 partnerName = partner?.username ?: "Pengguna NusaMart",
-                // Sesuaikan field foto dengan model User kamu
-                partnerPhotoResId = partner?.imageURL ?: R.drawable.nm_logo,
+                // UBAH: Hanya kirimkan String URL-nya saja (bisa null)
+                partnerImageUrl = partner?.imageURL,
                 lastMessage = room.lastMessage?.takeIf { it.isNotBlank() }
                     ?: "Mulai percakapan...",
                 updatedAt = room.updateAt.toString()

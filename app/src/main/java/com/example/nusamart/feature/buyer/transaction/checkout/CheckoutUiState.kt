@@ -1,12 +1,12 @@
 package com.example.nusamart.feature.buyer.transaction.checkout
 
+import com.example.nusamart.data.dto.AddressDto
 import com.example.nusamart.data.repository.order.OrderItemInput
-import com.example.nusamart.data.repository.user.UserAddressJson
 
 data class CheckoutUiState(
     val isLoading: Boolean = true,
     val items: List<OrderItemInput> = emptyList(),
-    val address: UserAddressJson? = null,
+    val address: AddressDto? = null,
     val courierName: String = "Pilih Kurir Pengiriman",
     val paymentName: String = "Pilih Metode Pembayaran",
     val subtotal: Double = 0.0,

@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SellerHomeVM @Inject constructor(
     private val userRepository: UserRepository,
-    private val orderRepository: OrderRepository // 1. Inject OrderRepository
+    private val orderRepository: OrderRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SellerHomeUiState())
@@ -27,43 +27,37 @@ class SellerHomeVM @Inject constructor(
     private fun loadDashboardData() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        val currentUser = userRepository.getCurrentUser()
-        val currentSeller = userRepository.getCurrentSeller()
+        // 1. Cukup panggil 1x karena data user dan seller sudah digabung dari API
+        val profile = userRepository.getCurrentProfile()
 
         _uiState.update {
             it.copy(
                 isLoading = false,
-                user = currentUser,
-                sellerInfo = currentSeller
+                user = profile, // Mengisi data user utama
+                sellerInfo = profile?.seller // Mengambil objek seller dari dalam profile
             )
         }
 
-        // 2. Observasi pesanan secara real-time berdasarkan idStore
-        // (Asumsi SellerJson memiliki properti 'idStore')
-        currentSeller?.idSeller?.let { storeId ->
-            launch { // Buka coroutine baru agar collect tidak memblokir proses lain
-                orderRepository.getOrdersFlow().collect { allOrders ->
-                    // Filter pesanan khusus untuk toko ini
-                    val storeOrders = allOrders.filter { it.idStore == storeId }
-
-                    // Hitung Metrik
-                    val newOrdersCount = storeOrders.count { it.orderStatus == "PENDING" }
-                    val completedOrders = storeOrders.filter { it.orderStatus == "DELIVERED" }
-                    val totalRevenue = completedOrders.sumOf { it.productTotalPrice }
-
-                    // Update state dengan data terbaru
-                    _uiState.update { state ->
-                        state.copy(
-                            newOrdersCount = newOrdersCount,
-                            totalRevenue = totalRevenue,
-                            // Catatan: Idealnya hitung dari OrderItem, tapi sebagai placeholder
-                            // kita hitung jumlah pesanan sukses dulu.
-                            productsSold = completedOrders.size
-                        )
-                    }
-                }
-            }
-        }
+//        // 2. Gunakan idUser dari profile sebagai ID Toko (storeId)
+//        profile?.idUser?.let { storeId ->
+//            launch {
+//                orderRepository.getOrdersFlow().collect { allOrders ->
+//                    val storeOrders = allOrders.filter { it.idStore == storeId }
+//
+//                    val newOrdersCount = storeOrders.count { it.orderStatus == "PENDING" }
+//                    val completedOrders = storeOrders.filter { it.orderStatus == "DELIVERED" }
+//                    val totalRevenue = completedOrders.sumOf { it.productTotalPrice }
+//
+//                    _uiState.update { state ->
+//                        state.copy(
+//                            newOrdersCount = newOrdersCount,
+//                            totalRevenue = totalRevenue,
+//                            productsSold = completedOrders.size
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun logout() = viewModelScope.launch {

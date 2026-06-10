@@ -24,7 +24,7 @@ class ProfileVM @Inject constructor(
 
     private fun loadProfile() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-        val currentUser = userRepository.getCurrentUser()
+        val currentUser = userRepository.getCurrentProfile()
         _uiState.update { it.copy(user = currentUser, isLoading = false) }
     }
 

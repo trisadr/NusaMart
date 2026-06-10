@@ -8,7 +8,7 @@ data class ChatListUiState(
 data class ChatRoomUiModel(
     val roomId: String,
     val partnerName: String,
-    val partnerPhotoResId: Int,
+    val partnerImageUrl: String? = null,
     val lastMessage: String,
     val updatedAt: String
 )

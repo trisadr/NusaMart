@@ -28,24 +28,24 @@ class LandingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // 1. Tambahkan delay 1,5 detik (1500 milidetik)
+            // Tambahkan delay 1,5 detik
             delay(1500L)
 
             val isLoggedIn = tokenPrefs.isLoggedIn()
 
             if (isLoggedIn) {
                 val role = tokenPrefs.getRole()
-                val destination = when (role) {
+
+                // UBAH: Gunakan .lowercase() agar aman dari perbedaan huruf kapital/kecil
+                val destination = when (role?.lowercase()) {
                     "seller" -> Routes.SellerHomeScreenRoute
                     "buyer"  -> Routes.HomeRoute
-                    // Fallback: Jika role tidak dikenali, lempar kembali ke Login
                     else     -> Routes.LoginPageRoute
                 }
                 _uiState.update {
                     it.copy(isLoading = false, navigateTo = destination)
                 }
             } else {
-                // 2. PERBAIKAN: Arahkan ke LoginPageRoute jika belum login
                 _uiState.update {
                     it.copy(isLoading = false, navigateTo = Routes.LoginPageRoute)
                 }

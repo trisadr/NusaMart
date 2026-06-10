@@ -31,7 +31,7 @@ class CheckoutSuccessVM @Inject constructor(
         val methodName = selectedMethod?.methodName ?: "Bayar di Tempat"
 
         // Tarik data user untuk dummy Virtual Account
-        val user = userRepository.getCurrentUser()
+        val user = userRepository.getCurrentProfile()
         val phone = user?.phone ?: "081234567890"
 
         var code = ""

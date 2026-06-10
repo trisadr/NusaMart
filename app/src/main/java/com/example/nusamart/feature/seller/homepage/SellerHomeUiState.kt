@@ -1,14 +1,15 @@
 package com.example.nusamart.feature.seller.homepage
 
-import com.example.nusamart.data.repository.user.SellerJson
-import com.example.nusamart.data.repository.user.UserJson
+import com.example.nusamart.data.dto.SellerDto
+import com.example.nusamart.data.dto.UserProfileResponse
 
 data class SellerHomeUiState(
     val isLoading: Boolean = true,
-    val user: UserJson? = null,
-    val sellerInfo: SellerJson? = null,
+    // UBAH: Sesuaikan tipe datanya dengan response API
+    val user: UserProfileResponse? = null,
+    val sellerInfo: SellerDto? = null,
+
     val newOrdersCount: Int = 0,
-    val productsSold: Int = 0,
-    val totalRevenue: Double = 0.0,
-    val errorMessage: String? = null
+    val totalRevenue: Int = 0,
+    val productsSold: Int = 0
 )

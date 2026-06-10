@@ -1,11 +1,16 @@
 package com.example.nusamart.feature.auth.login
 
-import com.example.nusamart.data.network.dto.AuthResponse
-import com.example.nusamart.data.network.dto.AddressDto
-import com.example.nusamart.data.network.dto.CommonResponse
-import com.example.nusamart.data.network.dto.UserProfileResponse
+import com.example.nusamart.data.dto.AddressDto
+import com.example.nusamart.data.dto.AuthResponse
+import com.example.nusamart.data.dto.CommonResponse
+import com.example.nusamart.data.dto.UserProfileResponse
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface AuthAndUserApi {
 
@@ -58,4 +63,10 @@ interface AuthAndUserApi {
 
     @POST("auth/logout")
     suspend fun logout(): retrofit2.Response<Map<String, String>>
+
+    // ── MENGAMBIL USER BERDASARKAN ID ──────────────────────
+    @GET("user/{id}") // Sesuaikan dengan route di backend Laravel-mu
+    suspend fun getUserById(
+        @Path("id") userId: String
+    ): Response<UserProfileResponse> // Asumsi response-nya sama dengan UserProfileResponse
 }

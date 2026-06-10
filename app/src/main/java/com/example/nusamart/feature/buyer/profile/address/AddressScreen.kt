@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
-import com.example.nusamart.data.repository.user.UserAddressJson
+import com.example.nusamart.data.dto.AddressDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,8 +122,8 @@ fun AddressScreen(vm: AddressVM = hiltViewModel()) {
 
 @Composable
 private fun AddressList(
-    addresses: List<UserAddressJson>,
-    onEdit: (UserAddressJson) -> Unit,
+    addresses: List<AddressDto>,
+    onEdit: (AddressDto) -> Unit,
     onDelete: (String) -> Unit
 ) {
     if (addresses.isEmpty()) {

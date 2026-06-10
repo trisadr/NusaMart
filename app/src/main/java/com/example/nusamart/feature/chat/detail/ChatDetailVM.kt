@@ -46,7 +46,7 @@ class ChatDetailVM @Inject constructor(
                 messages = messages,
                 currentUserId = myId,
                 otherUserName = otherUser?.username ?: "Chat",
-                otherUserPhotoResId = otherUser?.imageURL ?: com.example.nusamart.R.drawable.nm_logo
+                otherUserImageUrl = otherUser?.imageURL
             )
         }
     }

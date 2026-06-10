@@ -11,7 +11,7 @@ data class User(
     val role: Role,
     val createAt: LocalDateTime,
     val updateAt: LocalDateTime,
-    val imageURL: Int? = null
+    val imageURL: String? = null
 ) {
     enum class Role {
         BUYER,

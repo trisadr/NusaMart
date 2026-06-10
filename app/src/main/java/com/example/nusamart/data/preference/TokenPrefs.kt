@@ -23,7 +23,6 @@ class TokenPrefs @Inject constructor(
         private val KEY_USER_ID = stringPreferencesKey("user_id")
     }
 
-    // Dipakai untuk OkHttp Interceptor (ambil data secara langsung/blocking)
     suspend fun getTokenSync(): String? {
         return context.tokenDataStore.data.map { it[KEY_TOKEN] }.firstOrNull()
     }
@@ -36,10 +35,15 @@ class TokenPrefs @Inject constructor(
         return context.tokenDataStore.data.map { it[KEY_ROLE] }.firstOrNull()
     }
 
+    // TAMBAHAN: Fungsi untuk mengambil UserId
+    fun getUserId(): Flow<String?> {
+        return context.tokenDataStore.data.map { it[KEY_USER_ID] }
+    }
+
     suspend fun saveSession(token: String, role: String, userId: String) {
         context.tokenDataStore.edit { prefs ->
             prefs[KEY_TOKEN] = token
-            prefs[KEY_ROLE] = role.lowercase() // samakan case dengan routing mobile (buyer/seller)
+            prefs[KEY_ROLE] = role.lowercase()
             prefs[KEY_USER_ID] = userId
         }
     }

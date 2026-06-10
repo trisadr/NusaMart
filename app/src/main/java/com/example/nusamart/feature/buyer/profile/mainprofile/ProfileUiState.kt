@@ -1,8 +1,8 @@
 package com.example.nusamart.feature.buyer.profile.mainprofile
 
-import com.example.nusamart.data.repository.user.UserJson
+import com.example.nusamart.data.dto.UserProfileResponse
 
 data class ProfileUiState(
-    val user: UserJson? = null,
+    val user: UserProfileResponse? = null,
     val isLoading: Boolean = true
 )

@@ -51,9 +51,18 @@ class RegisterVM @Inject constructor(
         if (state.username.isBlank()) return@launch showErrorDialog("Username wajib diisi.")
         if (state.email.isBlank()) return@launch showErrorDialog("Email wajib diisi.")
         if (state.phone.length < 10) return@launch showErrorDialog("Nomor telepon tidak valid.")
+
         if (state.password.isBlank()) return@launch showErrorDialog("Password wajib diisi.")
+
+        // --- TAMBAHAN: Validasi minimal 8 karakter ---
+        if (state.password.length < 8) {
+            _uiState.update { it.copy(dialogState = RegisterDialogState.PasswordTooShort) }
+            return@launch
+        }
+
         if (state.confirmPassword.isBlank()) return@launch showErrorDialog("Konfirmasi password wajib diisi.")
         if (!isEmailValid(state.email)) return@launch showErrorDialog("Format email tidak valid.")
+
         if (state.password != state.confirmPassword) {
             _uiState.update { it.copy(dialogState = RegisterDialogState.PasswordMismatch) }
             return@launch
@@ -85,9 +94,9 @@ class RegisterVM @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
                 _successEvent.emit(Unit)
             }
-            is RegisterResult.ErrorDuplicate -> {
+            is RegisterResult.Error -> {
                 _uiState.update {
-                    it.copy(isLoading = false, dialogState = RegisterDialogState.DuplicateAccount(result.message))
+                    it.copy(isLoading = false, dialogState = RegisterDialogState.ApiError(result.message))
                 }
             }
         }

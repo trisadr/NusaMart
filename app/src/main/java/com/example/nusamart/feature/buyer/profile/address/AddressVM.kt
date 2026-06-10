@@ -2,7 +2,7 @@ package com.example.nusamart.feature.buyer.profile.address
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.data.repository.user.UserAddressJson
+import com.example.nusamart.data.dto.AddressDto // UBAH IMPORT INI
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,15 +30,20 @@ class AddressVM @Inject constructor(
     }
 
     fun deleteAddress(id: String) = viewModelScope.launch {
-        userRepository.deleteAddress(id)
-        loadAddresses()
+        _uiState.update { it.copy(isLoading = true) } // Tambahkan loading
+        val success = userRepository.deleteAddress(id)
+        if (success) {
+            loadAddresses()
+        } else {
+            _uiState.update { it.copy(isLoading = false) }
+            // Opsional: Tampilkan toast/error message jika gagal hapus
+        }
     }
 
-    // --- Fungsi Form ---
     fun showAddForm() = _uiState.update { it.copy(isFormVisible = true, editAddressId = null) }
 
-    // Membuka form dan mengisi dengan data alamat lama
-    fun showEditForm(address: UserAddressJson) = _uiState.update {
+    // UBAH: Parameter menggunakan AddressDto
+    fun showEditForm(address: AddressDto) = _uiState.update {
         it.copy(
             isFormVisible = true,
             editAddressId = address.idAddress,
@@ -81,13 +86,13 @@ class AddressVM @Inject constructor(
     fun saveAddress() = viewModelScope.launch {
         val state = _uiState.value
 
-        // Pastikan semua field wajib terisi
         if (state.formLabel.isNotBlank() && state.formReceiver.isNotBlank() &&
             state.formPhone.isNotBlank() && state.formCompleteAddress.isNotBlank() &&
             state.formCity.isNotBlank() && state.formProvince.isNotBlank()) {
 
-            if (state.editAddressId != null) {
-                // Proses Edit (Update)
+            _uiState.update { it.copy(isLoading = true) } // Loading saat memanggil API
+
+            val isSuccess = if (state.editAddressId != null) {
                 userRepository.updateAddress(
                     addressId = state.editAddressId,
                     label = state.formLabel,
@@ -100,7 +105,6 @@ class AddressVM @Inject constructor(
                     isDefault = state.formIsDefault
                 )
             } else {
-                // Proses Tambah Baru
                 userRepository.addAddress(
                     label = state.formLabel,
                     receiver = state.formReceiver,
@@ -113,8 +117,13 @@ class AddressVM @Inject constructor(
                 )
             }
 
-            hideForm()
-            loadAddresses() // Refresh list setelah menyimpan
+            if (isSuccess) {
+                hideForm()
+                loadAddresses() // Refresh list dari backend
+            } else {
+                _uiState.update { it.copy(isLoading = false) }
+                // Opsional: Tampilkan error gagal simpan
+            }
         }
     }
 }

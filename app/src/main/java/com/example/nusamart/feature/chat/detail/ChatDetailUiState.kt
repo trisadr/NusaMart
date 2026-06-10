@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.chat.detail
 
-import androidx.annotation.DrawableRes
 import com.example.nusamart.data.model.chat.Chat
 
 data class ChatDetailUiState(
@@ -8,5 +7,5 @@ data class ChatDetailUiState(
     val messages: List<Chat> = emptyList(),
     val currentUserId: String = "",
     val otherUserName: String = "",
-    @DrawableRes val otherUserPhotoResId: Int = 0
+    val otherUserImageUrl: String? = null
 )
