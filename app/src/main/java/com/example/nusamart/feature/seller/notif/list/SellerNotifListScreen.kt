@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.data.repository.notif.NotificationJson
+import com.example.nusamart.data.dto.NotificationDto
 import com.example.nusamart.feature.components.SellerBottomMenu
 import com.example.nusamart.feature.components.SellerBottomNavigation
 
@@ -132,13 +132,13 @@ fun SellerNotifListScreen(vm: SellerNotifListVM = hiltViewModel()) {
 
 @Composable
 private fun SellerNotificationItem(
-    notif: NotificationJson,
+    notif: NotificationDto,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     containerIconColor: androidx.compose.ui.graphics.Color,
     iconTint: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
-    val bgColor = if (notif.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+    val bgColor = if (notif.isRead == 1) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
 
     Column(modifier = Modifier.fillMaxWidth().background(bgColor).clickable(onClick = onClick)) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -147,7 +147,7 @@ private fun SellerNotificationItem(
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = notif.title, fontSize = 15.sp, fontWeight = if (notif.isRead) FontWeight.Normal else FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = notif.title, fontSize = 15.sp, fontWeight = if (notif.isRead == 1) FontWeight.Normal else FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = notif.body, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(8.dp))

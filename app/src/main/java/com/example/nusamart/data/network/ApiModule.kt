@@ -2,6 +2,7 @@ package com.example.nusamart.data.network
 
 import com.example.nusamart.data.interfaceapi.CartApi
 import com.example.nusamart.data.interfaceapi.ChatApi
+import com.example.nusamart.data.interfaceapi.NotificationApi
 import com.example.nusamart.data.interfaceapi.OrderApi
 import com.example.nusamart.data.interfaceapi.PaymentApi
 import com.example.nusamart.data.interfaceapi.ProductApi
@@ -105,5 +106,11 @@ object ApiModule {
     @Singleton
     fun provideChatApi(retrofit: Retrofit): ChatApi {
         return retrofit.create(ChatApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
+        return retrofit.create(NotificationApi::class.java)
     }
 }

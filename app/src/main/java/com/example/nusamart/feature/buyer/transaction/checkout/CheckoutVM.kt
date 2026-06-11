@@ -216,11 +216,7 @@ class CheckoutVM @Inject constructor(
 
                         if (sellerId != null) {
                             val productNames = items.joinToString(", ") { it.nameSnapshot }
-                            notificationRepository.addNewOrderNotificationForSeller(
-                                sellerId = sellerId,
-                                orderId = orderId,
-                                productNames = productNames
-                            )
+                            _uiState.update { it.copy(isLoading = false) }
                         }
                     }
                 }

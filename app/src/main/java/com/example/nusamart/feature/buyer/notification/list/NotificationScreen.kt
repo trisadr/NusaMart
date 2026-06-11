@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.data.repository.notif.NotificationJson
+import com.example.nusamart.data.dto.NotificationDto
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 
@@ -162,13 +162,13 @@ fun NotificationScreen(
 
 @Composable
 private fun NotificationItem(
-    notif: NotificationJson,
+    notif: NotificationDto,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     containerIconColor: androidx.compose.ui.graphics.Color,
     iconTint: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
-    val bgColor = if (notif.isRead) {
+    val bgColor = if (notif.isRead == 1) {
         MaterialTheme.colorScheme.surface
     } else {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
@@ -188,7 +188,7 @@ private fun NotificationItem(
                 Text(
                     text = notif.title,
                     fontSize = 15.sp,
-                    fontWeight = if (notif.isRead) FontWeight.Normal else FontWeight.Bold,
+                    fontWeight = if (notif.isRead == 1) FontWeight.Normal else FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))

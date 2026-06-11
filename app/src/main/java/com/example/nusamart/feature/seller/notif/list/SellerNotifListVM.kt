@@ -24,7 +24,7 @@ class SellerNotifListVM @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         val userId = userRepository.getActiveUserId()
         if (userId != null) {
-            val list = notificationRepository.getNotificationsByUser(userId)
+            val list = notificationRepository.getNotificationsByUser()
             _uiState.update { it.copy(isLoading = false, notifications = list) }
         } else {
             _uiState.update { it.copy(isLoading = false) }
@@ -34,7 +34,7 @@ class SellerNotifListVM @Inject constructor(
     fun markAllAsRead() = viewModelScope.launch {
         val userId = userRepository.getActiveUserId()
         if (userId != null) {
-            notificationRepository.markAllAsRead(userId)
+            notificationRepository.markAllAsRead()
             loadNotifications()
         }
     }

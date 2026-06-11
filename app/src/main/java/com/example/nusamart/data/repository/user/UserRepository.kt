@@ -97,11 +97,6 @@ class UserRepository @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    notificationRepository.addSystemNotification(
-                        userId = body.user.idUser, // <-- PERBAIKAN DI SINI (tambahkan .user dan pastikan namanya idUser)
-                        username = username.trim(),
-                        isSeller = isSeller
-                    )
                     return@withContext RegisterResult.Success
                 }
             }

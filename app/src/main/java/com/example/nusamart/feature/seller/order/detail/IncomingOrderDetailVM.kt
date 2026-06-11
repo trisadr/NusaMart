@@ -2,9 +2,6 @@ package com.example.nusamart.feature.seller.order.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.data.model.order.Order
-import com.example.nusamart.data.model.shipping.Shipping
-import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.shipping.ShippingRepository
 import com.example.nusamart.data.repository.user.UserRepository
@@ -19,8 +16,8 @@ import javax.inject.Inject
 class IncomingOrderDetailVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
-    private val shippingRepository: ShippingRepository,
-    private val notificationRepository: NotificationRepository
+    private val shippingRepository: ShippingRepository
+    // NotificationRepository resmi DIHAPUS dari sini! 🎉
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomingOrderDetailUiState())
@@ -46,16 +43,9 @@ class IncomingOrderDetailVM @Inject constructor(
     fun processOrder(orderId: String, courierId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.PROCESSED.name)
+        // Cukup perbarui status dan buat pengiriman. Laravel yang akan menembak notif ke pembeli.
+        orderRepository.updateOrderStatus(orderId, "PROCESSED")
         shippingRepository.createShipping(orderId, courierId)
-
-        // AMBIL DATA & KIRIM NOTIFIKASI KE BUYER
-        val order = orderRepository.getOrderById(orderId)
-        if (order != null) {
-            val items = orderRepository.getOrderItems(orderId)
-            val productNames = items.joinToString(", ") { it.nameSnapshot }
-            notificationRepository.addOrderStatusNotification(order.idUser, orderId, productNames, "PROCESSED")
-        }
 
         loadOrderDetail(orderId)
     }
@@ -64,25 +54,8 @@ class IncomingOrderDetailVM @Inject constructor(
     fun cancelOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // Update status order
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.CANCELLED.name)
-
-        // AMBIL DATA ORDER UNTUK MENDAPATKAN ID BUYER
-        val order = orderRepository.getOrderById(orderId)
-        if (order != null) {
-
-            // 1. AMBIL NAMA-NAMA PRODUK DARI PESANAN INI
-            val items = orderRepository.getOrderItems(orderId)
-            // Gabungkan semua nama produk menjadi satu teks (misal: "Kopi Lokal, Gula Aren")
-            val productNames = items.joinToString(", ") { it.nameSnapshot }
-
-            // 2. KIRIM NOTIFIKASI PEMBATALAN BESERTA NAMA PRODUK
-            notificationRepository.addOrderCancelledNotification(
-                userId = order.idUser,
-                orderId = orderId,
-                productNames = productNames // <-- KIRIMKAN KE SINI
-            )
-        }
+        // Cukup perbarui status. Laravel yang akan menangani notif pembatalan.
+        orderRepository.updateOrderStatus(orderId, "CANCELLED")
 
         loadOrderDetail(orderId)
     }
@@ -91,16 +64,20 @@ class IncomingOrderDetailVM @Inject constructor(
     fun shipOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.SHIPPED.name)
+        // Update status order utama
+        orderRepository.updateOrderStatus(orderId, "SHIPPED")
 
+        // Update status di sisi kurir/pengiriman
         val shipping = shippingRepository.getShippingByOrderId(orderId)
         if (shipping != null) {
             val dummyResi = "NUSA-${System.currentTimeMillis()}"
+
             shippingRepository.updateShippingStatus(
                 shippingId = shipping.idShipping,
-                newStatus = Shipping.ShippingStatus.PICKED_UP.name,
+                newStatus = "PICKED_UP",
                 resiNumber = dummyResi
             )
+
             shippingRepository.addTrackingUpdate(
                 shippingId = shipping.idShipping,
                 location = "Toko Penjual",
@@ -108,14 +85,7 @@ class IncomingOrderDetailVM @Inject constructor(
             )
         }
 
-        // AMBIL DATA & KIRIM NOTIFIKASI KE BUYER
-        val order = orderRepository.getOrderById(orderId)
-        if (order != null) {
-            val items = orderRepository.getOrderItems(orderId)
-            val productNames = items.joinToString(", ") { it.nameSnapshot }
-            notificationRepository.addOrderStatusNotification(order.idUser, orderId, productNames, "SHIPPED")
-        }
-
+        // Notifikasi pengiriman dikerjakan Laravel di belakang layar.
         loadOrderDetail(orderId)
     }
 }
