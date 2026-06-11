@@ -54,7 +54,7 @@ fun CourierOptionScreen(
                         name = courier.courierName,
                         icon = Icons.Default.LocalShipping,
                         isSelected = currentRoute.selectedCourierId == courier.idCourier,
-                        subtitle = "Estimasi: ${courier.timeEstimation}",
+                        subtitle = "Estimasi: ${courier.timeEstimation} Hari",
                         onSelect = {
                             backStack.removeAt(backStack.lastIndex)
                             backStack.removeAt(backStack.lastIndex)

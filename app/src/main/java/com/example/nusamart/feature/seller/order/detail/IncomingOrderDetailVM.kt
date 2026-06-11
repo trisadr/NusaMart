@@ -98,7 +98,7 @@ class IncomingOrderDetailVM @Inject constructor(
             val dummyResi = "NUSA-${System.currentTimeMillis()}"
             shippingRepository.updateShippingStatus(
                 shippingId = shipping.idShipping,
-                newStatus = Shipping.ShippingStatus.PICKED_UP,
+                newStatus = Shipping.ShippingStatus.PICKED_UP.name,
                 resiNumber = dummyResi
             )
             shippingRepository.addTrackingUpdate(

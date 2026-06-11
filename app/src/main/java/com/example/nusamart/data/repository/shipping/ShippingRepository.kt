@@ -1,194 +1,96 @@
 package com.example.nusamart.data.repository.shipping
 
-import android.content.Context
-import com.example.nusamart.data.model.shipping.Shipping
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.example.nusamart.data.dto.AddTrackingRequest
+import com.example.nusamart.data.dto.CourierOptionDto
+import com.example.nusamart.data.dto.CreateShippingRequest
+import com.example.nusamart.data.dto.ShippingDto
+import com.example.nusamart.data.dto.ShippingTrackingDto
+import com.example.nusamart.data.dto.UpdateShippingStatusRequest
+import com.example.nusamart.data.interfaceapi.ShippingApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// JSON-Friendly Models
-
-data class CourierOptionJson(
-    val idCourier: String,
-    val courierName: String,
-    val serviceType: String,
-    val timeEstimation: String,
-    val isActive: Boolean
-)
-
-data class ShippingJson(
-    val idShipping: String,
-    val idOrder: String,
-    val idCourier: String,
-    val resi: String? = null,
-    val shippingDate: String? = null,
-    val deliveredDate: String? = null,
-    val shippingStatus: String
-)
-
-data class ShippingTrackingJson(
-    val idTracking: String,
-    val idShipping: String,
-    val packetLocation: String? = null,
-    val description: String? = null,
-    val updateAt: String
-)
-
-// Hasil Operasi
-
+// Sealed class untuk menangkap hasil operasi (sukses/gagal)
 sealed class ShippingResult {
-    data class Success(val shippingId: String) : ShippingResult()
+    data class Success(val data: Any? = null) : ShippingResult()
     data class Error(val message: String) : ShippingResult()
 }
 
-// Repository
-
 @Singleton
 class ShippingRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val apiService: ShippingApi
 ) {
 
-    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    // --- MANAJEMEN KURIR ---
 
-    private val courierFile = "courier_option.json"
-    private val shippingFile = "shipping.json"
-    private val trackingFile = "shipping_tracking.json"
-
-    // Helper Baca/Tulis JSON
-
-    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
-        val file = File(context.filesDir, fileName)
-        if (!file.exists()) {
-            // Coba salin dari assets jika file belum ada di internal storage (misal untuk data kurir)
-            try {
-                context.assets.open(fileName).use { inputStream ->
-                    val json = inputStream.bufferedReader().readText()
-                    file.writeText(json)
-                }
-            } catch (e: Exception) {
-                return mutableListOf()
-            }
+    suspend fun getActiveCouriers(): List<CourierOptionDto> = withContext(Dispatchers.IO) {
+        try {
+            val couriers = apiService.getCouriers()
+            // Filter isActive == 1 karena menggunakan Int (0/1) dari MySQL
+            couriers.filter { it.isActive == 1 }
+        } catch (e: Exception) {
+            emptyList()
         }
-        val json = file.readText()
-        val type = object : TypeToken<List<T>>() {}.type
-        return gson.fromJson(json, type) ?: mutableListOf()
     }
 
-    private fun <T> writeJson(fileName: String, data: List<T>) {
-        val file = File(context.filesDir, fileName)
-        file.writeText(gson.toJson(data))
-    }
-
-
-    // MANAJEMEN KURIR (COURIER)
-
-    suspend fun getActiveCouriers(): List<CourierOptionJson> = withContext(Dispatchers.IO) {
-        val couriers = readJson<CourierOptionJson>(courierFile)
-        return@withContext couriers.filter { it.isActive }
-    }
-
-    suspend fun getCourierById(courierId: String): CourierOptionJson? = withContext(Dispatchers.IO) {
-        val couriers = readJson<CourierOptionJson>(courierFile)
-        return@withContext couriers.find { it.idCourier == courierId }
-    }
-
-
-    // MANAJEMEN PENGIRIMAN (SHIPPING)
-
-    suspend fun getShippingByOrderId(orderId: String): ShippingJson? = withContext(Dispatchers.IO) {
-        val shippings = readJson<ShippingJson>(shippingFile)
-        return@withContext shippings.find { it.idOrder == orderId }
-    }
-
-    // Dipanggil saat seller mengonfirmasi/memproses pesanan
-    suspend fun createShipping(
-        orderId: String,
-        courierId: String
-    ): ShippingResult = withContext(Dispatchers.IO) {
-        delay(500)
-        val shippings = readJson<ShippingJson>(shippingFile)
-
-        // Cek apakah order sudah memiliki data pengiriman
-        if (shippings.any { it.idOrder == orderId }) {
-            return@withContext ShippingResult.Error("Data pengiriman untuk pesanan ini sudah dibuat.")
+    suspend fun getCourierById(courierId: String): CourierOptionDto? = withContext(Dispatchers.IO) {
+        try {
+            apiService.getCourierDetail(courierId)
+        } catch (e: Exception) {
+            null
         }
+    }
 
-        // Auto Increment SHP-000001
-        val maxShpNum = shippings.maxOfOrNull { it.idShipping.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
-        val newShippingId = String.format("SHP-%06d", maxShpNum + 1)
 
-        val newShipping = ShippingJson(
-            idShipping = newShippingId,
-            idOrder = orderId,
-            idCourier = courierId,
-            resi = null,
-            shippingDate = null,
-            deliveredDate = null,
-            shippingStatus = Shipping.ShippingStatus.WAITING.name
-        )
+    // --- MANAJEMEN PENGIRIMAN ---
 
-        shippings.add(newShipping)
-        writeJson(shippingFile, shippings)
+    suspend fun getShippingByOrderId(orderId: String): ShippingDto? = withContext(Dispatchers.IO) {
+        try {
+            apiService.getShippingByOrder(orderId)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
-        return@withContext ShippingResult.Success(newShippingId)
+    // Dipanggil saat seller mengonfirmasi pesanan
+    suspend fun createShipping(orderId: String, courierId: String): ShippingResult = withContext(Dispatchers.IO) {
+        try {
+            val request = CreateShippingRequest(idOrder = orderId, idCourier = courierId)
+            val response = apiService.createShipping(request)
+
+            // Kembalikan ID shipping yang baru terbuat
+            ShippingResult.Success(response.shipping?.idShipping)
+        } catch (e: Exception) {
+            ShippingResult.Error(e.message ?: "Gagal membuat data pengiriman")
+        }
     }
 
     // Dipanggil saat seller menginput resi atau kurir mengupdate status
     suspend fun updateShippingStatus(
         shippingId: String,
-        newStatus: Shipping.ShippingStatus,
+        newStatus: String, // String status seperti "PICKED_UP", "IN_TRANSIT"
         resiNumber: String? = null
     ): Boolean = withContext(Dispatchers.IO) {
-        val shippings = readJson<ShippingJson>(shippingFile)
-        val index = shippings.indexOfFirst { it.idShipping == shippingId }
-
-        if (index != -1) {
-            val nowStr = LocalDateTime.now().toString()
-            val oldShipping = shippings[index]
-
-            // Set shippingDate jika status berubah menjadi PICKED_UP
-            val newShippingDate = if (newStatus == Shipping.ShippingStatus.PICKED_UP && oldShipping.shippingDate == null) {
-                nowStr
-            } else {
-                oldShipping.shippingDate
-            }
-
-            // Set deliveredDate jika status berubah menjadi DELIVERED
-            val newDeliveredDate = if (newStatus == Shipping.ShippingStatus.DELIVERED && oldShipping.deliveredDate == null) {
-                nowStr
-            } else {
-                oldShipping.deliveredDate
-            }
-
-            shippings[index] = oldShipping.copy(
-                shippingStatus = newStatus.name,
-                resi = resiNumber ?: oldShipping.resi,
-                shippingDate = newShippingDate,
-                deliveredDate = newDeliveredDate
-            )
-
-            writeJson(shippingFile, shippings)
-            return@withContext true
+        try {
+            val request = UpdateShippingStatusRequest(shippingStatus = newStatus, resi = resiNumber)
+            apiService.updateShippingStatus(shippingId, request)
+            true
+        } catch (e: Exception) {
+            false
         }
-        return@withContext false
     }
 
 
-    // RIWAYAT PELACAKAN (TRACKING)
+    // --- RIWAYAT PELACAKAN (TRACKING) ---
 
-    suspend fun getTrackingHistory(shippingId: String): List<ShippingTrackingJson> = withContext(Dispatchers.IO) {
-        val trackings = readJson<ShippingTrackingJson>(trackingFile)
-        // Urutkan dari yang terbaru (updateAt descending)
-        return@withContext trackings.filter { it.idShipping == shippingId }
-            .sortedByDescending { it.updateAt }
+    suspend fun getTrackingHistory(shippingId: String): List<ShippingTrackingDto> = withContext(Dispatchers.IO) {
+        try {
+            apiService.getTrackingHistory(shippingId)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     // Menambah log pergerakan paket
@@ -197,23 +99,12 @@ class ShippingRepository @Inject constructor(
         location: String?,
         description: String
     ): Boolean = withContext(Dispatchers.IO) {
-        val trackings = readJson<ShippingTrackingJson>(trackingFile)
-
-        // Auto Increment TRK-000001
-        val maxTrkNum = trackings.maxOfOrNull { it.idTracking.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
-        val newTrackingId = String.format("TRK-%06d", maxTrkNum + 1)
-
-        val newTracking = ShippingTrackingJson(
-            idTracking = newTrackingId,
-            idShipping = shippingId,
-            packetLocation = location,
-            description = description,
-            updateAt = LocalDateTime.now().toString()
-        )
-
-        trackings.add(newTracking)
-        writeJson(trackingFile, trackings)
-
-        return@withContext true
+        try {
+            val request = AddTrackingRequest(packetLocation = location, description = description)
+            apiService.addTrackingUpdate(shippingId, request)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }

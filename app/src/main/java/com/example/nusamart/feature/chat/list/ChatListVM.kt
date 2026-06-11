@@ -29,7 +29,7 @@ class ChatListVM @Inject constructor(
             return@launch
         }
 
-        val rooms = chatRepository.getChatRooms(myId)
+        val rooms = chatRepository.getChatRooms()
         val uiModels = rooms.map { room ->
             val partnerId = if (room.idUser1 == myId) room.idUser2 else room.idUser1
             val partner = userRepository.getUserById(partnerId)

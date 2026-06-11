@@ -35,7 +35,7 @@ class ChatDetailVM @Inject constructor(
 
         // ← TAMBAH: tandai pesan sebagai terbaca saat chat dibuka
         if (myId.isNotBlank()) {
-            chatRepository.markMessagesAsRead(roomId, myId)
+            chatRepository.markMessagesAsRead(roomId)
         }
 
         val messages = chatRepository.getChatsByRoom(roomId)
@@ -56,7 +56,7 @@ class ChatDetailVM @Inject constructor(
         val trimmed = text.trim()
         if (trimmed.isBlank()) return@launch
 
-        chatRepository.sendMessage(currentRoomId, myId, trimmed)
+        chatRepository.sendMessage(currentRoomId, text)
         val messages = chatRepository.getChatsByRoom(currentRoomId)
         _uiState.update { it.copy(messages = messages) }
     }

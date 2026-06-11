@@ -126,8 +126,8 @@ class ProductPageVM @Inject constructor(
             val sellerId = store?.idSeller
 
             if (myId != null && sellerId != null) {
-                val room = chatRepository.getOrCreateRoom(myId, sellerId)
-                onNavigateToChat(room.idRoom)
+                val room = chatRepository.getOrCreateRoom(sellerId)
+                room?.let { onNavigateToChat(it.idRoom) }
             }
         }
     }

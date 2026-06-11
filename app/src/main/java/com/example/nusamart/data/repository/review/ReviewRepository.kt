@@ -1,120 +1,83 @@
 package com.example.nusamart.data.repository.review
 
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.example.nusamart.data.dto.ByItemsRequest
+import com.example.nusamart.data.dto.ReviewDto
+import com.example.nusamart.data.interfaceapi.ReviewApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// JSON-Friendly Models
-
-data class ReviewJson(
-    val idReview: String,
-    val idOrderItem: String,
-    val idUser: String,
-    val rating: Double,
-    val comment: String? = null,
-    val isHidden: Boolean,
-    val createAt: String
-)
-
-data class ReviewImageJson(
-    val idRevImage: String,
-    val idReview: String,
-    val urlImage: String?
-)
-
-// Repository
-
 @Singleton
 class ReviewRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val apiService: ReviewApi
 ) {
 
-    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
-    private val reviewFile = "review.json"
-    private val reviewImageFile = "review_image.json"
-
-    // Helper Baca/Tulis JSON
-
-    private inline fun <reified T> readJson(fileName: String): MutableList<T> {
-        val file = File(context.filesDir, fileName)
-
-        if (!file.exists()) {
-            try {
-                context.assets.open(fileName).use { inputStream ->
-                    val json = inputStream.bufferedReader().readText()
-                    file.writeText(json)
-                }
-            } catch (e: Exception) {
-                return mutableListOf()
-            }
+    // Mengambil ulasan berdasarkan ID Produk
+    suspend fun getReviewsByProduct(productId: String): List<ReviewDto> = withContext(Dispatchers.IO) {
+        try {
+            apiService.getReviewsByProduct(productId)
+        } catch (e: Exception) {
+            emptyList()
         }
-
-        val json = file.readText()
-        val type = object : TypeToken<List<T>>() {}.type
-        return gson.fromJson(json, type) ?: mutableListOf()
     }
 
-    private fun <T> writeJson(fileName: String, data: List<T>) {
-        val file = File(context.filesDir, fileName)
-        file.writeText(gson.toJson(data))
+    // Mengambil ulasan berdasarkan list ID Order Item
+    suspend fun getReviewsByItemIds(itemIds: List<String>): List<ReviewDto> = withContext(Dispatchers.IO) {
+        try {
+            val request = ByItemsRequest(itemIds)
+            apiService.getReviewsByItems(request)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-
-    // MANAJEMEN ULASAN
-
-    // Tambahkan di dalam class ReviewRepository
-    suspend fun getReviewsByItemIds(itemIds: List<String>): List<ReviewJson> = withContext(Dispatchers.IO) {
-        val reviews = readJson<ReviewJson>(reviewFile)
-        return@withContext reviews.filter { it.idOrderItem in itemIds }
-    }
+    // Membuat ulasan baru beserta upload gambar (jika ada)
     suspend fun createReview(
         idOrderItem: String,
-        idUser: String,
         rating: Double,
         comment: String?,
-        imageUrl: String? // 1. UBAH DI SINI: dari imageResId: Int? menjadi imageUrl: String?
-    ) = withContext(Dispatchers.IO) {
-        delay(300) // Simulasi loading network
-        val reviews = readJson<ReviewJson>(reviewFile)
+        localImagePath: String? // File path lokal di HP user (bukan URL internet)
+    ): Result<ReviewDto?> = withContext(Dispatchers.IO) {
+        try {
+            // 1. Konversi teks menjadi RequestBody
+            val idItemBody = idOrderItem.toRequestBody("text/plain".toMediaTypeOrNull())
+            val ratingBody = rating.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val commentBody = comment?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        // Auto Increment id REV-000001
-        val maxRevNum = reviews.maxOfOrNull { it.idReview.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
-        val newReviewId = String.format("REV-%06d", maxRevNum + 1)
+            // 2. Siapkan file gambar (jika user memilih foto)
+            var imagePart: MultipartBody.Part? = null
 
-        val newReview = ReviewJson(
-            idReview = newReviewId,
-            idOrderItem = idOrderItem,
-            idUser = idUser,
-            rating = rating,
-            comment = comment,
-            isHidden = false,
-            createAt = LocalDateTime.now().toString()
-        )
-        reviews.add(newReview)
-        writeJson(reviewFile, reviews)
+            if (!localImagePath.isNullOrEmpty()) {
+                val file = File(localImagePath)
+                if (file.exists()) {
+                    // Konversi file fisik menjadi MultipartBody
+                    val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                    imagePart = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
+                }
+            }
 
-        // Jika user mengupload foto ulasan
-        if (imageUrl != null) { // 2. UBAH DI SINI: gunakan variabel imageUrl
-            val reviewImages = readJson<ReviewImageJson>(reviewImageFile)
-            val maxImgNum = reviewImages.maxOfOrNull { it.idRevImage.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
-            val newRevImageId = String.format("RVI-%06d", maxImgNum + 1)
+            // 3. Tembak API
+            val response = apiService.createReview(idItemBody, ratingBody, commentBody, imagePart)
 
-            val newImage = ReviewImageJson(
-                idRevImage = newRevImageId,
-                idReview = newReviewId,
-                urlImage = imageUrl // 3. UBAH DI SINI: error hilang karena tipenya sama-sama String?
-            )
-            reviewImages.add(newImage)
-            writeJson(reviewImageFile, reviewImages)
+            Result.success(response.review)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // (Admin Only) Menyembunyikan ulasan
+    suspend fun hideReview(reviewId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            apiService.hideReview(reviewId)
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 }

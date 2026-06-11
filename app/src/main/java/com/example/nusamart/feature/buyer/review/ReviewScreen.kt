@@ -1,6 +1,10 @@
 package com.example.nusamart.feature.buyer.review
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -173,7 +177,8 @@ fun ReviewScreen(
                     ReviewItemSection(
                         form = form,
                         onRatingChange = { rating -> vm.updateRating(form.idOrderItem, rating) },
-                        onReviewTextChange = { text -> vm.updateComment(form.idOrderItem, text) }
+                        onReviewTextChange = { text -> vm.updateComment(form.idOrderItem, text) },
+                        onPhotoSelected = { uri -> vm.updatePhoto(context, form.idOrderItem, uri) }
                     )
 
                     if (index < uiState.itemsToReview.lastIndex) {
@@ -189,9 +194,20 @@ fun ReviewScreen(
 private fun ReviewItemSection(
     form: ReviewItemForm,
     onRatingChange: (Int) -> Unit,
-    onReviewTextChange: (String) -> Unit
+    onReviewTextChange: (String) -> Unit,
+    onPhotoSelected: (Uri) -> Unit
 ) {
     val context = LocalContext.current
+
+    // Inisialisasi Photo Picker Launcher
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                onPhotoSelected(uri)
+            }
+        }
+    )
 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         // Info Barang
@@ -224,6 +240,63 @@ private fun ReviewItemSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Input Foto
+        Text("Tambahkan Foto (Opsional)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Tampilkan gambar jika sudah ada yang dipilih
+            if (form.selectedPhoto != null) {
+                AsyncImage(
+                    model = form.selectedPhoto, // Coil bisa membaca File Path String
+                    contentDescription = "Foto Ulasan",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {
+                            // Klik lagi untuk mengganti foto
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Tampilkan tombol tambah jika belum ada foto
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable {
+                            // Luncurkan Photo Picker saat diklik
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.AddAPhoto,
+                            contentDescription = null,
+                            tint = Color(0xFFFF6D00),
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Tambah",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFFF6D00)
+                        )
+                    }
+                }
+            }
+        }
         // Input Rating
         Text("Bagaimana kualitas produk ini?", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
@@ -236,24 +309,6 @@ private fun ReviewItemSection(
                     tint = if (starValue <= form.rating) Color(0xFFFFC107) else Color.LightGray,
                     modifier = Modifier.size(40.dp).padding(4.dp).clickable { onRatingChange(starValue) }
                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Input Foto
-        Text("Tambahkan Foto (Opsional)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(
-            modifier = Modifier.size(80.dp).clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable { Toast.makeText(context, "Fitur upload foto segera hadir!", Toast.LENGTH_SHORT).show() },
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(24.dp))
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("Tambah", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6D00))
             }
         }
 

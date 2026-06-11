@@ -1,5 +1,7 @@
 package com.example.nusamart.feature.buyer.review
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nusamart.data.repository.order.OrderRepository
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -122,16 +125,47 @@ class ReviewVM @Inject constructor(
 
         _uiState.update { it.copy(isLoading = true) }
 
+        // Loop untuk mengirim semua ulasan
         state.itemsToReview.forEach { form ->
+
+            // PERBAIKAN DI SINI:
+            // Hapus idUser dan ubah imageUrl menjadi localImagePath
             reviewRepository.createReview(
                 idOrderItem = form.idOrderItem,
-                idUser = userId,
                 rating = form.rating.toDouble(),
                 comment = form.comment.ifBlank { null },
-                imageUrl = form.selectedPhoto
+                localImagePath = form.selectedPhoto
             )
         }
 
         _uiState.update { it.copy(isLoading = false, isSubmitSuccess = true) }
+    }
+
+    // FUNGSI BARU: Konversi Uri ke File Path dan update State
+    fun updatePhoto(context: Context, idOrderItem: String, uri: Uri) {
+        viewModelScope.launch {
+            try {
+                // 1. Baca data dari Uri
+                val inputStream = context.contentResolver.openInputStream(uri) ?: return@launch
+
+                // 2. Buat file sementara di cache direktori
+                val tempFile = File.createTempFile("review_img_", ".jpg", context.cacheDir)
+                tempFile.outputStream().use { output ->
+                    inputStream.copyTo(output)
+                }
+
+                // 3. Simpan absolute path-nya ke UI State
+                val localPath = tempFile.absolutePath
+
+                _uiState.update { state ->
+                    val newItems = state.itemsToReview.map {
+                        if (it.idOrderItem == idOrderItem) it.copy(selectedPhoto = localPath) else it
+                    }
+                    state.copy(itemsToReview = newItems)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace() // Abaikan jika gagal baca gambar
+            }
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.example.nusamart.feature.buyer.transaction.courier
 
-import com.example.nusamart.data.repository.shipping.CourierOptionJson
+import com.example.nusamart.data.dto.CourierOptionDto
 
 data class CourierOptionUiState(
-    val couriers: List<CourierOptionJson> = emptyList(),
+    val couriers: List<CourierOptionDto> = emptyList(),
     val isLoading: Boolean = true
 )
