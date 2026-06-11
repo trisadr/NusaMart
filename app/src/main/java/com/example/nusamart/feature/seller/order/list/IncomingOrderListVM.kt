@@ -35,7 +35,7 @@ class IncomingOrderListVM @Inject constructor(
 
         // 2. JIKA TOKO DITEMUKAN, AMBIL DAFTAR PESANANNYA
         if (myStore != null) {
-            val incomingOrders = orderRepository.getOrdersByStore(myStore.idStore)
+            val incomingOrders = orderRepository.getSellerOrders()
 
             val uiModels = incomingOrders.map { order ->
                 val items = orderRepository.getOrderItems(order.idOrder)

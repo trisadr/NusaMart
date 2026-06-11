@@ -12,8 +12,8 @@ import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.shipping.ShippingRepository
 import com.example.nusamart.data.repository.store.StoreRepository
-import com.example.nusamart.data.repository.transaction.TransactionRepository
-import com.example.nusamart.data.repository.transaction.TransactionResult
+import com.example.nusamart.data.repository.transaction.PaymentRepository  // ✅ ganti
+import com.example.nusamart.data.repository.transaction.PaymentResult      // ✅ ganti
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ import javax.inject.Inject
 class CheckoutVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val shippingRepository: ShippingRepository,
-    private val transactionRepository: TransactionRepository,
+    private val paymentRepository: PaymentRepository,
     private val cartRepository: CartRepository,
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
@@ -49,7 +49,7 @@ class CheckoutVM @Inject constructor(
         val address = if (route.selectedAddressId != null) {
             addresses.find { it.idAddress == route.selectedAddressId }
         } else {
-            addresses.find { it.isDefault } ?: addresses.firstOrNull()
+            addresses.find { it.isDefault == 1 } ?: addresses.firstOrNull()
         }
 
         // Load Kurir
@@ -62,7 +62,7 @@ class CheckoutVM @Inject constructor(
         // Load Metode Pembayaran
         var pName = "Pilih Metode Pembayaran"
         if (route.selectedPaymentMethodId != null) {
-            val methods = transactionRepository.getActivePaymentMethods()
+            val methods = paymentRepository.getActivePaymentMethods()
             val method = methods.find { it.idMethod == route.selectedPaymentMethodId }
             if (method != null) pName = method.methodName
         }
@@ -78,12 +78,9 @@ class CheckoutVM @Inject constructor(
             emptyList()
         }
 
-        // LOGIKA BARANG
         if (route.fromCart) {
             if (userId != null) {
-                // ✅ Gunakan getCartWithItems() — return CartResponse langsung
                 val cartResponse = cartRepository.getCartWithItems()
-                // ✅ Filter item yang isChecked == 1 (Int, bukan Boolean)
                 val checkedCartItems = cartResponse.items.filter { it.isChecked == 1 }
 
                 val tempGroup = mutableMapOf<String, MutableList<OrderItemInput>>()
@@ -93,8 +90,7 @@ class CheckoutVM @Inject constructor(
                         val detailResult = productRepository.getProductDetail(product.idProduct)
 
                         if (detailResult is ProductResult.Success) {
-                            val pItems = detailResult.data.items
-                            val matchedItem = pItems.find { it.idItem == cItem.idItem }
+                            val matchedItem = detailResult.data.items.find { it.idItem == cItem.idItem }
 
                             if (matchedItem != null) {
                                 val storeId = product.idStore
@@ -190,14 +186,13 @@ class CheckoutVM @Inject constructor(
             val totalShippingCost = state.shippingCost * groupedOrderItems.size
             val totalPaymentAmount = state.subtotal + state.serviceFee + totalShippingCost
 
-            val payRes = transactionRepository.createPayment(
-                userId = userId,
+            val payRes = paymentRepository.createPayment(
                 methodId = route.selectedPaymentMethodId!!,
                 totalAmount = totalPaymentAmount,
                 imageURL = null
             )
 
-            if (payRes is TransactionResult.Success) {
+            if (payRes is PaymentResult.Success) {
                 val paymentId = payRes.transactionId
 
                 for ((storeId, items) in groupedOrderItems) {
@@ -230,7 +225,6 @@ class CheckoutVM @Inject constructor(
                     }
                 }
 
-                // ✅ Hapus item dari keranjang: ambil ulang lalu filter isChecked == 1
                 if (route.fromCart && createdOrderIds.isNotEmpty()) {
                     val cartResponse = cartRepository.getCartWithItems()
                     cartResponse.items

@@ -64,7 +64,7 @@ class AddressVM @Inject constructor(
             editAddressId = null,
             formLabel = "", formReceiver = "", formPhone = "",
             formCompleteAddress = "", formCity = "", formProvince = "",
-            formPostalCode = "", formIsDefault = false
+            formPostalCode = "", formIsDefault = 0
         )
     }
 
@@ -81,7 +81,7 @@ class AddressVM @Inject constructor(
         val filtered = v.filter { it.isDigit() }
         if (filtered.length <= 5) _uiState.update { it.copy(formPostalCode = filtered) }
     }
-    fun updateIsDefault(v: Boolean) = _uiState.update { it.copy(formIsDefault = v) }
+    fun updateIsDefault(v: Int) = _uiState.update { it.copy(formIsDefault = v) }
 
     fun saveAddress() = viewModelScope.launch {
         val state = _uiState.value

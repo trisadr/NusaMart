@@ -1,6 +1,6 @@
 package com.example.nusamart.feature.seller.order.list
 
-import com.example.nusamart.data.repository.order.OrderJson
+import com.example.nusamart.data.dto.OrderDto
 
 data class IncomingOrderListUiState(
     val isLoading: Boolean = true,
@@ -9,7 +9,7 @@ data class IncomingOrderListUiState(
 )
 
 data class IncomingOrderListUiModel(
-    val order: OrderJson,
+    val order: OrderDto,
     val buyerName: String,
     val firstItemName: String,
     val additionalItemCount: Int

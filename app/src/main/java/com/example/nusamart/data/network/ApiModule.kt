@@ -1,8 +1,11 @@
 package com.example.nusamart.data.network
 
 import com.example.nusamart.data.interfaceapi.CartApi
+import com.example.nusamart.data.interfaceapi.OrderApi
+import com.example.nusamart.data.interfaceapi.PaymentApi
 import com.example.nusamart.data.interfaceapi.ProductApi
 import com.example.nusamart.data.interfaceapi.StoreApi
+import com.example.nusamart.data.interfaceapi.WalletApi
 import com.example.nusamart.data.preference.TokenPrefs
 import com.example.nusamart.feature.auth.login.AuthAndUserApi
 import dagger.Module
@@ -63,5 +66,23 @@ object ApiModule {
     @Singleton
     fun provideCartApiService(retrofit: Retrofit): CartApi {
         return retrofit.create(CartApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePaymentApi(retrofit: Retrofit): PaymentApi {
+        return retrofit.create(PaymentApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWalletApi(retrofit: Retrofit): WalletApi {
+        return retrofit.create(WalletApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOrderApi(retrofit: Retrofit): OrderApi {
+        return retrofit.create(OrderApi::class.java)
     }
 }

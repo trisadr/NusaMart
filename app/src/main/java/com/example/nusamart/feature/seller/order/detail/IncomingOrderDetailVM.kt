@@ -46,7 +46,7 @@ class IncomingOrderDetailVM @Inject constructor(
     fun processOrder(orderId: String, courierId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.PROCESSED)
+        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.PROCESSED.name)
         shippingRepository.createShipping(orderId, courierId)
 
         // AMBIL DATA & KIRIM NOTIFIKASI KE BUYER
@@ -65,7 +65,7 @@ class IncomingOrderDetailVM @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
 
         // Update status order
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.CANCELLED)
+        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.CANCELLED.name)
 
         // AMBIL DATA ORDER UNTUK MENDAPATKAN ID BUYER
         val order = orderRepository.getOrderById(orderId)
@@ -91,7 +91,7 @@ class IncomingOrderDetailVM @Inject constructor(
     fun shipOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.SHIPPED)
+        orderRepository.updateOrderStatus(orderId, Order.OrderStatus.SHIPPED.name)
 
         val shipping = shippingRepository.getShippingByOrderId(orderId)
         if (shipping != null) {

@@ -154,7 +154,7 @@ private fun AddressList(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                if (address.isDefault) {
+                                if (address.isDefault == 1) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Surface(
                                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
@@ -286,8 +286,10 @@ private fun AddOrEditAddressForm(uiState: AddressUiState, vm: AddressVM) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Checkbox(
-                checked = uiState.formIsDefault,
-                onCheckedChange = vm::updateIsDefault,
+                checked = (uiState.formIsDefault == 1),
+                onCheckedChange = { checked ->
+                    vm.updateIsDefault(if (checked) 1 else 0)  // ✅ Boolean → Int saat callback
+                },
                 colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
             )
             Text(

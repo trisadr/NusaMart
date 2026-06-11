@@ -2,7 +2,7 @@ package com.example.nusamart.feature.buyer.transaction.success
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.data.repository.transaction.TransactionRepository
+import com.example.nusamart.data.repository.transaction.PaymentRepository  // ✅ ganti
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CheckoutSuccessVM @Inject constructor(
-    private val transactionRepository: TransactionRepository,
+    private val paymentRepository: PaymentRepository,  // ✅ ganti
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
@@ -21,22 +21,20 @@ class CheckoutSuccessVM @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun loadData(paymentId: String, orderId: String) = viewModelScope.launch {
-        // Tarik data payment dari orderId
-        val payment = transactionRepository.getPaymentByOrderId(orderId)
-        val methods = transactionRepository.getActivePaymentMethods()
+        // ✅ getPaymentByOrderId dan getActivePaymentMethods dari PaymentRepository
+        val payment = paymentRepository.getPaymentByOrderId(orderId)
+        val methods = paymentRepository.getActivePaymentMethods()
 
-        // Cari metode pembayaran yang digunakan
         val selectedMethod = methods.find { it.idMethod == payment?.idMethod }
         val selectedProvider = selectedMethod?.provider ?: "COD"
         val methodName = selectedMethod?.methodName ?: "Bayar di Tempat"
 
-        // Tarik data user untuk dummy Virtual Account
         val user = userRepository.getCurrentProfile()
         val phone = user?.phone ?: "081234567890"
 
         var code = ""
         when (selectedProvider) {
-            "MIDTRANS" -> code = "QRIS" // Gambar QR akan di-handle di UI
+            "MIDTRANS" -> code = "QRIS"
             "MANUAL" -> {
                 val prefix = when {
                     methodName.contains("BCA", ignoreCase = true) -> "014"

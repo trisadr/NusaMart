@@ -22,40 +22,32 @@ class OrderListVM @Inject constructor(
     private val _uiState = MutableStateFlow(OrderListUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadOrders()
-    }
+    init { loadOrders() }
 
     fun loadOrders() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-        val userId = userRepository.getActiveUserId()
 
-        if (userId != null) {
-            val userOrders = orderRepository.getOrdersByUser(userId)
-            val allStores = storeRepository.getAllStores() // Ambil daftar toko
+        val userOrders = orderRepository.getOrdersByUser()
+        val allStores = storeRepository.getAllStores()
 
-            val uiModels = userOrders.map { order ->
-                val store = allStores.find { it.idStore == order.idStore }
-                val items = orderRepository.getOrderItems(order.idOrder)
+        val uiModels = userOrders.map { order ->
+            val store = allStores.find { it.idStore == order.idStore }
 
-                val storeName = store?.name ?: "Toko Tidak Diketahui"
-                val firstItemName = items.firstOrNull()?.nameSnapshot ?: "Memuat produk..."
+            val items = order.orderItems
 
-                // Menghitung apakah ada barang lain di pesanan yang sama
-                val additionalCount = if (items.size > 1) items.size - 1 else 0
+            val storeName = store?.name ?: "Toko Tidak Diketahui"
+            val firstItemName = items.firstOrNull()?.nameSnapshot ?: "Memuat produk..."
+            val additionalCount = if (items.size > 1) items.size - 1 else 0
 
-                OrderListUiModel(
-                    order = order,
-                    storeName = storeName,
-                    firstItemName = firstItemName,
-                    additionalItemCount = additionalCount
-                )
-            }
-
-            _uiState.update { it.copy(orders = uiModels, isLoading = false) }
-        } else {
-            _uiState.update { it.copy(isLoading = false) }
+            OrderListUiModel(
+                order = order,
+                storeName = storeName,
+                firstItemName = firstItemName,
+                additionalItemCount = additionalCount
+            )
         }
+
+        _uiState.update { it.copy(orders = uiModels, isLoading = false) }
     }
 
     fun setFilter(filter: String) {

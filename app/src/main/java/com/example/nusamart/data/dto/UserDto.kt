@@ -46,7 +46,7 @@ data class AddressDto(
     @SerializedName("city") val city: String,
     @SerializedName("province") val province: String,
     @SerializedName("postalCode") val postalCode: String,
-    @SerializedName("isDefault") val isDefault: Boolean
+    @SerializedName("isDefault") val isDefault: Int
 )
 
 // Wrapper Response Umum Laravel (untuk update/store/delete)

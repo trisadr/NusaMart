@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
-import com.example.nusamart.data.repository.order.OrderItemJson
+import com.example.nusamart.data.dto.OrderItemDto
 import com.example.nusamart.feature.buyer.order.list.mapStatusToIndonesian
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -276,7 +276,7 @@ fun OrderDetailScreen(
 }
 
 @Composable
-private fun OrderItemRow(item: OrderItemJson) {
+private fun OrderItemRow(item: OrderItemDto) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,

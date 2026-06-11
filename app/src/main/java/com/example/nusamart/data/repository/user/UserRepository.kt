@@ -153,7 +153,7 @@ class UserRepository @Inject constructor(
 
     suspend fun addAddress(
         label: String, receiver: String, phone: String, completeAddress: String,
-        city: String, province: String, postalCode: String, isDefault: Boolean
+        city: String, province: String, postalCode: String, isDefault: Int
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val request = mapOf(
@@ -176,7 +176,7 @@ class UserRepository @Inject constructor(
 
     suspend fun updateAddress(
         addressId: String, label: String, receiver: String, phone: String,
-        completeAddress: String, city: String, province: String, postalCode: String, isDefault: Boolean
+        completeAddress: String, city: String, province: String, postalCode: String, isDefault: Int
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val request = mapOf(

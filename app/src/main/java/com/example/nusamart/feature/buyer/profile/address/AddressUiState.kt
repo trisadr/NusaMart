@@ -17,5 +17,5 @@ data class AddressUiState(
     val formCity: String = "",
     val formProvince: String = "",
     val formPostalCode: String = "",
-    val formIsDefault: Boolean = false
+    val formIsDefault: Int = 0,
 )
