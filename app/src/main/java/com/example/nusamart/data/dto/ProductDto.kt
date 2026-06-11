@@ -1,0 +1,61 @@
+package com.example.nusamart.data.dto
+
+import com.google.gson.annotations.SerializedName
+
+data class ProductDto(
+    @SerializedName("idProduct") val idProduct: String,
+    @SerializedName("idStore") val idStore: String,
+    @SerializedName("productName") val productName: String,
+    @SerializedName("description") val description: String?,
+    @SerializedName("weightGram") val weightGram: Int,
+    @SerializedName("productStatus") val productStatus: String,
+    @SerializedName("createAt") val createAt: String?,
+    @SerializedName("updateAt") val updateAt: String?,
+    @SerializedName("avgRating") val avgRating: Double?,
+    @SerializedName("sold") val sold: Int = 0
+)
+
+data class ProductItemDto(
+    @SerializedName("idItem") val idItem: String,
+    @SerializedName("idProduct") val idProduct: String,
+    @SerializedName("sku") val sku: String?,
+    @SerializedName("stock") val stock: Int,
+    @SerializedName("price") val price: Double,
+    @SerializedName("isActive") val isActive: Boolean,
+    @SerializedName("variations") val variations: List<ProductVariationDto>? = null // Mengakomodasi relasi dari Laravel
+)
+
+data class ProductVariationDto(
+    @SerializedName("idVariation") val idVariation: String,
+    @SerializedName("idItem") val idItem: String,
+    @SerializedName("typeVariation") val typeVariation: String,
+    @SerializedName("value") val value: String
+)
+
+data class ProductImageDto(
+    @SerializedName("idImage") val idImage: String,
+    @SerializedName("idProduct") val idProduct: String,
+    @SerializedName("imageURL") val imageURL: String, // Diubah menjadi String karena API mengembalikan URL gambar sungguhan
+    @SerializedName("isPrimary") val isPrimary: Boolean
+)
+
+data class CategoryDto(
+    @SerializedName("idCategory") val idCategory: String,
+    @SerializedName("categoryName") val categoryName: String,
+    @SerializedName("isActive") val isActive: Boolean
+)
+
+data class SubCategoryDto(
+    @SerializedName("idSubCategory") val idSubCategory: String,
+    @SerializedName("idCategory") val idCategory: String,
+    @SerializedName("subCategoryName") val subCategoryName: String,
+    @SerializedName("description") val description: String?
+)
+
+// Wrapper untuk endpoint show() yang mengembalikan beberapa object sekaligus
+data class ProductDetailResponse(
+    @SerializedName("product") val product: ProductDto,
+    @SerializedName("items") val items: List<ProductItemDto>,
+    @SerializedName("images") val images: List<ProductImageDto>,
+    @SerializedName("categories") val categories: List<SubCategoryDto>
+)
