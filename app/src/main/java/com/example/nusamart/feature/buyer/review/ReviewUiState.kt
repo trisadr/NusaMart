@@ -4,10 +4,10 @@ data class ReviewItemForm(
     val idOrderItem: String,
     val productName: String,
     val quantity: Int,
-    val productImageResId: Int,
+    val productImageUrl: String? = null,
     val rating: Int = 0,
     val comment: String = "",
-    val selectedPhotoResId: Int? = null
+    val selectedPhoto: String? = null
 )
 
 data class ReviewUiState(
@@ -16,6 +16,6 @@ data class ReviewUiState(
     val itemsToReview: List<ReviewItemForm> = emptyList(),
     val showValidationError: Boolean = false,
     val isSubmitSuccess: Boolean = false,
-    val isOrderDelivered: Boolean = true,     // validasi untuk menentukan apakah bisa isi review
+    val isOrderDelivered: Boolean = true,
     val allReviewed: Boolean = false
 )

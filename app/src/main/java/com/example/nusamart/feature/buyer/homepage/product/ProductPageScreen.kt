@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
@@ -158,11 +159,13 @@ fun ProductPageScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxWidth().aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 ) { page ->
-                    Image(
-                        painter = painterResource(uiState.images[page]),
+                    AsyncImage(
+                        model = uiState.images[page], // Mengambil URL dari list String
                         contentDescription = uiState.productName,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        placeholder = painterResource(id = R.drawable.nm_logo), // Tampil saat loading
+                        error = painterResource(id = R.drawable.nm_logo) // Tampil jika gagal
                     )
                 }
                 if (uiState.images.size > 1) {
@@ -279,11 +282,13 @@ fun ProductPageScreen(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 32.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(uiState.images.firstOrNull() ?: R.drawable.nm_logo),
+                    AsyncImage(
+                        model = uiState.images.firstOrNull() ?: R.drawable.nm_logo,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp))
+                        modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)),
+                        placeholder = painterResource(id = R.drawable.nm_logo),
+                        error = painterResource(id = R.drawable.nm_logo)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {

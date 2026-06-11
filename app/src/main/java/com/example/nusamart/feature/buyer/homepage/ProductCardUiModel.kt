@@ -5,5 +5,5 @@ data class ProductCardUiModel(
     val name: String,
     val price: Double,
     val location: String,
-    val imageResId: Int // Menyimpan ID resource gambar
+    val imageResId: String? = null
 )

@@ -1,7 +1,10 @@
 package com.example.nusamart.data.repository.product
 
+import com.example.nusamart.data.dto.CategoryDto
+import com.example.nusamart.data.dto.ProductDetailResponse
+import com.example.nusamart.data.dto.ProductDto
+import com.example.nusamart.data.dto.SubCategoryDto
 import com.example.nusamart.data.interfaceapi.ProductApi
-import com.example.nusamart.data.dto.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -14,7 +17,7 @@ sealed class ProductResult<out T> {
 
 @Singleton
 class ProductRepository @Inject constructor(
-    private val apiService: ProductApiService
+    private val apiService: ProductApi
 ) {
 
     // KATEGORI & SUB KATEGORI

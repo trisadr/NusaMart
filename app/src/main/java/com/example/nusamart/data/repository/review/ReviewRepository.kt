@@ -28,7 +28,7 @@ data class ReviewJson(
 data class ReviewImageJson(
     val idRevImage: String,
     val idReview: String,
-    val urlImage: Int
+    val urlImage: String?
 )
 
 // Repository
@@ -81,7 +81,7 @@ class ReviewRepository @Inject constructor(
         idUser: String,
         rating: Double,
         comment: String?,
-        imageResId: Int?
+        imageUrl: String? // 1. UBAH DI SINI: dari imageResId: Int? menjadi imageUrl: String?
     ) = withContext(Dispatchers.IO) {
         delay(300) // Simulasi loading network
         val reviews = readJson<ReviewJson>(reviewFile)
@@ -103,7 +103,7 @@ class ReviewRepository @Inject constructor(
         writeJson(reviewFile, reviews)
 
         // Jika user mengupload foto ulasan
-        if (imageResId != null) {
+        if (imageUrl != null) { // 2. UBAH DI SINI: gunakan variabel imageUrl
             val reviewImages = readJson<ReviewImageJson>(reviewImageFile)
             val maxImgNum = reviewImages.maxOfOrNull { it.idRevImage.substringAfter("-").toIntOrNull() ?: 0 } ?: 0
             val newRevImageId = String.format("RVI-%06d", maxImgNum + 1)
@@ -111,7 +111,7 @@ class ReviewRepository @Inject constructor(
             val newImage = ReviewImageJson(
                 idRevImage = newRevImageId,
                 idReview = newReviewId,
-                urlImage = imageResId
+                urlImage = imageUrl // 3. UBAH DI SINI: error hilang karena tipenya sama-sama String?
             )
             reviewImages.add(newImage)
             writeJson(reviewImageFile, reviewImages)

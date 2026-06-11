@@ -2,10 +2,10 @@ package com.example.nusamart.feature.buyer.homepage.product
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.R
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.chat.ChatRepository
 import com.example.nusamart.data.repository.product.ProductRepository
+import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,58 +30,62 @@ class ProductPageVM @Inject constructor(
     fun loadProduct(productId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, productId = productId) }
 
-        val allProducts = productRepository.getAllProducts()
-        val product = allProducts.find { it.idProduct == productId } ?: return@launch
+        val detailResult = productRepository.getProductDetail(productId)
 
-        // Ambil Data Store
-        val stores = storeRepository.getAllStores()
-        val store = stores.find { it.idStore == product.idStore }
-        val sName = store?.name ?: "Toko Tidak Diketahui"
-        val sLoc = store?.location ?: "Lokasi Tidak Diketahui"
-        val sUrl = store?.urlLocation
+        if (detailResult is ProductResult.Success) {
+            val detailData = detailResult.data
+            val product = detailData.product
+            val itemsData = detailData.items
+            val imagesData = detailData.images
 
-        // Ambil & Urutkan Gambar (Primary di urutan 0)
-        val images = productRepository.getProductImages(productId)
-            .sortedByDescending { it.isPrimary }
-            .map { it.imageURL }
-            .ifEmpty { listOf(R.drawable.nm_logo) }
+            val stores = storeRepository.getAllStores()
+            val store = stores.find { it.idStore == product.idStore }
+            val sName = store?.name ?: "Toko Tidak Diketahui"
+            val sLoc = store?.location ?: "Lokasi Tidak Diketahui"
+            val sUrl = store?.urlLocation
 
-        // Ambil Item & Variasi
-        val itemsData = productRepository.getProductItems(productId)
-        val uiItems = itemsData.map { item ->
-            val variations = productRepository.getProductVariations(item.idItem)
-            val varName = if (variations.isEmpty()) "Default" else variations.joinToString(" - ") { it.value }
+            val images = imagesData
+                .sortedByDescending { it.isPrimary }
+                .map { it.imageURL }
 
-            ProductItemUiModel(
-                idItem = item.idItem,
-                price = item.price,
-                stock = item.stock,
-                variationName = varName
-            )
-        }.filter { it.stock > 0 } // Hanya tampilkan yang stoknya ada
+            val uiItems = itemsData.map { item ->
+                val variations = item.variations ?: emptyList()
+                val varName = if (variations.isEmpty()) "Default"
+                else variations.joinToString(" - ") { it.value }
 
-        val minPrice = uiItems.minOfOrNull { it.price } ?: 0.0
-        val maxPrice = uiItems.maxOfOrNull { it.price } ?: 0.0
-        val totalStock = uiItems.sumOf { it.stock }
-        val firstSelectedId = uiItems.firstOrNull()?.idItem
+                ProductItemUiModel(
+                    idItem = item.idItem,
+                    price = item.price,
+                    stock = item.stock,
+                    variationName = varName
+                )
+            }.filter { it.stock > 0 }
 
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                productName = product.productName,
-                productDescription = product.description ?: "Tidak ada deskripsi",
-                images = images,
-                minPrice = minPrice,
-                maxPrice = maxPrice,
-                totalStock = totalStock,
-                storeId = product.idStore,
-                storeName = sName,
-                storeLocation = sLoc,
-                storeUrlLocation = sUrl,
-                items = uiItems,
-                selectedItemId = firstSelectedId,
-                quantity = 1
-            )
+            val minPrice = uiItems.minOfOrNull { it.price } ?: 0.0
+            val maxPrice = uiItems.maxOfOrNull { it.price } ?: 0.0
+            val totalStock = uiItems.sumOf { it.stock }
+            val firstSelectedId = uiItems.firstOrNull()?.idItem
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    productName = product.productName,
+                    productDescription = product.description ?: "Tidak ada deskripsi",
+                    images = images,
+                    minPrice = minPrice,
+                    maxPrice = maxPrice,
+                    totalStock = totalStock,
+                    storeId = product.idStore,
+                    storeName = sName,
+                    storeLocation = sLoc,
+                    storeUrlLocation = sUrl,
+                    items = uiItems,
+                    selectedItemId = firstSelectedId,
+                    quantity = 1
+                )
+            }
+        } else {
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -104,9 +108,10 @@ class ProductPageVM @Inject constructor(
     fun addToCart(onSuccess: (String) -> Unit) = viewModelScope.launch {
         val state = _uiState.value
         if (state.selectedItemId == null) return@launch
-        val userId = userRepository.getActiveUserId() ?: return@launch
-        val cart = cartRepository.getOrCreateCart(userId)
-        cartRepository.addCartItem(cart.idCart, state.selectedItemId, state.quantity)
+
+        // ✅ Sesuai CartRepository: addCartItem(idItem, quantity) — tidak perlu userId/cartId
+        cartRepository.addCartItem(state.selectedItemId, state.quantity)
+
         closeSheet()
         onSuccess("${state.quantity} ${state.productName} masuk ke keranjang")
     }
@@ -114,20 +119,15 @@ class ProductPageVM @Inject constructor(
     fun startChatWithSeller(onNavigateToChat: (String) -> Unit) {
         viewModelScope.launch {
             val myId = userRepository.getActiveUserId()
+            val currentStoreId = _uiState.value.storeId
 
-            // Kita ambil data toko dari produk yang sedang dibuka
-            val product = productRepository.getProductById(_uiState.value.productId)
-            val store = storeRepository.getStoreById(product?.idStore ?: "")
+            val stores = storeRepository.getAllStores()
+            val store = stores.find { it.idStore == currentStoreId }
             val sellerId = store?.idSeller
 
             if (myId != null && sellerId != null) {
-                // Di sini fungsi ini akan mencari room yang ada ATAU membuat baru
                 val room = chatRepository.getOrCreateRoom(myId, sellerId)
-
-                // Panggil navigasi ke layar chat
                 onNavigateToChat(room.idRoom)
-            } else {
-                // Handle jika user belum login atau seller tidak ditemukan
             }
         }
     }

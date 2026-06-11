@@ -1,28 +1,31 @@
 package com.example.nusamart.data.interfaceapi
 
-import com.example.nusamart.data.dto.*
+import com.example.nusamart.data.dto.CategoryDto
+import com.example.nusamart.data.dto.ProductDetailResponse
+import com.example.nusamart.data.dto.ProductDto
+import com.example.nusamart.data.dto.SubCategoryDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ProductApi {
 
-    @GET("api/products")
+    @GET("products")
     suspend fun getAllProducts(): List<ProductDto>
 
-    @GET("api/products/{id}")
+    @GET("products/{id}")
     suspend fun getProductDetail(@Path("id") id: String): ProductDetailResponse
 
-    @GET("api/categories")
+    @GET("categories")
     suspend fun getCategories(): List<CategoryDto>
 
-    @GET("api/categories/{id}/subcategories")
+    @GET("categories/{id}/subcategories")
     suspend fun getSubCategories(@Path("id") categoryId: String): List<SubCategoryDto>
 
-    @GET("api/products/store/{storeId}")
+    @GET("products/store/{storeId}")
     suspend fun getProductsByStore(@Path("storeId") storeId: String): List<ProductDto>
 
-    @GET("api/products/search")
+    @GET("products/search")
     suspend fun searchProducts(@Query("q") keyword: String): List<ProductDto>
 
     // Catatan: Anda perlu menambahkan endpoint POST di Laravel Controller

@@ -1,7 +1,6 @@
 package com.example.nusamart.feature.buyer.review
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 
@@ -197,16 +196,13 @@ private fun ReviewItemSection(
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         // Info Barang
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            val safeImageResId = remember(form.productImageResId) {
-                try {
-                    context.resources.getResourceName(form.productImageResId)
-                    form.productImageResId
-                } catch (e: Exception) { R.drawable.nm_logo }
-            }
 
-            Image(
-                painter = painterResource(id = safeImageResId),
-                contentDescription = null,
+            // HAPUS blok safeImageResId lama, dan GANTI Image menjadi AsyncImage
+            AsyncImage(
+                model = form.productImageUrl ?: R.drawable.nm_logo,
+                contentDescription = form.productName,
+                placeholder = painterResource(id = R.drawable.nm_logo),
+                error = painterResource(id = R.drawable.nm_logo),
                 modifier = Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )

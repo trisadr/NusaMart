@@ -2,8 +2,8 @@ package com.example.nusamart.feature.buyer.homepage.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.R
 import com.example.nusamart.data.repository.product.ProductRepository
+import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.feature.buyer.homepage.ProductCardUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,23 +27,45 @@ class SearchResultVM @Inject constructor(
 
     fun initialize(initialKeyword: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, currentQuery = initialKeyword) }
-        // Fetch dan Map data sama seperti HomeVM
-        val allProductsRaw = productRepository.getAllProducts()
+
         val allStores = storeRepository.getAllStores()
 
-        allProductsCache = allProductsRaw.mapNotNull { product ->
-            val items = productRepository.getProductItems(product.idProduct)
-            if (items.isEmpty()) return@mapNotNull null
-            val images = productRepository.getProductImages(product.idProduct)
-            val store = allStores.find { it.idStore == product.idStore }
+        // 1. Unwrap ProductResult dari getAllProducts()
+        val productsResult = productRepository.getAllProducts()
+        val allProductsRaw = if (productsResult is ProductResult.Success) {
+            productsResult.data
+        } else {
+            emptyList()
+        }
 
-            ProductCardUiModel(
-                idProduct = product.idProduct,
-                name = product.productName,
-                price = items.minOf { it.price },
-                location = store?.location ?: "Lokasi Tidak Diketahui",
-                imageResId = images.find { it.isPrimary }?.imageURL ?: R.drawable.nm_logo
-            )
+        // 2. Gunakan getProductDetail untuk memetakan data
+        allProductsCache = allProductsRaw.mapNotNull { product ->
+
+            val detailResult = productRepository.getProductDetail(product.idProduct)
+
+            if (detailResult is ProductResult.Success) {
+                val productDetail = detailResult.data
+                val items = productDetail.items
+
+                // Abaikan produk yang belum punya harga/item
+                if (items.isEmpty()) return@mapNotNull null
+
+                // Ambil URL gambar utama
+                val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL
+
+                // Cari lokasi toko
+                val store = allStores.find { it.idStore == product.idStore }
+
+                ProductCardUiModel(
+                    idProduct = product.idProduct,
+                    name = product.productName,
+                    price = items.minOf { it.price },
+                    location = store?.location ?: "Lokasi Tidak Diketahui",
+                    imageResId = primaryImageUrl // Pastikan menggunakan imageUrl, bukan imageResId
+                )
+            } else {
+                null // Jika gagal fetch detail, lewati produk ini
+            }
         }
 
         applyFilters()

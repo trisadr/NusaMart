@@ -1,8 +1,14 @@
 package com.example.nusamart.feature.buyer.homepage
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.nusamart.R
 
 @Composable
@@ -32,17 +39,17 @@ fun ProductGridCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column {
-            // Jika imageResId 0 atau null, gunakan nm_logo sebagai fallback
-            val imageRes = if (product.imageResId != 0) product.imageResId else R.drawable.nm_logo
-
-            Image(
-                painter = painterResource(id = imageRes),
+            // Ganti Image menjadi AsyncImage
+            AsyncImage(
+                model = product.imageResId ?: R.drawable.nm_logo, // Jika URL null, langsung pakai R.drawable
                 contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.nm_logo), // Gambar saat proses loading
+                error = painterResource(id = R.drawable.nm_logo) // Gambar jika URL gagal dimuat
             )
 
             Column(modifier = Modifier.padding(12.dp)) {

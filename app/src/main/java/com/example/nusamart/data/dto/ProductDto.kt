@@ -12,7 +12,11 @@ data class ProductDto(
     @SerializedName("createAt") val createAt: String?,
     @SerializedName("updateAt") val updateAt: String?,
     @SerializedName("avgRating") val avgRating: Double?,
-    @SerializedName("sold") val sold: Int = 0
+    @SerializedName("sold") val sold: Int = 0,
+
+    // PERHATIKAN DUA BARIS INI: Harus menggunakan product_items dan product_images
+    @SerializedName("product_items") val items: List<ProductItemDto>? = null,
+    @SerializedName("product_images") val images: List<ProductImageDto>? = null
 )
 
 data class ProductItemDto(
@@ -21,8 +25,9 @@ data class ProductItemDto(
     @SerializedName("sku") val sku: String?,
     @SerializedName("stock") val stock: Int,
     @SerializedName("price") val price: Double,
-    @SerializedName("isActive") val isActive: Boolean,
-    @SerializedName("variations") val variations: List<ProductVariationDto>? = null // Mengakomodasi relasi dari Laravel
+    @SerializedName("isActive") val isActive: Int,
+    @SerializedName("variations") val variations: List<ProductVariationDto>? = null, // Mengakomodasi relasi dari Laravel
+    @SerializedName("product") val product: ProductDto? = null
 )
 
 data class ProductVariationDto(
@@ -36,7 +41,7 @@ data class ProductImageDto(
     @SerializedName("idImage") val idImage: String,
     @SerializedName("idProduct") val idProduct: String,
     @SerializedName("imageURL") val imageURL: String, // Diubah menjadi String karena API mengembalikan URL gambar sungguhan
-    @SerializedName("isPrimary") val isPrimary: Boolean
+    @SerializedName("isPrimary") val isPrimary: Int
 )
 
 data class CategoryDto(

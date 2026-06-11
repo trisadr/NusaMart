@@ -7,10 +7,13 @@ import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.notif.NotificationRepository
 import com.example.nusamart.data.repository.order.OrderItemInput
 import com.example.nusamart.data.repository.order.OrderRepository
+import com.example.nusamart.data.repository.order.OrderResult
 import com.example.nusamart.data.repository.product.ProductRepository
+import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.shipping.ShippingRepository
 import com.example.nusamart.data.repository.store.StoreRepository
 import com.example.nusamart.data.repository.transaction.TransactionRepository
+import com.example.nusamart.data.repository.transaction.TransactionResult
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,93 +67,100 @@ class CheckoutVM @Inject constructor(
             if (method != null) pName = method.methodName
         }
 
-        // Inisialisasi Variabel
         val itemsInput = mutableListOf<OrderItemInput>()
         var subTotal = 0.0
         var mainStoreId = "STR-000001"
 
-        // LOGIKA BARANG (DARI KERANJANG ATAU BELI LANGSUNG)
+        val productsResult = productRepository.getAllProducts()
+        val allProducts = if (productsResult is ProductResult.Success) {
+            productsResult.data
+        } else {
+            emptyList()
+        }
+
+        // LOGIKA BARANG
         if (route.fromCart) {
             if (userId != null) {
-                val cart = cartRepository.getOrCreateCart(userId)
-                val checkedCartItems = cartRepository.getCartItems(cart.idCart).filter { it.isChecked }
-                val allProducts = productRepository.getAllProducts()
+                // ✅ Gunakan getCartWithItems() — return CartResponse langsung
+                val cartResponse = cartRepository.getCartWithItems()
+                // ✅ Filter item yang isChecked == 1 (Int, bukan Boolean)
+                val checkedCartItems = cartResponse.items.filter { it.isChecked == 1 }
 
                 val tempGroup = mutableMapOf<String, MutableList<OrderItemInput>>()
 
                 for (cItem in checkedCartItems) {
                     for (product in allProducts) {
-                        val pItems = productRepository.getProductItems(product.idProduct)
-                        val matchedItem = pItems.find { it.idItem == cItem.idItem }
+                        val detailResult = productRepository.getProductDetail(product.idProduct)
 
-                        if (matchedItem != null) {
-                            val storeId = product.idStore
-                            mainStoreId = storeId
+                        if (detailResult is ProductResult.Success) {
+                            val pItems = detailResult.data.items
+                            val matchedItem = pItems.find { it.idItem == cItem.idItem }
 
-                            val variations = productRepository.getProductVariations(matchedItem.idItem)
+                            if (matchedItem != null) {
+                                val storeId = product.idStore
+                                mainStoreId = storeId
 
-                            val variantValues = variations.joinToString(", ") { it.value }
+                                val variations = matchedItem.variations ?: emptyList()
+                                val variantValues = variations.joinToString(", ") { it.value }
+                                val displayName = if (variantValues.isNotEmpty()) {
+                                    "${product.productName} ($variantValues)"
+                                } else {
+                                    product.productName
+                                }
 
-                            val displayName = if (variantValues.isNotEmpty()) {
-                                "${product.productName} ($variantValues)"
-                            } else {
-                                product.productName
+                                val orderItem = OrderItemInput(
+                                    idItem = cItem.idItem,
+                                    quantity = cItem.quantity,
+                                    nameSnapshot = displayName,
+                                    priceSnapshot = matchedItem.price
+                                )
+
+                                tempGroup.getOrPut(storeId) { mutableListOf() }.add(orderItem)
+                                itemsInput.add(orderItem)
+                                subTotal += (matchedItem.price * cItem.quantity)
+                                break
                             }
-
-                            val orderItem = OrderItemInput(
-                                idItem = cItem.idItem,
-                                quantity = cItem.quantity,
-                                nameSnapshot = displayName,
-                                priceSnapshot = matchedItem.price
-                            )
-
-                            if (tempGroup.containsKey(storeId)) {
-                                tempGroup[storeId]!!.add(orderItem)
-                            } else {
-                                tempGroup[storeId] = mutableListOf(orderItem)
-                            }
-
-                            itemsInput.add(orderItem)
-                            subTotal += (matchedItem.price * cItem.quantity)
-                            break
                         }
                     }
                 }
                 groupedOrderItems = tempGroup
             }
         } else if (route.productId != null) {
-            val product = productRepository.getAllProducts().find { it.idProduct == route.productId }
+            val product = allProducts.find { it.idProduct == route.productId }
+
             if (product != null) {
                 val storeId = product.idStore
                 mainStoreId = storeId
-                val itemData = productRepository.getProductItems(route.productId).firstOrNull()
-                val price = itemData?.price ?: 50000.0
 
-                var displayName = product.productName
-                if (itemData != null) {
-                    val variations = productRepository.getProductVariations(itemData.idItem)
-                    val variantValues = variations.joinToString(", ") { it.value }
+                val detailResult = productRepository.getProductDetail(route.productId)
 
-                    if (variantValues.isNotEmpty()) {
-                        displayName = "${product.productName} ($variantValues)"
+                if (detailResult is ProductResult.Success) {
+                    val itemData = detailResult.data.items.firstOrNull()
+                    val price = itemData?.price ?: 50000.0
+
+                    var displayName = product.productName
+                    if (itemData != null) {
+                        val variations = itemData.variations ?: emptyList()
+                        val variantValues = variations.joinToString(", ") { it.value }
+                        if (variantValues.isNotEmpty()) {
+                            displayName = "${product.productName} ($variantValues)"
+                        }
                     }
+
+                    val orderItem = OrderItemInput(
+                        idItem = itemData?.idItem ?: "ITM-0",
+                        quantity = route.quantity,
+                        nameSnapshot = displayName,
+                        priceSnapshot = price
+                    )
+
+                    itemsInput.add(orderItem)
+                    subTotal = price * route.quantity
+                    groupedOrderItems = mapOf(storeId to listOf(orderItem))
                 }
-
-                val orderItem = OrderItemInput(
-                    idItem = itemData?.idItem ?: "ITM-0",
-                    quantity = route.quantity,
-                    nameSnapshot = displayName,
-                    priceSnapshot = price
-                )
-
-                itemsInput.add(orderItem)
-                subTotal = price * route.quantity
-
-                groupedOrderItems = mapOf(storeId to listOf(orderItem))
             }
         }
 
-        // Update UI State
         _uiState.update {
             it.copy(
                 isLoading = false,
@@ -177,7 +187,6 @@ class CheckoutVM @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             val createdOrderIds = mutableListOf<String>()
-
             val totalShippingCost = state.shippingCost * groupedOrderItems.size
             val totalPaymentAmount = state.subtotal + state.serviceFee + totalShippingCost
 
@@ -188,7 +197,7 @@ class CheckoutVM @Inject constructor(
                 imageURL = null
             )
 
-            if (payRes is com.example.nusamart.data.repository.transaction.TransactionResult.Success) {
+            if (payRes is TransactionResult.Success) {
                 val paymentId = payRes.transactionId
 
                 for ((storeId, items) in groupedOrderItems) {
@@ -202,17 +211,14 @@ class CheckoutVM @Inject constructor(
                         servicePrice = 0.0
                     )
 
-                    if (orderRes is com.example.nusamart.data.repository.order.OrderResult.Success) {
+                    if (orderRes is OrderResult.Success) {
                         val orderId = orderRes.orderId
                         createdOrderIds.add(orderId)
                         shippingRepository.createShipping(orderId, route.selectedCourierId!!)
 
-                        // --- TAMBAHAN KODE NOTIFIKASI KE SELLER ---
-                        // 1. Cari siapa pemilik tokonya
                         val store = storeRepository.getStoreById(storeId)
                         val sellerId = store?.idSeller
 
-                        // 2. Jika ketemu, gabungkan nama barang dan kirim notifikasi
                         if (sellerId != null) {
                             val productNames = items.joinToString(", ") { it.nameSnapshot }
                             notificationRepository.addNewOrderNotificationForSeller(
@@ -224,12 +230,12 @@ class CheckoutVM @Inject constructor(
                     }
                 }
 
+                // ✅ Hapus item dari keranjang: ambil ulang lalu filter isChecked == 1
                 if (route.fromCart && createdOrderIds.isNotEmpty()) {
-                    val cart = cartRepository.getOrCreateCart(userId)
-                    val checkedCartItems = cartRepository.getCartItems(cart.idCart).filter { it.isChecked }
-                    checkedCartItems.forEach { item ->
-                        cartRepository.deleteItem(item.idCartItem)
-                    }
+                    val cartResponse = cartRepository.getCartWithItems()
+                    cartResponse.items
+                        .filter { it.isChecked == 1 }
+                        .forEach { cartRepository.deleteItem(it.idCartItem) }
                 }
 
                 val combinedOrderIds = createdOrderIds.joinToString(", ")

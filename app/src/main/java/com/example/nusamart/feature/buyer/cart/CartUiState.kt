@@ -6,8 +6,8 @@ data class CartItemUiModel(
     val productName: String,
     val price: Double,
     val quantity: Int,
-    val isChecked: Boolean,
-    val imageResId: Int
+    val isChecked: Int,
+    val imageUrl: String? = null, // Tambahkan imageUrl jika diperlukan: String
 )
 
 data class StoreCartGroup(
@@ -21,5 +21,5 @@ data class CartUiState(
     val storeGroups: List<StoreCartGroup> = emptyList(),
     val totalPrice: Double = 0.0,
     val checkedCount: Int = 0,
-    val isAllChecked: Boolean = false
+    val isAllChecked: Int = 0
 )

@@ -2,9 +2,9 @@ package com.example.nusamart.feature.buyer.review
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nusamart.R
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.product.ProductRepository
+import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.review.ReviewRepository
 import com.example.nusamart.data.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,23 +53,35 @@ class ReviewVM @Inject constructor(
         }
 
         // 4. Proses data untuk UI
-        val allProducts = productRepository.getAllProducts()
-        val forms = unreviewedItems.map { oi ->
-            var imageRes = R.drawable.nm_logo
-            val productItems = productRepository.getProductItemsByItemId(oi.idItem)
-            val product = allProducts.find { it.idProduct == productItems?.idProduct }
+        // Buka bungkus ProductResult
+        val productsResult = productRepository.getAllProducts()
+        val allProducts = if (productsResult is ProductResult.Success) productsResult.data else emptyList()
 
-            if (product != null) {
-                val images = productRepository.getProductImages(product.idProduct)
-                val primary = images.find { it.isPrimary }
-                if (primary != null) imageRes = primary.imageURL
+        // Buat map untuk mencocokkan idItem dengan imageURL utama produk
+        val itemImageMap = mutableMapOf<String, String>()
+
+        allProducts.forEach { product ->
+            val detailResult = productRepository.getProductDetail(product.idProduct)
+            if (detailResult is ProductResult.Success) {
+                val detailData = detailResult.data
+                val primaryImage = detailData.images.find { it.isPrimary == 1 }?.imageURL
+
+                if (primaryImage != null) {
+                    // Simpan URL gambar untuk setiap variasi item di produk ini
+                    detailData.items.forEach { item ->
+                        itemImageMap[item.idItem] = primaryImage
+                    }
+                }
             }
+        }
 
+        // Petakan ke ReviewItemForm
+        val forms = unreviewedItems.map { oi ->
             ReviewItemForm(
                 idOrderItem = oi.idOrderItem,
                 productName = oi.nameSnapshot,
                 quantity = oi.quantity,
-                productImageResId = imageRes
+                productImageUrl = itemImageMap[oi.idItem]
             )
         }
 
@@ -116,7 +128,7 @@ class ReviewVM @Inject constructor(
                 idUser = userId,
                 rating = form.rating.toDouble(),
                 comment = form.comment.ifBlank { null },
-                imageResId = form.selectedPhotoResId
+                imageUrl = form.selectedPhoto
             )
         }
 

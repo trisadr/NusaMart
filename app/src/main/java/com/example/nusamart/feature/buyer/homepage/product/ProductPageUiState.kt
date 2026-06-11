@@ -12,7 +12,7 @@ data class ProductPageUiState(
     val productId: String = "",
     val productName: String = "",
     val productDescription: String = "",
-    val images: List<Int> = emptyList(), // Daftar resource gambar
+    val images: List<String> = emptyList(), // Daftar resource gambar
     val minPrice: Double = 0.0,
     val maxPrice: Double = 0.0,
     val totalStock: Int = 0,

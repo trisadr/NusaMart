@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.buyer.cart
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.example.nusamart.R
 import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.BottomMenu
@@ -103,7 +104,10 @@ fun CartScreen(vm: CartVM = hiltViewModel()) {
         }
     ) { innerPadding ->
         if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else if (uiState.storeGroups.isEmpty()) {
@@ -138,12 +142,14 @@ fun CartScreen(vm: CartVM = hiltViewModel()) {
 @Composable
 private fun ShopGroup(
     group: StoreCartGroup,
-    onCheckedChange: (String, Boolean) -> Unit,
+    // ✅ Sesuaikan dengan VM: (cartItemId: String, isChecked: Int) -> Unit
+    onCheckedChange: (String, Int) -> Unit,
     onQuantityIncrease: (String, Int) -> Unit,
     onQuantityDecrease: (String, Int) -> Unit,
     onDeleteItem: (String) -> Unit
 ) {
-    val allChecked = group.items.all { it.isChecked }
+    // ✅ Bandingkan Int dengan == 1
+    val allChecked = group.items.all { it.isChecked == 1 }
 
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
@@ -159,11 +165,19 @@ private fun ShopGroup(
             ) {
                 Checkbox(
                     checked = allChecked,
-                    onCheckedChange = { checked -> group.items.forEach { onCheckedChange(it.idCartItem, checked) } }
+                    onCheckedChange = { checked ->
+                        // ✅ Konversi Boolean -> Int saat memanggil onCheckedChange
+                        val intValue = if (checked) 1 else 0
+                        group.items.forEach { onCheckedChange(it.idCartItem, intValue) }
+                    }
                 )
                 Text(
-                    text = group.storeName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
-                    modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
+                    text = group.storeName,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
@@ -172,13 +186,19 @@ private fun ShopGroup(
             group.items.forEachIndexed { index, item ->
                 CartItemRow(
                     item = item,
-                    onCheckedChange = { checked -> onCheckedChange(item.idCartItem, checked) },
+                    onCheckedChange = { checked ->
+                        // ✅ Konversi Boolean -> Int
+                        onCheckedChange(item.idCartItem, if (checked) 1 else 0)
+                    },
                     onIncrease = { onQuantityIncrease(item.idCartItem, item.quantity) },
                     onDecrease = { onQuantityDecrease(item.idCartItem, item.quantity) },
                     onDelete = { onDeleteItem(item.idCartItem) }
                 )
                 if (index < group.items.lastIndex) {
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp
+                    )
                 }
             }
         }
@@ -195,24 +215,62 @@ private fun CartItemRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Checkbox(checked = item.isChecked, onCheckedChange = onCheckedChange, modifier = Modifier.padding(top = 2.dp))
-
-        Image(
-            painter = painterResource(id = item.imageResId),
-            contentDescription = item.productName,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)
+        // ✅ Konversi Int -> Boolean untuk Checkbox
+        Checkbox(
+            checked = item.isChecked == 1,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(top = 2.dp)
         )
 
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(text = item.productName, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 18.sp)
-            Text(text = "Rp ${item.price.toLong()}", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                QuantityStepper(quantity = item.quantity, onIncrease = onIncrease, onDecrease = onDecrease)
+        AsyncImage(
+            model = item.imageUrl ?: R.drawable.nm_logo,
+            contentDescription = item.productName,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.nm_logo),
+            placeholder = painterResource(id = R.drawable.nm_logo),
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = item.productName,
+                fontSize = 13.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 18.sp
+            )
+            Text(
+                text = "Rp ${item.price.toLong()}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                QuantityStepper(
+                    quantity = item.quantity,
+                    onIncrease = onIncrease,
+                    onDecrease = onDecrease
+                )
                 IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Hapus",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
         }
@@ -222,13 +280,27 @@ private fun CartItemRow(
 @Composable
 private fun QuantityStepper(quantity: Int, onIncrease: () -> Unit, onDecrease: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        OutlinedIconButton(onClick = onDecrease, modifier = Modifier.size(28.dp), shape = RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp)) {
+        OutlinedIconButton(
+            onClick = onDecrease,
+            modifier = Modifier.size(28.dp),
+            shape = RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp)
+        ) {
             Text("−", fontSize = 14.sp)
         }
-        Box(modifier = Modifier.width(36.dp).height(28.dp).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .width(36.dp)
+                .height(28.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
             Text(quantity.toString(), fontSize = 13.sp, fontWeight = FontWeight.Medium)
         }
-        OutlinedIconButton(onClick = onIncrease, modifier = Modifier.size(28.dp), shape = RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp)) {
+        OutlinedIconButton(
+            onClick = onIncrease,
+            modifier = Modifier.size(28.dp),
+            shape = RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp)
+        ) {
             Text("+", fontSize = 14.sp)
         }
     }
@@ -237,10 +309,17 @@ private fun QuantityStepper(quantity: Int, onIncrease: () -> Unit, onDecrease: (
 @Composable
 private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text("🛒", fontSize = 64.sp)
             Text("Keranjangmu masih kosong", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-            Text("Yuk, mulai belanja sekarang!", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Yuk, mulai belanja sekarang!",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Button(onClick = onShopClick) { Text("Mulai Belanja") }
         }
     }
@@ -248,21 +327,45 @@ private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Uni
 
 @Composable
 private fun CartBottomBar(
-    isAllChecked: Boolean,
+    // ✅ Ubah dari Boolean ke Int
+    isAllChecked: Int,
     totalPrice: Double,
     checkedCount: Int,
-    onAllCheckedChange: (Boolean) -> Unit,
+    // ✅ Ubah dari (Boolean) -> Unit ke (Int) -> Unit
+    onAllCheckedChange: (Int) -> Unit,
     onCheckout: () -> Unit
 ) {
     Surface(tonalElevation = 8.dp, shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Checkbox(checked = isAllChecked, onCheckedChange = onAllCheckedChange)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Checkbox(
+                    // ✅ Konversi Int -> Boolean untuk Checkbox
+                    checked = isAllChecked == 1,
+                    onCheckedChange = { checked ->
+                        // ✅ Konversi Boolean -> Int saat callback
+                        onAllCheckedChange(if (checked) 1 else 0)
+                    }
+                )
                 Text("Semua", fontSize = 13.sp)
             }
-            Text("Rp ${totalPrice.toLong()}", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "Rp ${totalPrice.toLong()}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
             Spacer(modifier = Modifier.width(10.dp))
-            Button(onClick = onCheckout, shape = RoundedCornerShape(8.dp), enabled = checkedCount > 0) {
+            Button(
+                onClick = onCheckout,
+                shape = RoundedCornerShape(8.dp),
+                enabled = checkedCount > 0
+            ) {
                 Text("Beli ($checkedCount)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             }
         }
