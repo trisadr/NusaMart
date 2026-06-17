@@ -125,4 +125,9 @@ object Routes {
     data class ReviewRoute(
         val orderId: String
     ) : NavKey
+
+    // STORE
+    @Serializable
+    data class StorePageRoute(val storeId: String) : NavKey
+
 }

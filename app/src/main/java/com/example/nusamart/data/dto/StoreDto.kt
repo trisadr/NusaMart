@@ -11,7 +11,9 @@ data class StoreDto(
     @SerializedName("location") val location: String,
     @SerializedName("urlLocation") val urlLocation: String?,
     @SerializedName("createAt") val createAt: String?,
-    @SerializedName("updateAt") val updateAt: String?
+    @SerializedName("updateAt") val updateAt: String?,
+    @SerializedName("isVerified") val isVerified: Boolean? = false,
+    @SerializedName("storeRating") val storeRating: Double? = null
 )
 
 data class UpdateStoreResponse(

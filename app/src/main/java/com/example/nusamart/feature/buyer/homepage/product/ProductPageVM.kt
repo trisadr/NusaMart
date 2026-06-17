@@ -40,9 +40,11 @@ class ProductPageVM @Inject constructor(
 
             val stores = storeRepository.getAllStores()
             val store = stores.find { it.idStore == product.idStore }
+
             val sName = store?.name ?: "Toko Tidak Diketahui"
             val sLoc = store?.location ?: "Lokasi Tidak Diketahui"
             val sUrl = store?.urlLocation
+            val isVerified = store?.isVerified == true
 
             val images = imagesData
                 .sortedByDescending { it.isPrimary }
@@ -75,10 +77,12 @@ class ProductPageVM @Inject constructor(
                     minPrice = minPrice,
                     maxPrice = maxPrice,
                     totalStock = totalStock,
+                    soldCount = product.soldCount ?: 0, // <-- Mengambil data terjual dari DTO
                     storeId = product.idStore,
                     storeName = sName,
                     storeLocation = sLoc,
                     storeUrlLocation = sUrl,
+                    isStoreVerified = isVerified,
                     items = uiItems,
                     selectedItemId = firstSelectedId,
                     quantity = 1
@@ -109,7 +113,6 @@ class ProductPageVM @Inject constructor(
         val state = _uiState.value
         if (state.selectedItemId == null) return@launch
 
-        // ✅ Sesuai CartRepository: addCartItem(idItem, quantity) — tidak perlu userId/cartId
         cartRepository.addCartItem(state.selectedItemId, state.quantity)
 
         closeSheet()

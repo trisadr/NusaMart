@@ -166,7 +166,7 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                         },
                         modifier = Modifier
                             .size(48.dp)
-                            .background(Color(0xFFFF6D00), CircleShape)
+                            .background(Color(0xFF008B81), CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Send,
@@ -181,7 +181,7 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
     ) { padding ->
         if (uiState.isLoading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFFF6D00))
+                CircularProgressIndicator(color = Color(0xFF00736B))
             }
         } else {
             // Mengelompokkan pesan berdasarkan tanggal (Parsing String ke LocalDate)
@@ -271,7 +271,9 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
         horizontalAlignment = if (isMe) Alignment.End else Alignment.Start
     ) {
         Surface(
-            color = if (isMe) Color(0xFFFF6D00) else MaterialTheme.colorScheme.surfaceVariant,
+            // --- PERUBAHAN DISINI ---
+            // Warna background bubble lawan bicara diubah menjadi teal (4DB6AC)
+            color = if (isMe) Color(0xFF008B81) else Color(0xFF4DB6AC),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,
@@ -285,7 +287,9 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
                 // Teks Pesan
                 Text(
                     text = msg.messageText,
-                    color = if (isMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                    // --- PERUBAHAN DISINI ---
+                    // Warna teks lawan bicara diubah menjadi putih agar terbaca jelas di atas warna teal
+                    color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 20.sp
                 )
@@ -301,7 +305,9 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
                     Text(
                         text = timeText,
                         fontSize = 10.sp,
-                        color = if (isMe) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        // --- PERUBAHAN DISINI ---
+                        // Warna waktu lawan bicara diubah menjadi putih transparan
+                        color = Color.White.copy(alpha = 0.8f)
                     )
 
                     if (isMe) {

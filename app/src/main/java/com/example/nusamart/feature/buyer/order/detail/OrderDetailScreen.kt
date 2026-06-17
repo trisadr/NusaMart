@@ -79,7 +79,9 @@ fun OrderDetailScreen(
         },
         bottomBar = {
             if (order != null) {
+                val canComplete = order.orderStatus == "SHIPPED"
                 val canReview = order.orderStatus == "DELIVERED" && !uiState.isReviewed
+
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 8.dp,
@@ -92,6 +94,22 @@ fun OrderDetailScreen(
                             .navigationBarsPadding(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Tombol Pesanan Selesai jika statusnya SHIPPED
+                        if (canComplete) {
+                            Button(
+                                onClick = { vm.completeOrder(orderId) },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Text("Pesanan Selesai", fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        // Tombol Beri Ulasan jika statusnya DELIVERED dan belum direview
                         if (canReview) {
                             Button(
                                 onClick = { backStack.add(Routes.ReviewRoute(orderId)) },
@@ -107,7 +125,12 @@ fun OrderDetailScreen(
                         }
 
                         OutlinedButton(
-                            onClick = { /* TODO: Chat Penjual */ },
+                            // GANTI BAGIAN ONCLICK INI
+                            onClick = {
+                                vm.startChatWithSeller { roomId ->
+                                    backStack.add(Routes.ChatDetailRoute(roomId))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
@@ -165,7 +188,7 @@ fun OrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- KARTU INFORMASI PENGIRIMAN (KUSTOM TEAL 4DB6AC) ---
+                // --- KARTU INFORMASI PENGIRIMAN ---
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),

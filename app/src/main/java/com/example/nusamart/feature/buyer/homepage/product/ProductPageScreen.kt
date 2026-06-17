@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -160,12 +161,12 @@ fun ProductPageScreen(
                     modifier = Modifier.fillMaxWidth().aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 ) { page ->
                     AsyncImage(
-                        model = uiState.images[page], // Mengambil URL dari list String
+                        model = uiState.images[page],
                         contentDescription = uiState.productName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
-                        placeholder = painterResource(id = R.drawable.nm_logo), // Tampil saat loading
-                        error = painterResource(id = R.drawable.nm_logo) // Tampil jika gagal
+                        placeholder = painterResource(id = R.drawable.nm_logo),
+                        error = painterResource(id = R.drawable.nm_logo)
                     )
                 }
                 if (uiState.images.size > 1) {
@@ -185,18 +186,34 @@ fun ProductPageScreen(
             }
 
             Column(modifier = Modifier.padding(16.dp).background(MaterialTheme.colorScheme.background)) {
-                // --- Price ---
-                val priceText = if (uiState.minPrice == uiState.maxPrice) formatPrice(uiState.minPrice)
-                else "${formatPrice(uiState.minPrice)} - ${formatPrice(uiState.maxPrice)}"
 
-                Text(
-                    text = priceText,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                // --- HARGA & TERJUAL ---
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val priceText = if (uiState.minPrice == uiState.maxPrice) formatPrice(uiState.minPrice)
+                    else "${formatPrice(uiState.minPrice)} - ${formatPrice(uiState.maxPrice)}"
+
+                    Text(
+                        text = priceText,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f) // Harga otomatis mendorong teks "Terjual" ke kanan
+                    )
+
+                    // Langsung tampilkan tanpa syarat if (> 0) biar selalu kelihatan!
+                    Text(
+                        text = "${formatSoldCount(uiState.soldCount)} Terjual",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Spacer(Modifier.height(8.dp))
 
+                // --- NAMA PRODUK ---
                 Text(
                     text = uiState.productName,
                     style = MaterialTheme.typography.titleLarge,
@@ -249,14 +266,41 @@ fun ProductPageScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
 
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Image(
-                        painter = painterResource(R.drawable.nm_logo),
-                        contentDescription = "Foto Toko",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(44.dp).clip(CircleShape)
-                    )
-                    Spacer(Modifier.width(12.dp))
+                // --- UI Profil Toko dengan Badge Local ---
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { backStack.add(Routes.StorePageRoute(uiState.storeId)) }
+                        .padding(vertical = 8.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.nm_logo),
+                            contentDescription = "Foto Toko",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                        )
+
+                        if (uiState.isStoreVerified) {
+                            Image(
+                                painter = painterResource(id = R.drawable.local),
+                                contentDescription = "Verified Local Badge",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .height(18.dp)
+                                    .offset(y = 8.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.width(16.dp))
+
                     Text(
                         text = uiState.storeName,
                         fontWeight = FontWeight.Bold,
@@ -308,7 +352,6 @@ fun ProductPageScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Variasi (Jika lebih dari 1 item)
                 if (uiState.items.size > 1) {
                     Text(
                         text = "Pilih Variasi",
@@ -407,4 +450,14 @@ fun ProductPageScreen(
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price.toLong())}"
+}
+
+// Fungsi helper untuk memformat angka terjual
+fun formatSoldCount(count: Int): String {
+    return when {
+        count < 1000 -> count.toString()
+        count % 1000 == 0 -> "${count / 1000}rb"
+        count > 1000 -> "${count / 1000}rb+"
+        else -> count.toString()
+    }
 }

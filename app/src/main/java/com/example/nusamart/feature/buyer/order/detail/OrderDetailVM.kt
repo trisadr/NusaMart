@@ -2,8 +2,10 @@ package com.example.nusamart.feature.buyer.order.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.data.repository.chat.ChatRepository // <-- TAMBAHKAN INI
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.shipping.ShippingRepository
+import com.example.nusamart.data.repository.store.StoreRepository // <-- TAMBAHKAN INI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +17,8 @@ import javax.inject.Inject
 class OrderDetailVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val shippingRepository: ShippingRepository,
+    private val chatRepository: ChatRepository,     // <-- INJECT ChatRepository
+    private val storeRepository: StoreRepository    // <-- INJECT StoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OrderDetailUiState())
@@ -29,9 +33,9 @@ class OrderDetailVM @Inject constructor(
         }
         val items = orderRepository.getOrderItems(orderId)
         val isReviewed = orderRepository.isOrderReviewed(orderId)
-        // Ambil data resi dari Shipping Repository
         val shipping = shippingRepository.getShippingByOrderId(orderId)
         val resi = shipping?.resi ?: "Belum dikirim"
+
         _uiState.update {
             it.copy(
                 isLoading = false,
@@ -40,6 +44,36 @@ class OrderDetailVM @Inject constructor(
                 isReviewed = isReviewed,
                 resiNumber = resi
             )
+        }
+    }
+
+    fun completeOrder(orderId: String) = viewModelScope.launch {
+        _uiState.update { it.copy(isLoading = true) }
+        val success = orderRepository.updateOrderStatus(orderId, "DELIVERED")
+        if (success) {
+            loadOrderDetail(orderId)
+        } else {
+            _uiState.update { it.copy(isLoading = false, errorMessage = "Gagal menyelesaikan pesanan") }
+        }
+    }
+
+    // --- FUNGSI BARU UNTUK MULAI CHAT ---
+    fun startChatWithSeller(onNavigateToChat: (String) -> Unit) {
+        viewModelScope.launch {
+            val currentOrder = _uiState.value.order ?: return@launch
+
+            // 1. Ambil detail toko dari order
+            val storeId = currentOrder.idStore
+            val store = storeRepository.getStoreById(storeId)
+
+            // 2. Ambil ID Seller dari toko tersebut
+            val sellerId = store?.idSeller
+
+            if (sellerId != null) {
+                // 3. Buat atau dapatkan Room ID dengan Seller, lalu navigasi
+                val room = chatRepository.getOrCreateRoom(sellerId)
+                room?.let { onNavigateToChat(it.idRoom) }
+            }
         }
     }
 }

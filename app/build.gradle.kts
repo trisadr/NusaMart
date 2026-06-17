@@ -26,7 +26,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://lantern-ample-widen.ngrok-free.dev/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://implicit-married-attic.ngrok-free.dev/api/\"")
         }
         release {
             isMinifyEnabled = false

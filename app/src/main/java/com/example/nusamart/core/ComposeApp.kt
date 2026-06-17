@@ -13,6 +13,7 @@ import com.example.nusamart.feature.buyer.cart.CartScreen
 import com.example.nusamart.feature.buyer.homepage.home.HomePageScreen
 import com.example.nusamart.feature.buyer.homepage.product.ProductPageScreen
 import com.example.nusamart.feature.buyer.homepage.search.SearchResultScreen
+import com.example.nusamart.feature.buyer.homepage.store.StorePageScreen
 import com.example.nusamart.feature.buyer.notification.detail.NotificationDetailScreen
 import com.example.nusamart.feature.buyer.notification.list.NotificationScreen
 import com.example.nusamart.feature.buyer.order.detail.OrderDetailScreen
@@ -135,6 +136,11 @@ fun ComposeApp() {
                     // Review
                     entry<Routes.ReviewRoute> { route ->
                         ReviewScreen(orderId = route.orderId)
+                    }
+
+                    // STORE
+                    entry<Routes.StorePageRoute> { route ->
+                        StorePageScreen(storeId = route.storeId)
                     }
                 }
             )

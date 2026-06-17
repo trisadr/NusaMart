@@ -11,8 +11,9 @@ data class ProductDto(
     @SerializedName("productStatus") val productStatus: String,
     @SerializedName("createAt") val createAt: String?,
     @SerializedName("updateAt") val updateAt: String?,
-    @SerializedName("avgRating") val avgRating: Double?,
     @SerializedName("sold") val sold: Int = 0,
+    @SerializedName("avgRating") val avgRating: Double? = 0.0,
+    @SerializedName("soldCount") val soldCount: Int? = 0,
 
     // PERHATIKAN DUA BARIS INI: Harus menggunakan product_items dan product_images
     @SerializedName("product_items") val items: List<ProductItemDto>? = null,

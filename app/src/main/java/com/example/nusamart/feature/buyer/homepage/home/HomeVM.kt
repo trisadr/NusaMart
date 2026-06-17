@@ -54,10 +54,11 @@ class HomeVM @Inject constructor(
                 name = product.productName,
                 price = items.minOf { it.price },
                 location = store?.location ?: "Lokasi Tidak Diketahui",
-                imageResId = primaryImageUrl // <- Ubah ini menjadi imageUrl
+                imageResId = primaryImageUrl,
+                rating = product.avgRating ?: 0.0,
+                soldCount = product.soldCount ?: 0
             )
         }
-        // Sisa blok } else { null } sudah dihapus agar strukturnya rapi
 
         _uiState.update { it.copy(products = uiModels, isLoading = false) }
     }

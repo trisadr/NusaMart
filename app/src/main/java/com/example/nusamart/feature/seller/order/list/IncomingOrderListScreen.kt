@@ -175,7 +175,7 @@ private fun IncomingOrderListItem(model: IncomingOrderListUiModel, onClick: () -
 
     val statusColor = when (statusIndo) {
         "SELESAI" -> MaterialTheme.colorScheme.primary
-        "DIKIRIM" -> MaterialTheme.colorScheme.tertiary
+        "DIKIRIM" -> MaterialTheme.colorScheme.primary
         "DIPROSES" -> MaterialTheme.colorScheme.secondary
         "MENUNGGU" -> MaterialTheme.colorScheme.outline
         "DIBATALKAN" -> MaterialTheme.colorScheme.error

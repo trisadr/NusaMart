@@ -61,7 +61,9 @@ class SearchResultVM @Inject constructor(
                     name = product.productName,
                     price = items.minOf { it.price },
                     location = store?.location ?: "Lokasi Tidak Diketahui",
-                    imageResId = primaryImageUrl // Pastikan menggunakan imageUrl, bukan imageResId
+                    imageResId = primaryImageUrl,
+                    rating = product.avgRating ?: 0.0,
+                    soldCount = product.soldCount ?: 0
                 )
             } else {
                 null // Jika gagal fetch detail, lewati produk ini
