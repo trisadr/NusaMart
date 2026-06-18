@@ -2,7 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE ---
+// RESPONSE
 
 data class StoreWalletDto(
     @SerializedName("idWallet") val idWallet: String,
@@ -14,7 +14,7 @@ data class StoreWalletDto(
 data class WalletTransactionDto(
     @SerializedName("idTransaction") val idTransaction: String,
     @SerializedName("idWallet") val idWallet: String,
-    @SerializedName("mutationType") val mutationType: String, // "IN" | "OUT"
+    @SerializedName("mutationType") val mutationType: String,
     @SerializedName("nominal") val nominal: Double,
     @SerializedName("description") val description: String? = null,
     @SerializedName("referenceId") val referenceId: String,
@@ -26,7 +26,7 @@ data class WithdrawalDto(
     @SerializedName("idWallet") val idWallet: String,
     @SerializedName("nominal") val nominal: Double,
     @SerializedName("serviceCost") val serviceCost: Double,
-    @SerializedName("status") val status: String, // "PENDING" | "PROCESSING" | "DONE" | "FAILED"
+    @SerializedName("status") val status: String,
     @SerializedName("transferPic") val transferPic: String? = null,
     @SerializedName("createAt") val createAt: String? = null
 )
@@ -36,8 +36,7 @@ data class WithdrawalActionResponse(
     @SerializedName("withdrawal") val withdrawal: WithdrawalDto?
 )
 
-// --- REQUEST ---
-
+// REQUEST
 data class WithdrawRequest(
     @SerializedName("nominal") val nominal: Double,
     @SerializedName("serviceCost") val serviceCost: Double

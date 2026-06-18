@@ -54,6 +54,10 @@ import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.BottomMenu
 import com.example.nusamart.feature.components.NusaMartBottomNavigation
 
+// TAMBAHKAN IMPORT INI UNTUK HARGA
+import java.text.NumberFormat
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(vm: CartVM = hiltViewModel()) {
@@ -142,13 +146,11 @@ fun CartScreen(vm: CartVM = hiltViewModel()) {
 @Composable
 private fun ShopGroup(
     group: StoreCartGroup,
-    // ✅ Sesuaikan dengan VM: (cartItemId: String, isChecked: Int) -> Unit
     onCheckedChange: (String, Int) -> Unit,
     onQuantityIncrease: (String, Int) -> Unit,
     onQuantityDecrease: (String, Int) -> Unit,
     onDeleteItem: (String) -> Unit
 ) {
-    // ✅ Bandingkan Int dengan == 1
     val allChecked = group.items.all { it.isChecked == 1 }
 
     Card(
@@ -166,7 +168,6 @@ private fun ShopGroup(
                 Checkbox(
                     checked = allChecked,
                     onCheckedChange = { checked ->
-                        // ✅ Konversi Boolean -> Int saat memanggil onCheckedChange
                         val intValue = if (checked) 1 else 0
                         group.items.forEach { onCheckedChange(it.idCartItem, intValue) }
                     }
@@ -187,7 +188,6 @@ private fun ShopGroup(
                 CartItemRow(
                     item = item,
                     onCheckedChange = { checked ->
-                        // ✅ Konversi Boolean -> Int
                         onCheckedChange(item.idCartItem, if (checked) 1 else 0)
                     },
                     onIncrease = { onQuantityIncrease(item.idCartItem, item.quantity) },
@@ -218,7 +218,6 @@ private fun CartItemRow(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // ✅ Konversi Int -> Boolean untuk Checkbox
         Checkbox(
             checked = item.isChecked == 1,
             onCheckedChange = onCheckedChange,
@@ -248,8 +247,9 @@ private fun CartItemRow(
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 18.sp
             )
+            // FORMAT HARGA PER ITEM DI SINI
             Text(
-                text = "Rp ${item.price.toLong()}",
+                text = "Rp ${formatRupiah(item.price.toLong())}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.primary
@@ -327,11 +327,9 @@ private fun CartEmptyState(modifier: Modifier = Modifier, onShopClick: () -> Uni
 
 @Composable
 private fun CartBottomBar(
-    // ✅ Ubah dari Boolean ke Int
     isAllChecked: Int,
     totalPrice: Double,
     checkedCount: Int,
-    // ✅ Ubah dari (Boolean) -> Unit ke (Int) -> Unit
     onAllCheckedChange: (Int) -> Unit,
     onCheckout: () -> Unit
 ) {
@@ -345,17 +343,16 @@ private fun CartBottomBar(
                 modifier = Modifier.weight(1f)
             ) {
                 Checkbox(
-                    // ✅ Konversi Int -> Boolean untuk Checkbox
                     checked = isAllChecked == 1,
                     onCheckedChange = { checked ->
-                        // ✅ Konversi Boolean -> Int saat callback
                         onAllCheckedChange(if (checked) 1 else 0)
                     }
                 )
                 Text("Semua", fontSize = 13.sp)
             }
+            // FORMAT TOTAL HARGA DI SINI
             Text(
-                "Rp ${totalPrice.toLong()}",
+                "Rp ${formatRupiah(totalPrice.toLong())}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.primary
@@ -370,4 +367,10 @@ private fun CartBottomBar(
             }
         }
     }
+}
+
+// FUNGSI PEMBANTU FORMAT RUPIAH
+fun formatRupiah(number: Long): String {
+    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
+    return formatter.format(number)
 }

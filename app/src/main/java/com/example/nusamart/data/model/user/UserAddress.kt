@@ -12,5 +12,3 @@ data class UserAddress(
     val postalCode: String,
     val isDefault: Boolean
 )
-
-// JSON-friendly version -- mungkin bisa pindah di repository aja entar

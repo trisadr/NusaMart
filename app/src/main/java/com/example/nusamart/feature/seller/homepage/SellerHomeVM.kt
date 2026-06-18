@@ -27,37 +27,57 @@ class SellerHomeVM @Inject constructor(
     private fun loadDashboardData() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // 1. Cukup panggil 1x karena data user dan seller sudah digabung dari API
+        // 1. Ambil profil untuk mendapatkan data user
         val profile = userRepository.getCurrentProfile()
 
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                user = profile, // Mengisi data user utama
-                sellerInfo = profile?.seller // Mengambil objek seller dari dalam profile
-            )
-        }
+        // GANTI BARIS YANG MERAH MENJADI INI:
+        // Cukup pastikan objek seller tidak null (berarti dia benar-benar penjual)
+        val isSeller = profile?.seller != null
 
-//        // 2. Gunakan idUser dari profile sebagai ID Toko (storeId)
-//        profile?.idUser?.let { storeId ->
-//            launch {
-//                orderRepository.getOrdersFlow().collect { allOrders ->
-//                    val storeOrders = allOrders.filter { it.idStore == storeId }
-//
-//                    val newOrdersCount = storeOrders.count { it.orderStatus == "PENDING" }
-//                    val completedOrders = storeOrders.filter { it.orderStatus == "DELIVERED" }
-//                    val totalRevenue = completedOrders.sumOf { it.productTotalPrice }
-//
-//                    _uiState.update { state ->
-//                        state.copy(
-//                            newOrdersCount = newOrdersCount,
-//                            totalRevenue = totalRevenue,
-//                            productsSold = completedOrders.size
-//                        )
-//                    }
-//                }
-//            }
-//        }
+        // Ubah pengecekannya menggunakan isSeller
+        if (isSeller) {
+            // 2. Ambil semua pesanan yang masuk ke toko ini dari API
+            val allSellerOrders = orderRepository.getSellerOrders()
+
+            // ====================================================================================
+            // LOGIKA METRIK DAHBOARD (Berdasarkan permintaan Trisa)
+            // ====================================================================================
+
+            // A. Pesanan Baru (Status Menunggu - PENDING)
+            // Menghitung jumlah order yang statusnya masih PENDING
+            val newOrdersCount = allSellerOrders.count { it.orderStatus == "PENDING" }
+
+            // B. Jumlah Barang Terjual
+            // Dihitung dari order yang sedang dikirim (SHIPPED) DAN yang sudah selesai (DELIVERED)
+            val productsSold = allSellerOrders
+                .filter { it.orderStatus == "SHIPPED" || it.orderStatus == "DELIVERED" }
+                .flatMap { it.orderItems }
+                .sumOf { it.quantity }
+
+            // C. Total Pendapatan (Status Dikonfirmasi Selesai - DELIVERED)
+            // Menjumlahkan productTotalPrice (total harga barang, tanpa ongkir)
+            // dari order yang statusnya sudah DELIVERED.
+            val totalRevenue = allSellerOrders
+                .filter { it.orderStatus == "DELIVERED" } // Filter order selesai
+                .sumOf { it.productTotalPrice } // Jumlahkan harga produk
+
+            // ====================================================================================
+
+            // 3. Update UI State dengan data dinamis
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    user = profile,
+                    sellerInfo = profile?.seller,
+                    newOrdersCount = newOrdersCount,
+                    totalRevenue = totalRevenue.toLong(),
+                    productsSoldCount = productsSold
+                )
+            }
+        } else {
+            // Jika bukan seller atau terjadi kesalahan
+            _uiState.update { it.copy(isLoading = false, user = profile) }
+        }
     }
 
     fun logout() = viewModelScope.launch {

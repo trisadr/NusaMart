@@ -48,6 +48,8 @@ import com.example.nusamart.core.LocalBackStack
 import com.example.nusamart.core.Routes
 import com.example.nusamart.feature.components.SellerBottomMenu
 import com.example.nusamart.feature.components.SellerBottomNavigation
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,27 +181,34 @@ fun SellerHomeScreen(vm: SellerHomeVM = hiltViewModel()) {
                     Text("Performa Toko", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Baris Pertama: Pesanan Baru & Barang Terjual (Dibagi 2)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         MetricCard(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.LocalShipping,
                             title = "Pesanan Baru",
-                            value = uiState.newOrdersCount.toString() // Ambil dari uiState
+                            value = uiState.newOrdersCount.toString()
                         )
                         MetricCard(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.Inventory,
-                            title = "Pesanan Sukses", // Saya sesuaikan labelnya
-                            value = uiState.productsSold.toString() // Ambil dari uiState
-                        )
-                        MetricCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Default.AccountBalanceWallet, // Ikon lebih cocok untuk uang
-                            title = "Pendapatan",
-                            // Sederhana format Rupiah (tanpa decimal)
-                            value = "Rp${uiState.totalRevenue.toLong()}"
+                            title = "Barang Terjual",
+                            value = uiState.productsSoldCount.toString()
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Baris Kedua: Pendapatan (Lebar penuh / Full width)
+                    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
+                    val formattedRevenue = "Rp ${formatter.format(uiState.totalRevenue)}"
+
+                    MetricCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.Default.AccountBalanceWallet,
+                        title = "Total Pendapatan",
+                        value = formattedRevenue
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))

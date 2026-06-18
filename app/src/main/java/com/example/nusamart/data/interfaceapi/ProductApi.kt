@@ -28,6 +28,4 @@ interface ProductApi {
     @GET("products/search")
     suspend fun searchProducts(@Query("q") keyword: String): List<ProductDto>
 
-    // Catatan: Anda perlu menambahkan endpoint POST di Laravel Controller
-    // jika ingin mengaktifkan fitur tambah produk dari aplikasi.
 }

@@ -2,15 +2,14 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE (Balasan dari Server) ---
-
+//RESPONSE (Balasan dari Server)
 data class NotificationDto(
     @SerializedName("idNotif") val idNotif: String,
     @SerializedName("idUser") val idUser: String,
     @SerializedName("title") val title: String,
     @SerializedName("body") val body: String,
     @SerializedName("type") val type: String,
-    @SerializedName("isRead") val isRead: Int, // Gunakan Int (0/1) untuk konsistensi dengan MySQL
+    @SerializedName("isRead") val isRead: Int,
     @SerializedName("createAt") val createAt: String,
     @SerializedName("referenceId") val referenceId: String?,
     @SerializedName("referenceType") val referenceType: String?

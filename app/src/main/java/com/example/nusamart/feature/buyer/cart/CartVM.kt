@@ -42,48 +42,29 @@ class CartVM @Inject constructor(
             return
         }
 
-        // ✅ Panggil sekali saja, ambil idCart dan items dari objek yang sama
+        // Hanya 3x Request API di awal, sangat cepat!
         val cartResponse = cartRepository.getCartWithItems()
-        val cartItems = cartResponse.items // List<CartItemDto>
+        val cartItems = cartResponse.items
 
         val allStores = storeRepository.getAllStores()
-
         val allProductsResult = productRepository.getAllProducts()
-        val allProducts = if (allProductsResult is ProductResult.Success) {
-            allProductsResult.data
-        } else {
-            emptyList()
-        }
+        val allProducts = if (allProductsResult is ProductResult.Success) allProductsResult.data else emptyList()
 
-        val productImagesMap = mutableMapOf<String, String>()
-
-        allProducts.forEach { product ->
-            val detailResult = productRepository.getProductDetail(product.idProduct)
-            if (detailResult is ProductResult.Success) {
-                val primaryImage = detailResult.data.images.find { it.isPrimary == 1 }?.imageURL
-                if (!primaryImage.isNullOrEmpty()) {
-                    productImagesMap[product.idProduct] = primaryImage
-                }
-            }
-        }
-
+        // 🚀 ULTRA SPEED: Tidak ada pemanggilan API getProductDetail di sini!
+        // Langsung mapping dari data allProducts karena items dan images sudah disediakan DTO
         val uiItems = cartItems.mapNotNull { cItem ->
-            // Cari produk yang memiliki item dengan idItem ini
-            val matchedProduct = allProducts.firstOrNull { product ->
-                val detailResult = productRepository.getProductDetail(product.idProduct)
-                if (detailResult is ProductResult.Success) {
-                    detailResult.data.items.any { it.idItem == cItem.idItem }
-                } else false
+
+            // 1. Cari produk yang memiliki ID Item keranjang ini
+            val matchedProduct = allProducts.find { product ->
+                product.items?.any { it.idItem == cItem.idItem } == true
             } ?: return@mapNotNull null
 
-            val detailResult = productRepository.getProductDetail(matchedProduct.idProduct)
-            if (detailResult !is ProductResult.Success) return@mapNotNull null
-
-            val itemDetail = detailResult.data.items.find { it.idItem == cItem.idItem }
-                ?: return@mapNotNull null
+            // 2. Ambil harga dan gambar langsung dari dalam objek produk
+            val itemDetail = matchedProduct.items?.find { it.idItem == cItem.idItem } ?: return@mapNotNull null
+            val primaryImage = matchedProduct.images?.find { it.isPrimary == 1 }?.imageURL
+                ?: matchedProduct.images?.firstOrNull()?.imageURL
 
             val store = allStores.find { it.idStore == matchedProduct.idStore }
-            val productImageUrl = productImagesMap[matchedProduct.idProduct]
 
             val cartItemModel = CartItemUiModel(
                 idCartItem = cItem.idCartItem,
@@ -92,7 +73,7 @@ class CartVM @Inject constructor(
                 price = itemDetail.price,
                 quantity = cItem.quantity,
                 isChecked = cItem.isChecked,
-                imageUrl = productImageUrl
+                imageUrl = primaryImage
             )
 
             val storeName = store?.name ?: "Toko Lainnya"
@@ -109,47 +90,84 @@ class CartVM @Inject constructor(
             )
         }
 
-        val checkedItems = uiItems.map { it.first }.filter { it.isChecked == 1 }
+        _uiState.update { state ->
+            recalculateState(state.copy(isLoading = false, storeGroups = grouped))
+        }
+    }
+
+    private fun recalculateState(state: CartUiState): CartUiState {
+        val allItems = state.storeGroups.flatMap { it.items }
+        val checkedItems = allItems.filter { it.isChecked == 1 }
         val totalPrice = checkedItems.sumOf { it.price * it.quantity }
-        val isAllChecked = if (uiItems.isNotEmpty() && uiItems.all { it.first.isChecked == 1 }) 1 else 0
+        val isAllChecked = if (allItems.isNotEmpty() && checkedItems.size == allItems.size) 1 else 0
 
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                storeGroups = grouped,
-                totalPrice = totalPrice,
-                checkedCount = checkedItems.size,
-                isAllChecked = isAllChecked
-            )
+        return state.copy(
+            totalPrice = totalPrice,
+            checkedCount = checkedItems.size,
+            isAllChecked = isAllChecked
+        )
+    }
+
+    // =======================================================================
+    // OPTIMISTIC UI: UI Berubah Instan, API berjalan mulus di Background
+    // =======================================================================
+
+    fun toggleChecked(cartItemId: String, isChecked: Int) {
+        _uiState.update { state ->
+            val newGroups = state.storeGroups.map { group ->
+                group.copy(items = group.items.map { item ->
+                    if (item.idCartItem == cartItemId) item.copy(isChecked = isChecked) else item
+                })
+            }
+            recalculateState(state.copy(storeGroups = newGroups))
         }
+        viewModelScope.launch { cartRepository.updateChecked(cartItemId, isChecked == 1) }
     }
 
-    fun toggleChecked(cartItemId: String, isChecked: Int) = viewModelScope.launch {
-        // ✅ Konversi Int ke Boolean untuk dikirim ke repository
-        cartRepository.updateChecked(cartItemId, isChecked == 1)
-        loadCart()
-    }
-
-    fun toggleAllChecked(isChecked: Int) = viewModelScope.launch {
-        // ✅ Repository tidak butuh cartId, langsung kirim Boolean
-        cartRepository.updateAllChecked(isChecked == 1)
-        loadCart()
-    }
-
-    fun increaseQuantity(cartItemId: String, currentQuantity: Int) = viewModelScope.launch {
-        cartRepository.updateQuantity(cartItemId, currentQuantity + 1)
-        loadCart()
-    }
-
-    fun decreaseQuantity(cartItemId: String, currentQuantity: Int) = viewModelScope.launch {
-        if (currentQuantity > 1) {
-            cartRepository.updateQuantity(cartItemId, currentQuantity - 1)
-            loadCart()
+    fun toggleAllChecked(isChecked: Int) {
+        _uiState.update { state ->
+            val newGroups = state.storeGroups.map { group ->
+                group.copy(items = group.items.map { it.copy(isChecked = isChecked) })
+            }
+            recalculateState(state.copy(storeGroups = newGroups))
         }
+        viewModelScope.launch { cartRepository.updateAllChecked(isChecked == 1) }
     }
 
-    fun deleteItem(cartItemId: String) = viewModelScope.launch {
-        cartRepository.deleteItem(cartItemId)
-        loadCart()
+    fun increaseQuantity(cartItemId: String, currentQuantity: Int) {
+        val newQty = currentQuantity + 1
+        _uiState.update { state ->
+            val newGroups = state.storeGroups.map { group ->
+                group.copy(items = group.items.map { item ->
+                    if (item.idCartItem == cartItemId) item.copy(quantity = newQty) else item
+                })
+            }
+            recalculateState(state.copy(storeGroups = newGroups))
+        }
+        viewModelScope.launch { cartRepository.updateQuantity(cartItemId, newQty) }
+    }
+
+    fun decreaseQuantity(cartItemId: String, currentQuantity: Int) {
+        if (currentQuantity <= 1) return
+        val newQty = currentQuantity - 1
+        _uiState.update { state ->
+            val newGroups = state.storeGroups.map { group ->
+                group.copy(items = group.items.map { item ->
+                    if (item.idCartItem == cartItemId) item.copy(quantity = newQty) else item
+                })
+            }
+            recalculateState(state.copy(storeGroups = newGroups))
+        }
+        viewModelScope.launch { cartRepository.updateQuantity(cartItemId, newQty) }
+    }
+
+    fun deleteItem(cartItemId: String) {
+        _uiState.update { state ->
+            val newGroups = state.storeGroups.map { group ->
+                group.copy(items = group.items.filterNot { it.idCartItem == cartItemId })
+            }.filter { it.items.isNotEmpty() }
+            recalculateState(state.copy(storeGroups = newGroups))
+        }
+        viewModelScope.launch { cartRepository.deleteItem(cartItemId) }
     }
 }

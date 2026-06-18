@@ -22,16 +22,15 @@ interface ReviewApi {
     @POST("reviews/items")
     suspend fun getReviewsByItems(@Body request: ByItemsRequest): List<ReviewDto>
 
-    // Gunakan Multipart karena kita mengirim file gambar beserta teks
     @Multipart
     @POST("reviews")
     suspend fun createReview(
         @Part("idOrderItem") idOrderItem: RequestBody,
         @Part("rating") rating: RequestBody,
         @Part("comment") comment: RequestBody?,
-        @Part imageFile: MultipartBody.Part? // File gambar (opsional)
+        @Part imageFile: MultipartBody.Part?
     ): ReviewActionResponse
 
     @PUT("admin/reviews/{id}/hide")
-    suspend fun hideReview(@Path("id") id: String): GeneralResponse // GeneralResponse bisa dari CartDto yang kamu buat sebelumnya
+    suspend fun hideReview(@Path("id") id: String): GeneralResponse
 }

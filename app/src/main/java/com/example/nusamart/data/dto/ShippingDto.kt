@@ -2,14 +2,14 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE (Balasan dari Server) ---
+// RESPONSE (Balasan dari Server)
 
 data class CourierOptionDto(
     @SerializedName("idCourier") val idCourier: String,
     @SerializedName("courierName") val courierName: String,
     @SerializedName("serviceType") val serviceType: String,
     @SerializedName("timeEstimation") val timeEstimation: String,
-    @SerializedName("isActive") val isActive: Int // Gunakan Int (0/1) seperti standar sebelumnya
+    @SerializedName("isActive") val isActive: Int
 )
 
 data class ShippingDto(
@@ -45,7 +45,7 @@ data class TrackingActionResponse(
 )
 
 
-// --- REQUEST (Data yang dikirim ke Server) ---
+// REQUEST (Data yang dikirim ke Server)
 
 data class CreateShippingRequest(
     @SerializedName("idOrder") val idOrder: String,

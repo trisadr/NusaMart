@@ -50,6 +50,10 @@ import com.example.nusamart.core.Routes
 import com.example.nusamart.data.dto.OrderItemDto
 import com.example.nusamart.feature.buyer.order.list.mapStatusToIndonesian
 
+// TAMBAHKAN DUA IMPORT INI UNTUK FORMAT ANGKA
+import java.text.NumberFormat
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderDetailScreen(
@@ -94,7 +98,6 @@ fun OrderDetailScreen(
                             .navigationBarsPadding(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Tombol Pesanan Selesai jika statusnya SHIPPED
                         if (canComplete) {
                             Button(
                                 onClick = { vm.completeOrder(orderId) },
@@ -109,7 +112,6 @@ fun OrderDetailScreen(
                             }
                         }
 
-                        // Tombol Beri Ulasan jika statusnya DELIVERED dan belum direview
                         if (canReview) {
                             Button(
                                 onClick = { backStack.add(Routes.ReviewRoute(orderId)) },
@@ -125,7 +127,6 @@ fun OrderDetailScreen(
                         }
 
                         OutlinedButton(
-                            // GANTI BAGIAN ONCLICK INI
                             onClick = {
                                 vm.startChatWithSeller { roomId ->
                                     backStack.add(Routes.ChatDetailRoute(roomId))
@@ -188,7 +189,6 @@ fun OrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- KARTU INFORMASI PENGIRIMAN ---
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -258,20 +258,20 @@ fun OrderDetailScreen(
                 HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Rincian Pembayaran
+                // Rincian Pembayaran (Sudah diformat)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Total Harga Produk", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Rp ${order.productTotalPrice.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Rp ${formatRupiah(order.productTotalPrice.toLong())}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Ongkos Kirim", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Rp ${order.shippingCost.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Rp ${formatRupiah(order.shippingCost.toLong())}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Biaya Layanan", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Rp ${order.servicePrice.toLong()}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Rp ${formatRupiah(order.servicePrice.toLong())}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -281,7 +281,7 @@ fun OrderDetailScreen(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Total Pembayaran", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Text(
-                        text = "Rp ${order.grandTotal.toLong()}",
+                        text = "Rp ${formatRupiah(order.grandTotal.toLong())}",
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -313,17 +313,25 @@ private fun OrderItemRow(item: OrderItemDto) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
+            // Format harga per item di sini
             Text(
-                text = "${item.quantity} barang × Rp ${item.priceSnapshot.toLong()}",
+                text = "${item.quantity} barang × Rp ${formatRupiah(item.priceSnapshot.toLong())}",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        // Format subtotal per item di sini
         Text(
-            text = "Rp ${(item.quantity * item.priceSnapshot).toLong()}",
+            text = "Rp ${formatRupiah((item.quantity * item.priceSnapshot).toLong())}",
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
+}
+
+// FUNGSI PEMBANTU UNTUK FORMAT RUPIAH
+fun formatRupiah(number: Long): String {
+    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
+    return formatter.format(number)
 }

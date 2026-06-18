@@ -2,14 +2,13 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// Response untuk Login / Register (Sesuaikan dengan return AuthController Laravel-mu)
+// Response
 data class AuthResponse(
     @SerializedName("message") val message: String,
     @SerializedName("token") val token: String,
-    @SerializedName("user") val user: UserDto // <-- Laravel membungkusnya di sini!
+    @SerializedName("user") val user: UserDto
 )
 
-// TAMBAHKAN data class ini di file yang sama
 data class UserDto(
     @SerializedName("idUser") val idUser: String,
     @SerializedName("username") val username: String,
@@ -49,7 +48,6 @@ data class AddressDto(
     @SerializedName("isDefault") val isDefault: Int
 )
 
-// Wrapper Response Umum Laravel (untuk update/store/delete)
 data class CommonResponse<T>(
     @SerializedName("message") val message: String,
     @SerializedName("address") val address: T? = null,

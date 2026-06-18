@@ -16,21 +16,21 @@ import retrofit2.http.Path
 
 interface ShippingApi {
 
-    // --- PUBLIC ---
+    // PUBLIC
     @GET("couriers")
     suspend fun getCouriers(): List<CourierOptionDto>
 
     @GET("couriers/{id}")
     suspend fun getCourierDetail(@Path("id") id: String): CourierOptionDto
 
-    // --- PROTECTED BUYER/SELLER ---
+    // PROTECTED BUYER/SELLER
     @GET("shipping/order/{orderId}")
     suspend fun getShippingByOrder(@Path("orderId") orderId: String): ShippingDto
 
     @GET("shipping/{id}/tracking")
     suspend fun getTrackingHistory(@Path("id") id: String): List<ShippingTrackingDto>
 
-    // --- SELLER ONLY ---
+    // SELLER ONLY
     @POST("seller/shipping")
     suspend fun createShipping(@Body request: CreateShippingRequest): ShippingActionResponse
 

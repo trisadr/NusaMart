@@ -2,8 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE (Balasan dari Server) ---
-
+// RESPONSE (Balasan dari Server)
 data class RoomChatDto(
     @SerializedName("idRoom") val idRoom: String,
     @SerializedName("idUser1") val idUser1: String,
@@ -18,7 +17,7 @@ data class ChatMessageDto(
     @SerializedName("idRoom") val idRoom: String,
     @SerializedName("senderId") val senderId: String,
     @SerializedName("messageText") val messageText: String,
-    @SerializedName("isRead") val isRead: Int, // Gunakan Int (0/1) seperti standar Laravel/MySQL
+    @SerializedName("isRead") val isRead: Int,
     @SerializedName("createAt") val createAt: String
 )
 
@@ -28,7 +27,7 @@ data class ChatActionResponse(
 )
 
 
-// --- REQUEST (Data yang dikirim ke Server) ---
+// REQUEST (Data yang dikirim ke Server)
 
 data class GetOrCreateRoomRequest(
     @SerializedName("idUser2") val idUser2: String

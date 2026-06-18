@@ -2,7 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE (Balasan dari Server) ---
+// RESPONSE (Balasan dari Server)
 
 data class ReviewDto(
     @SerializedName("idReview") val idReview: String,
@@ -10,7 +10,7 @@ data class ReviewDto(
     @SerializedName("idUser") val idUser: String,
     @SerializedName("rating") val rating: Double,
     @SerializedName("comment") val comment: String?,
-    @SerializedName("isHidden") val isHidden: Int, // Gunakan Int (0/1) mengikuti setting DB sebelumnya
+    @SerializedName("isHidden") val isHidden: Int,
     @SerializedName("createAt") val createAt: String,
 
     // Hasil Eager Loading (with('reviewImages'))
@@ -29,8 +29,7 @@ data class ReviewActionResponse(
 )
 
 
-// --- REQUEST (Data yang dikirim ke Server) ---
-
+// REQUEST (Data yang dikirim ke Server)
 data class ByItemsRequest(
     @SerializedName("itemIds") val itemIds: List<String>
 )

@@ -2,8 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE ---
-
+// RESPONSE
 data class PaymentMethodDto(
     @SerializedName("idMethod") val idMethod: String,
     @SerializedName("methodName") val methodName: String,
@@ -28,8 +27,7 @@ data class PaymentActionResponse(
     @SerializedName("payment") val payment: PaymentDto?
 )
 
-// --- REQUEST ---
-
+// REQUEST
 data class CreatePaymentRequest(
     @SerializedName("idMethod") val idMethod: String,
     @SerializedName("totalAmount") val totalAmount: Double,

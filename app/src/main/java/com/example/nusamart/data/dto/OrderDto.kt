@@ -2,8 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// --- RESPONSE ---
-
+// RESPONSE
 data class OrderDto(
     @SerializedName("idOrder") val idOrder: String,
     @SerializedName("idPayment") val idPayment: String,
@@ -42,8 +41,7 @@ data class IsReviewedResponse(
     @SerializedName("isReviewed") val isReviewed: Boolean
 )
 
-// --- REQUEST ---
-
+// REQUEST
 data class CreateOrderRequest(
     @SerializedName("idStore") val idStore: String,
     @SerializedName("idAddress") val idAddress: String,

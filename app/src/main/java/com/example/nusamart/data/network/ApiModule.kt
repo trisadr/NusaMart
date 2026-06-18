@@ -30,7 +30,6 @@ object ApiModule {
         tokenPrefs: TokenPrefs
     ): OkHttpClient {
         return RetrofitProvider.provideOkHttpClient(
-            // Token provider otomatis menyisipkan token Sanctum ke header Authorization Bearer
             tokenProvider = {
                 kotlinx.coroutines.runBlocking {
                     tokenPrefs.getTokenSync()

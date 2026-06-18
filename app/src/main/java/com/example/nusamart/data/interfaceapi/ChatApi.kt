@@ -33,5 +33,5 @@ interface ChatApi {
     ): ChatActionResponse
 
     @PUT("chat/rooms/{id}/read")
-    suspend fun markAsRead(@Path("id") roomId: String): GeneralResponse // GeneralResponse bisa digunakan dari CartDto yang sudah kamu buat
+    suspend fun markAsRead(@Path("id") roomId: String): GeneralResponse
 }

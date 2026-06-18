@@ -82,7 +82,7 @@ fun ComposeApp() {
                     entry<Routes.CartRoute> { CartScreen() }
                     entry<Routes.HomeRoute> { HomePageScreen() }
 
-                    // -- Search result & Product page --
+                    // Search result & Product page
                     entry<Routes.SearchResultRoute> { route ->
                         SearchResultScreen(initialKeyword = route.keyword)
                     }

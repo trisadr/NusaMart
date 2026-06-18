@@ -14,8 +14,6 @@ data class ProductDto(
     @SerializedName("sold") val sold: Int = 0,
     @SerializedName("avgRating") val avgRating: Double? = 0.0,
     @SerializedName("soldCount") val soldCount: Int? = 0,
-
-    // PERHATIKAN DUA BARIS INI: Harus menggunakan product_items dan product_images
     @SerializedName("product_items") val items: List<ProductItemDto>? = null,
     @SerializedName("product_images") val images: List<ProductImageDto>? = null
 )
@@ -27,7 +25,7 @@ data class ProductItemDto(
     @SerializedName("stock") val stock: Int,
     @SerializedName("price") val price: Double,
     @SerializedName("isActive") val isActive: Int,
-    @SerializedName("variations") val variations: List<ProductVariationDto>? = null, // Mengakomodasi relasi dari Laravel
+    @SerializedName("variations") val variations: List<ProductVariationDto>? = null,
     @SerializedName("product") val product: ProductDto? = null
 )
 
@@ -41,7 +39,7 @@ data class ProductVariationDto(
 data class ProductImageDto(
     @SerializedName("idImage") val idImage: String,
     @SerializedName("idProduct") val idProduct: String,
-    @SerializedName("imageURL") val imageURL: String, // Diubah menjadi String karena API mengembalikan URL gambar sungguhan
+    @SerializedName("imageURL") val imageURL: String,
     @SerializedName("isPrimary") val isPrimary: Int
 )
 
@@ -58,7 +56,6 @@ data class SubCategoryDto(
     @SerializedName("description") val description: String?
 )
 
-// Wrapper untuk endpoint show() yang mengembalikan beberapa object sekaligus
 data class ProductDetailResponse(
     @SerializedName("product") val product: ProductDto,
     @SerializedName("items") val items: List<ProductItemDto>,

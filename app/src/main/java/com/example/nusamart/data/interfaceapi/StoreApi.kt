@@ -10,15 +10,15 @@ import retrofit2.http.Path
 
 interface StoreApi {
 
-    // Mengambil toko berdasarkan ID (Public)
+    // Public
     @GET("stores/{id}")
     suspend fun getStoreById(@Path("id") storeId: String): Response<StoreDto>
 
-    // Mengambil toko milik seller yang sedang login (Protected)
+    // Protected
     @GET("seller/store")
     suspend fun getMyStore(): Response<StoreDto>
 
-    // Memperbarui toko milik seller yang sedang login (Protected)
+    // Protected
     @PUT("seller/store")
     suspend fun updateStore(@Body request: Map<String, String?>): Response<UpdateStoreResponse>
 
