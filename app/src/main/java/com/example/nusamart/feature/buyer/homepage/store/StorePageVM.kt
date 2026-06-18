@@ -2,6 +2,7 @@ package com.example.nusamart.feature.buyer.homepage.store
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.store.StoreRepository
@@ -46,7 +47,7 @@ class StorePageVM @Inject constructor(
 
                 if (items.isEmpty()) return@mapNotNull null
 
-                val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL
+                val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL?.let { "${BuildConfig.STORAGE_URL}$it" }
 
                 ProductCardUiModel(
                     idProduct = product.idProduct,

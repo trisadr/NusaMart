@@ -2,6 +2,7 @@ package com.example.nusamart.feature.buyer.homepage.product
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.chat.ChatRepository
 import com.example.nusamart.data.repository.product.ProductRepository
@@ -48,7 +49,7 @@ class ProductPageVM @Inject constructor(
 
             val images = imagesData
                 .sortedByDescending { it.isPrimary }
-                .map { it.imageURL }
+                .map { "${BuildConfig.STORAGE_URL}${it.imageURL}" }
 
             val uiItems = itemsData.map { item ->
                 val variations = item.variations ?: emptyList()

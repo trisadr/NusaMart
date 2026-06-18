@@ -2,6 +2,7 @@ package com.example.nusamart.feature.buyer.homepage.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.store.StoreRepository
@@ -47,6 +48,7 @@ class HomeVM @Inject constructor(
 
             // Langsung ambil dari properti images bawaan ProductDto
             val primaryImageUrl = product.images?.find { it.isPrimary == 1 }?.imageURL
+                ?.let { "${BuildConfig.STORAGE_URL}$it" }
             val store = allStores.find { it.idStore == product.idStore }
 
             ProductCardUiModel(

@@ -27,6 +27,7 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "BASE_URL", "\"https://lantern-ample-widen.ngrok-free.dev/api/\"")
+            buildConfigField("String", "STORAGE_URL", "\"https://lantern-ample-widen.ngrok-free.dev/\"")
         }
         release {
             isMinifyEnabled = false
@@ -35,6 +36,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "BASE_URL", "\"https://api.production.com/api/\"")
+            buildConfigField("String", "STORAGE_URL", "\"https://api.production.com/\"")
         }
     }
 
@@ -45,7 +47,7 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true  // ← tambahan baru
+        buildConfig = true
     }
 }
 

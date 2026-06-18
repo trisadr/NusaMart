@@ -2,6 +2,7 @@ package com.example.nusamart.feature.buyer.homepage.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
 import com.example.nusamart.data.repository.store.StoreRepository
@@ -51,7 +52,7 @@ class SearchResultVM @Inject constructor(
                 if (items.isEmpty()) return@mapNotNull null
 
                 // Ambil URL gambar utama
-                val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL
+                val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL?.let { "${BuildConfig.STORAGE_URL}$it" }
 
                 // Cari lokasi toko
                 val store = allStores.find { it.idStore == product.idStore }
