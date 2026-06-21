@@ -29,11 +29,8 @@ class IncomingOrderListVM @Inject constructor(
     fun loadIncomingOrders() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // 1. LANGSUNG PANGGIL TOKO MILIK SELLER DARI API
-        // Tidak perlu lagi mem-passing sellerId karena API sudah membacanya dari Token
         val myStore = storeRepository.getMyStore()
 
-        // 2. JIKA TOKO DITEMUKAN, AMBIL DAFTAR PESANANNYA
         if (myStore != null) {
             val incomingOrders = orderRepository.getSellerOrders()
 
@@ -56,7 +53,6 @@ class IncomingOrderListVM @Inject constructor(
             val sortedModels = uiModels.sortedByDescending { it.order.orderDate }
             _uiState.update { it.copy(orders = sortedModels, isLoading = false) }
         } else {
-            // Jika API merespons kosong (seller belum buat toko)
             _uiState.update { it.copy(isLoading = false, orders = emptyList()) }
         }
     }

@@ -69,12 +69,12 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
     var text by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    // 1. Muat data chat saat layar pertama kali dibuka
+    // Muat data chat saat layar pertama kali dibuka
     LaunchedEffect(roomId) {
         vm.loadChat(roomId)
     }
 
-    // 2. Auto-scroll ke pesan paling bawah saat ada pesan baru
+    // Auto-scroll ke pesan paling bawah saat ada pesan baru
     LaunchedEffect(uiState.messages.size) {
         if (uiState.messages.isNotEmpty()) {
             listState.animateScrollToItem(uiState.messages.lastIndex)
@@ -123,7 +123,6 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
             )
         },
         bottomBar = {
-            // Area Input Pesan (menggunakan imePadding agar tidak tertutup keyboard)
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 8.dp,
@@ -147,9 +146,6 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            // Opsional: Jika kamu ingin batas pinggirnya (border) transparan juga agar lebih estetik
-                            // focusedBorderColor = Color.Transparent,
-                            // unfocusedBorderColor = Color.Transparent
                         )
                     )
 
@@ -160,7 +156,7 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                         onClick = {
                             val toSend = text.trim()
                             if (toSend.isNotBlank()) {
-                                text = "" // Kosongkan input setelah dikirim
+                                text = ""
                                 vm.sendMessage(toSend)
                             }
                         },
@@ -172,7 +168,7 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                             imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Kirim",
                             tint = Color.White,
-                            modifier = Modifier.padding(start = 4.dp) // Geser icon send sedikit ke kanan agar seimbang
+                            modifier = Modifier.padding(start = 4.dp)
                         )
                     }
                 }
@@ -184,7 +180,6 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                 CircularProgressIndicator(color = Color(0xFF00736B))
             }
         } else {
-            // Mengelompokkan pesan berdasarkan tanggal (Parsing String ke LocalDate)
             val groupedMessages = uiState.messages
                 .groupBy { msg ->
                     try {
@@ -204,19 +199,16 @@ fun ChatDetailScreen(roomId: String, vm: ChatDetailVM = hiltViewModel()) {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 groupedMessages.forEach { (date, messages) ->
-                    // 1. Header Tanggal
                     item(key = "date_${date}") {
                         DateLabel(date = date)
                     }
 
-                    // 2. Daftar Pesan di hari tersebut
                     items(messages, key = { it.idChat }) { msg ->
                         val isMe = msg.senderId == uiState.currentUserId
                         ChatBubble(msg = msg, isMe = isMe)
                     }
                 }
 
-                // Ruang kosong di bawah agar pesan terakhir tidak terlalu mepet
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
         }
@@ -256,7 +248,6 @@ private fun DateLabel(date: LocalDate) {
 
 @Composable
 private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
-    // Membaca waktu dari string ISO-8601 Laravel
     val timeText = try {
         val localTime = Instant.parse(msg.createAt).atZone(ZoneId.systemDefault()).toLocalDateTime()
         localTime.format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -271,14 +262,12 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
         horizontalAlignment = if (isMe) Alignment.End else Alignment.Start
     ) {
         Surface(
-            // --- PERUBAHAN DISINI ---
-            // Warna background bubble lawan bicara diubah menjadi teal (4DB6AC)
             color = if (isMe) Color(0xFF008B81) else Color(0xFF4DB6AC),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,
-                bottomStart = if (isMe) 16.dp else 4.dp, // Membuat ekor lancip di kiri bawah jika orang lain
-                bottomEnd = if (isMe) 4.dp else 16.dp   // Membuat ekor lancip di kanan bawah jika kita
+                bottomStart = if (isMe) 16.dp else 4.dp,
+                bottomEnd = if (isMe) 4.dp else 16.dp
             ),
             modifier = Modifier.widthIn(min = 80.dp, max = 280.dp)
         ) {
@@ -287,8 +276,6 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
                 // Teks Pesan
                 Text(
                     text = msg.messageText,
-                    // --- PERUBAHAN DISINI ---
-                    // Warna teks lawan bicara diubah menjadi putih agar terbaca jelas di atas warna teal
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 20.sp
@@ -300,19 +287,16 @@ private fun ChatBubble(msg: ChatMessageDto, isMe: Boolean) {
                 Row(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.align(Alignment.End) // Selalu dorong waktu ke kanan bawah bubble
+                    modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(
                         text = timeText,
                         fontSize = 10.sp,
-                        // --- PERUBAHAN DISINI ---
-                        // Warna waktu lawan bicara diubah menjadi putih transparan
                         color = Color.White.copy(alpha = 0.8f)
                     )
 
                     if (isMe) {
                         Spacer(modifier = Modifier.width(4.dp))
-                        // Cek status baca menggunakan angka 1 (karena DTO menggunakan Int)
                         Text(
                             text = if (msg.isRead == 1) "✓✓" else "✓",
                             fontSize = 10.sp,

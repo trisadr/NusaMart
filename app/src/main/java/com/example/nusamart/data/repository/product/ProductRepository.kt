@@ -19,9 +19,6 @@ sealed class ProductResult<out T> {
 class ProductRepository @Inject constructor(
     private val apiService: ProductApi
 ) {
-
-    // KATEGORI & SUB KATEGORI
-
     suspend fun getAllCategories(): ProductResult<List<CategoryDto>> = withContext(Dispatchers.IO) {
         return@withContext try {
             val response = apiService.getCategories()
@@ -39,8 +36,6 @@ class ProductRepository @Inject constructor(
             ProductResult.Error(e.localizedMessage ?: "Terjadi kesalahan")
         }
     }
-
-    // MANAJEMEN PRODUK
 
     suspend fun getAllProducts(): ProductResult<List<ProductDto>> = withContext(Dispatchers.IO) {
         return@withContext try {
@@ -77,10 +72,4 @@ class ProductRepository @Inject constructor(
             ProductResult.Error(e.localizedMessage ?: "Gagal mencari produk")
         }
     }
-
-    /* * FUNGSI POST (Tambah Produk & Variasi)
-     * Karena saat ini ProductController Laravel belum memiliki fungsi store(),
-     * bagian ini disiapkan sebagai TODO. Saat backend sudah siap,
-     * Anda cukup menambahkan endpoint @POST di ProductApiService.
-     */
 }

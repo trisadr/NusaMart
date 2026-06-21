@@ -30,19 +30,17 @@ class AddressVM @Inject constructor(
     }
 
     fun deleteAddress(id: String) = viewModelScope.launch {
-        _uiState.update { it.copy(isLoading = true) } // Tambahkan loading
+        _uiState.update { it.copy(isLoading = true) }
         val success = userRepository.deleteAddress(id)
         if (success) {
             loadAddresses()
         } else {
             _uiState.update { it.copy(isLoading = false) }
-            // Opsional: Tampilkan toast/error message jika gagal hapus
         }
     }
 
     fun showAddForm() = _uiState.update { it.copy(isFormVisible = true, editAddressId = null) }
 
-    // UBAH: Parameter menggunakan AddressDto
     fun showEditForm(address: AddressDto) = _uiState.update {
         it.copy(
             isFormVisible = true,
@@ -119,10 +117,9 @@ class AddressVM @Inject constructor(
 
             if (isSuccess) {
                 hideForm()
-                loadAddresses() // Refresh list dari backend
+                loadAddresses()
             } else {
                 _uiState.update { it.copy(isLoading = false) }
-                // Opsional: Tampilkan error gagal simpan
             }
         }
     }

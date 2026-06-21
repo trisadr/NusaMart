@@ -78,7 +78,7 @@ class ProductPageVM @Inject constructor(
                     minPrice = minPrice,
                     maxPrice = maxPrice,
                     totalStock = totalStock,
-                    soldCount = product.soldCount ?: 0, // <-- Mengambil data terjual dari DTO
+                    soldCount = product.soldCount ?: 0,
                     storeId = product.idStore,
                     storeName = sName,
                     storeLocation = sLoc,

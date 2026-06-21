@@ -21,10 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-// ==========================================
-// 1. ENUM DAN NAVIGASI UNTUK PEMBELI (BUYER)
-// ==========================================
-
 enum class BottomMenu {
     HOME,
     NOTIFICATION,
@@ -81,10 +77,6 @@ fun NusaMartBottomNavigation(
         )
     }
 }
-
-// ==========================================
-// 2. ENUM DAN NAVIGASI UNTUK PENJUAL (SELLER)
-// ==========================================
 
 enum class SellerBottomMenu {
     HOME,

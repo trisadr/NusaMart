@@ -2,16 +2,15 @@ package com.example.nusamart.data.repository.user
 
 import com.example.nusamart.data.dto.AddressDto
 import com.example.nusamart.data.dto.UserProfileResponse
+import com.example.nusamart.data.interfaceapi.AuthAndUserApi
 import com.example.nusamart.data.preference.TokenPrefs
 import com.example.nusamart.data.repository.notif.NotificationRepository
-import com.example.nusamart.feature.auth.login.AuthAndUserApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// --- Hasil Operasi ---
 sealed class RegisterResult {
     object Success : RegisterResult()
     data class Error(val message: String) : RegisterResult()
@@ -29,10 +28,6 @@ class UserRepository @Inject constructor(
     private val notificationRepository: NotificationRepository
 ) {
 
-    // =========================================================================
-    // SESSION MANAGEMENT
-    // =========================================================================
-
     suspend fun getActiveUserId(): String? {
         return tokenPrefs.getUserId().firstOrNull()
     }
@@ -40,10 +35,6 @@ class UserRepository @Inject constructor(
     suspend fun getActiveUserRole(): String? {
         return tokenPrefs.getRole()
     }
-
-    // =========================================================================
-    // AUTHENTICATION
-    // =========================================================================
 
     suspend fun login(emailOrUsername: String, password: String): LoginResult = withContext(Dispatchers.IO) {
         try {
@@ -57,7 +48,6 @@ class UserRepository @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    // UBAH: Tambahkan .user karena datanya dibungkus oleh Laravel
                     tokenPrefs.saveSession(
                         token = body.token,
                         role = body.user.role,
@@ -115,10 +105,6 @@ class UserRepository @Inject constructor(
             tokenPrefs.clearSession()
         }
     }
-
-    // =========================================================================
-    // PROFILE & ADDRESSES
-    // =========================================================================
 
     suspend fun getCurrentProfile(): UserProfileResponse? = withContext(Dispatchers.IO) {
         try {

@@ -8,8 +8,7 @@ data class SellerHomeUiState(
     val user: UserProfileResponse? = null,
     val sellerInfo: SellerDto? = null,
 
-    // Variabel metrik dinamis
     val newOrdersCount: Int = 0,
-    val totalRevenue: Long = 0, // Menggunakan Long untuk uang
-    val productsSoldCount: Int = 0 // Jumlah item barang terjual
+    val totalRevenue: Long = 0,
+    val productsSoldCount: Int = 0
 )

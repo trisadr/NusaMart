@@ -22,7 +22,6 @@ class CourierOptionVM @Inject constructor(
     private fun loadCouriers() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
         var list = shippingRepository.getActiveCouriers()
-        // Dummy data sementara kalau json dan file repository belum ada
         if (list.isEmpty()) {
             list = listOf(
                 CourierOptionDto("CUR-001", "JNE Reguler", "REGULAR", "3", 1),

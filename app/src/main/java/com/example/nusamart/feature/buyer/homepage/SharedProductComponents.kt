@@ -66,7 +66,6 @@ fun ProductGridCard(
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Column(modifier = Modifier.heightIn(min = 40.dp)) {
-                    // --- NAMA (1 Baris) ---
                     Text(
                         text = product.name,
                         style = MaterialTheme.typography.bodyMedium,
@@ -76,7 +75,6 @@ fun ProductGridCard(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // --- RATING ---
                     if (product.rating > 0.0) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -112,7 +110,6 @@ fun ProductGridCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // --- LOKASI & TERJUAL ---
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -123,12 +120,11 @@ fun ProductGridCard(
                         color = MaterialTheme.colorScheme.outline,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f) // Mendorong teks terjual ke kanan
+                        modifier = Modifier.weight(1f)
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    // Teks terjual langsung ditampilkan (tanpa if)
                     Text(
                         text = "${formatSoldCountCard(product.soldCount)} Terjual",
                         style = MaterialTheme.typography.labelSmall,
@@ -140,7 +136,6 @@ fun ProductGridCard(
     }
 }
 
-// Fungsi helper persis seperti di halaman detail
 private fun formatSoldCountCard(count: Int): String {
     return when {
         count < 1000 -> count.toString()

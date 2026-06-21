@@ -47,14 +47,14 @@ class RegisterVM @Inject constructor(
     fun register() = viewModelScope.launch {
         val state = _uiState.value
 
-        // --- Validasi Input Umum ---
+        // Validasi Input Umum
         if (state.username.isBlank()) return@launch showErrorDialog("Username wajib diisi.")
         if (state.email.isBlank()) return@launch showErrorDialog("Email wajib diisi.")
         if (state.phone.length < 10) return@launch showErrorDialog("Nomor telepon tidak valid.")
 
         if (state.password.isBlank()) return@launch showErrorDialog("Password wajib diisi.")
 
-        // --- TAMBAHAN: Validasi minimal 8 karakter ---
+        // Validasi minimal 8 karakter
         if (state.password.length < 8) {
             _uiState.update { it.copy(dialogState = RegisterDialogState.PasswordTooShort) }
             return@launch
@@ -68,7 +68,7 @@ class RegisterVM @Inject constructor(
             return@launch
         }
 
-        // --- Validasi Khusus Penjual ---
+        // Validasi Khusus Penjual
         if (state.isSeller) {
             if (state.nik.length != 16) return@launch showErrorDialog("NIK harus 16 digit angka.")
             if (state.bankName.isBlank()) return@launch showErrorDialog("Nama Bank wajib diisi.")
@@ -77,7 +77,7 @@ class RegisterVM @Inject constructor(
 
         _uiState.update { it.copy(isLoading = true) }
 
-        // Panggil ke Repository (mengirim data bank jika role-nya Seller)
+        // Panggil ke Repository
         val result = userRepository.register(
             username = state.username,
             email = state.email,

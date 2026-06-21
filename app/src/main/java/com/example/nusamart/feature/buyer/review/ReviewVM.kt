@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.order.OrderRepository
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
@@ -31,20 +32,20 @@ class ReviewVM @Inject constructor(
     fun loadOrderItems(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, orderId = orderId) }
 
-        // 1. Cek status order, pastikan DELIVERED
+        // Cek status order, pastikan DELIVERED
         val order = orderRepository.getOrderById(orderId)
         if (order?.orderStatus != "DELIVERED") {
             _uiState.update { it.copy(isLoading = false, isOrderDelivered = false) }
             return@launch
         }
 
-        // 2. Ambil Order Items dan Cek Ulasan yang sudah ada
+        // Ambil Order Items dan Cek Ulasan yang sudah ada
         val orderItems = orderRepository.getOrderItems(orderId)
         val itemIds = orderItems.map { it.idOrderItem }
         val existingReviews = reviewRepository.getReviewsByItemIds(itemIds)
         val reviewedItemIds = existingReviews.map { it.idOrderItem }.toSet()
 
-        // 3. Filter hanya item yang BELUM diulas
+        // Filter hanya item yang BELUM diulas
         val unreviewedItems = orderItems.filter { it.idOrderItem !in reviewedItemIds }
 
         // Jika semua sudah diulas, set flag allReviewed ke true
@@ -55,22 +56,18 @@ class ReviewVM @Inject constructor(
             return@launch
         }
 
-        // 4. Proses data untuk UI
-        // Buka bungkus ProductResult
         val productsResult = productRepository.getAllProducts()
         val allProducts = if (productsResult is ProductResult.Success) productsResult.data else emptyList()
 
-        // Buat map untuk mencocokkan idItem dengan imageURL utama produk
         val itemImageMap = mutableMapOf<String, String>()
 
         allProducts.forEach { product ->
             val detailResult = productRepository.getProductDetail(product.idProduct)
             if (detailResult is ProductResult.Success) {
                 val detailData = detailResult.data
-                val primaryImage = detailData.images.find { it.isPrimary == 1 }?.imageURL
+                val primaryImage = detailData.images.find { it.isPrimary == 1 }?.imageURL?.let { "${BuildConfig.STORAGE_URL}$it" }
 
                 if (primaryImage != null) {
-                    // Simpan URL gambar untuk setiap variasi item di produk ini
                     detailData.items.forEach { item ->
                         itemImageMap[item.idItem] = primaryImage
                     }
@@ -78,7 +75,6 @@ class ReviewVM @Inject constructor(
             }
         }
 
-        // Petakan ke ReviewItemForm
         val forms = unreviewedItems.map { oi ->
             ReviewItemForm(
                 idOrderItem = oi.idOrderItem,
@@ -125,11 +121,7 @@ class ReviewVM @Inject constructor(
 
         _uiState.update { it.copy(isLoading = true) }
 
-        // Loop untuk mengirim semua ulasan
         state.itemsToReview.forEach { form ->
-
-            // PERBAIKAN DI SINI:
-            // Hapus idUser dan ubah imageUrl menjadi localImagePath
             reviewRepository.createReview(
                 idOrderItem = form.idOrderItem,
                 rating = form.rating.toDouble(),
@@ -141,20 +133,16 @@ class ReviewVM @Inject constructor(
         _uiState.update { it.copy(isLoading = false, isSubmitSuccess = true) }
     }
 
-    // FUNGSI BARU: Konversi Uri ke File Path dan update State
     fun updatePhoto(context: Context, idOrderItem: String, uri: Uri) {
         viewModelScope.launch {
             try {
-                // 1. Baca data dari Uri
                 val inputStream = context.contentResolver.openInputStream(uri) ?: return@launch
 
-                // 2. Buat file sementara di cache direktori
                 val tempFile = File.createTempFile("review_img_", ".jpg", context.cacheDir)
                 tempFile.outputStream().use { output ->
                     inputStream.copyTo(output)
                 }
 
-                // 3. Simpan absolute path-nya ke UI State
                 val localPath = tempFile.absolutePath
 
                 _uiState.update { state ->
@@ -164,7 +152,7 @@ class ReviewVM @Inject constructor(
                     state.copy(itemsToReview = newItems)
                 }
             } catch (e: Exception) {
-                e.printStackTrace() // Abaikan jika gagal baca gambar
+                e.printStackTrace()
             }
         }
     }

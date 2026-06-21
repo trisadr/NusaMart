@@ -85,7 +85,7 @@ fun StorePageScreen(
         } else {
             Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
 
-                // --- HEADER PROFIL TOKO ---
+                // HEADER PROFIL TOKO
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -135,7 +135,7 @@ fun StorePageScreen(
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = "Rating",
-                                tint = Color(0xFFFFC107), // Warna Emas/Kuning
+                                tint = Color(0xFFFFC107),
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -150,7 +150,7 @@ fun StorePageScreen(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // --- GRID PRODUK TOKO ---
+                // GRID PRODUK TOKO
                 if (uiState.storeProducts.isEmpty()) {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text("Toko ini belum memiliki produk", color = MaterialTheme.colorScheme.onSurfaceVariant)

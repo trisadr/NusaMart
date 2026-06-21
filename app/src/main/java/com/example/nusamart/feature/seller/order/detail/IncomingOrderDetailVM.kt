@@ -17,7 +17,6 @@ class IncomingOrderDetailVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
     private val shippingRepository: ShippingRepository
-    // NotificationRepository resmi DIHAPUS dari sini! 🎉
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomingOrderDetailUiState())
@@ -39,35 +38,26 @@ class IncomingOrderDetailVM @Inject constructor(
         }
     }
 
-    // 1. PROSES PESANAN (PENDING -> PROCESSED)
     fun processOrder(orderId: String, courierId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // Cukup perbarui status dan buat pengiriman. Laravel yang akan menembak notif ke pembeli.
         orderRepository.updateOrderStatus(orderId, "PROCESSED")
         shippingRepository.createShipping(orderId, courierId)
 
         loadOrderDetail(orderId)
     }
 
-    // 2. BATALKAN PESANAN (PENDING -> CANCELLED)
     fun cancelOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-
-        // Cukup perbarui status. Laravel yang akan menangani notif pembatalan.
         orderRepository.updateOrderStatus(orderId, "CANCELLED")
-
         loadOrderDetail(orderId)
     }
 
-    // 3. KIRIM PESANAN (PROCESSED -> SHIPPED)
     fun shipOrder(orderId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // Update status order utama
         orderRepository.updateOrderStatus(orderId, "SHIPPED")
 
-        // Update status di sisi kurir/pengiriman
         val shipping = shippingRepository.getShippingByOrderId(orderId)
         if (shipping != null) {
             val dummyResi = "NUSA-${System.currentTimeMillis()}"
@@ -85,7 +75,6 @@ class IncomingOrderDetailVM @Inject constructor(
             )
         }
 
-        // Notifikasi pengiriman dikerjakan Laravel di belakang layar.
         loadOrderDetail(orderId)
     }
 }

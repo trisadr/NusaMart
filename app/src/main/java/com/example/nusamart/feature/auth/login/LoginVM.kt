@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-// --- Navigasi Login ---
 sealed class LoginNavigation {
     object ToBuyerHome : LoginNavigation()
     object ToSellerHome : LoginNavigation()

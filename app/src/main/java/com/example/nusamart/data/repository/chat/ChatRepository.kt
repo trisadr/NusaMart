@@ -14,14 +14,11 @@ import javax.inject.Singleton
 class ChatRepository @Inject constructor(
     private val apiService: ChatApi
 ) {
-
-    // --- ROOM CHAT ---
-
     suspend fun getChatRooms(): List<RoomChatDto> = withContext(Dispatchers.IO) {
         try {
             apiService.getChatRooms()
         } catch (e: Exception) {
-            emptyList() // Kembalikan list kosong jika error/belum ada chat
+            emptyList()
         }
     }
 
@@ -33,8 +30,6 @@ class ChatRepository @Inject constructor(
         }
     }
 
-    // Perhatikan: Kita hanya perlu mengirim ID lawan bicara, Laravel akan otomatis
-    // mencari tahu ID kita dari token Bearer yang dikirim Retrofit.
     suspend fun getOrCreateRoom(idUser2: String): RoomChatDto? = withContext(Dispatchers.IO) {
         try {
             val request = GetOrCreateRoomRequest(idUser2)
@@ -43,9 +38,6 @@ class ChatRepository @Inject constructor(
             null
         }
     }
-
-
-    // --- CHAT MESSAGES ---
 
     suspend fun getChatsByRoom(roomId: String): List<ChatMessageDto> = withContext(Dispatchers.IO) {
         try {

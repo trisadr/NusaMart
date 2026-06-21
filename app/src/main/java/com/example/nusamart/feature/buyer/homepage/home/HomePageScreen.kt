@@ -64,7 +64,6 @@ fun HomePageScreen(vm: HomeVM = hiltViewModel()) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ← UBAH: bungkus search bar + tombol chat dalam Row
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -87,11 +86,10 @@ fun HomePageScreen(vm: HomeVM = hiltViewModel()) {
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // Tombol chat dengan border mirip search bar
                     OutlinedIconButton(
                         onClick = { backStack.add(Routes.BuyerChatListRoute) },
-                        modifier = Modifier.size(56.dp),   // tinggi sama dengan OutlinedTextField default
-                        shape = RoundedCornerShape(12.dp), // radius sama dengan search bar
+                        modifier = Modifier.size(56.dp),
+                        shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(
                             width = 1.dp,
                             color = MaterialTheme.colorScheme.outline

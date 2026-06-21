@@ -2,6 +2,7 @@ package com.example.nusamart.feature.buyer.cart
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nusamart.BuildConfig
 import com.example.nusamart.data.repository.cart.CartRepository
 import com.example.nusamart.data.repository.product.ProductRepository
 import com.example.nusamart.data.repository.product.ProductResult
@@ -61,8 +62,10 @@ class CartVM @Inject constructor(
 
             // 2. Ambil harga dan gambar langsung dari dalam objek produk
             val itemDetail = matchedProduct.items?.find { it.idItem == cItem.idItem } ?: return@mapNotNull null
-            val primaryImage = matchedProduct.images?.find { it.isPrimary == 1 }?.imageURL
-                ?: matchedProduct.images?.firstOrNull()?.imageURL
+            val primaryImage = matchedProduct.images
+                ?.let { images -> images.find { it.isPrimary == 1 } ?: images.firstOrNull() }
+                ?.imageURL
+                ?.let { "${BuildConfig.STORAGE_URL}$it" }
 
             val store = allStores.find { it.idStore == matchedProduct.idStore }
 

@@ -15,8 +15,6 @@ class NotificationRepository @Inject constructor(
     // Mengambil semua notifikasi milik user yang sedang login
     suspend fun getNotificationsByUser(): List<NotificationDto> = withContext(Dispatchers.IO) {
         try {
-            // Kita tidak perlu mengirim userId sebagai parameter,
-            // karena Laravel sudah membacanya otomatis dari Token Sanctum (Bearer)
             apiService.getNotifications()
         } catch (e: Exception) {
             emptyList()
@@ -45,7 +43,6 @@ class NotificationRepository @Inject constructor(
     // Menandai seluruh notifikasi sebagai "sudah dibaca"
     suspend fun markAllAsRead(): Boolean = withContext(Dispatchers.IO) {
         try {
-            // Sama seperti get, kita tidak perlu mengirim userId, Laravel otomatis memproses user saat ini
             apiService.markAllAsRead()
             true
         } catch (e: Exception) {

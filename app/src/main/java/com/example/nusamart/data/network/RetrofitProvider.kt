@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitProvider {
 
     fun provideOkHttpClient(
-        tokenProvider: () -> String?  // lambda ambil token, nullable kalau belum login
+        tokenProvider: () -> String?
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(NetworkConfig.TIMEOUT, TimeUnit.SECONDS)
@@ -21,7 +21,7 @@ object RetrofitProvider {
                         .addHeader("Authorization", "Bearer $token")
                         .build()
                 } else {
-                    chain.request() // belum login, kirim tanpa token
+                    chain.request()
                 }
                 chain.proceed(request)
             }

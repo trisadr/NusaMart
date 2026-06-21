@@ -200,10 +200,9 @@ fun ProductPageScreen(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f) // Harga otomatis mendorong teks "Terjual" ke kanan
+                        modifier = Modifier.weight(1f)
                     )
 
-                    // Langsung tampilkan tanpa syarat if (> 0) biar selalu kelihatan!
                     Text(
                         text = "${formatSoldCount(uiState.soldCount)} Terjual",
                         fontSize = 13.sp,
@@ -266,7 +265,6 @@ fun ProductPageScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
 
-                // --- UI Profil Toko dengan Badge Local ---
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -452,7 +450,6 @@ fun formatPrice(price: Double): String {
     return "Rp ${formatter.format(price.toLong())}"
 }
 
-// Fungsi helper untuk memformat angka terjual
 fun formatSoldCount(count: Int): String {
     return when {
         count < 1000 -> count.toString()

@@ -36,7 +36,6 @@ class LandingViewModel @Inject constructor(
             if (isLoggedIn) {
                 val role = tokenPrefs.getRole()
 
-                // UBAH: Gunakan .lowercase() agar aman dari perbedaan huruf kapital/kecil
                 val destination = when (role?.lowercase()) {
                     "seller" -> Routes.SellerHomeScreenRoute
                     "buyer"  -> Routes.HomeRoute

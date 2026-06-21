@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentOptionVM @Inject constructor(
-    private val paymentRepository: PaymentRepository,  // ✅ ganti
+    private val paymentRepository: PaymentRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PaymentOptionUiState())
@@ -23,7 +23,6 @@ class PaymentOptionVM @Inject constructor(
     private fun loadMethods() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // ✅ Dari API langsung, tidak perlu dummy data lagi
         val list = paymentRepository.getActivePaymentMethods()
 
         _uiState.update { it.copy(methods = list, isLoading = false) }

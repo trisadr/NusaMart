@@ -190,7 +190,6 @@ private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header berisi Nama Toko & Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -225,7 +224,6 @@ private fun OrderListItem(model: OrderListUiModel, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.outlineVariant
             )
 
-            // Nama Produk & Total Harga
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     modifier = Modifier.size(52.dp),

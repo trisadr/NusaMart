@@ -55,7 +55,6 @@ fun SellerNotifDetailScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Detail Notifikasi", fontWeight = FontWeight.Bold) },
-                // TOMBOL BACK DI SEBELAH KANAN (Actions)
                 actions = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
                         Icon(
@@ -69,7 +68,6 @@ fun SellerNotifDetailScreen(
             )
         },
         bottomBar = {
-            // Jika tipe ORDER, arahkan ke detail pesanan masuk (Incoming Order)
             if (notif != null && notif.type == "ORDER" && notif.referenceId != null) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -78,8 +76,6 @@ fun SellerNotifDetailScreen(
                 ) {
                     Button(
                         onClick = {
-                            // Arahkan ke detail pesanan masuk milik seller
-                            //backStack.add(Routes.IncomingOrderDetailRoute(notif.referenceId))
                         },
                         modifier = Modifier
                             .fillMaxWidth()

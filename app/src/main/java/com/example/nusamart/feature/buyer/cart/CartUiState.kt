@@ -7,7 +7,7 @@ data class CartItemUiModel(
     val price: Double,
     val quantity: Int,
     val isChecked: Int,
-    val imageUrl: String? = null, // Tambahkan imageUrl jika diperlukan: String
+    val imageUrl: String? = null,
 )
 
 data class StoreCartGroup(

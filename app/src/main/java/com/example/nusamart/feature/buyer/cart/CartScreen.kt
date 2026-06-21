@@ -247,7 +247,6 @@ private fun CartItemRow(
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 18.sp
             )
-            // FORMAT HARGA PER ITEM DI SINI
             Text(
                 text = "Rp ${formatRupiah(item.price.toLong())}",
                 fontWeight = FontWeight.Bold,
@@ -369,7 +368,6 @@ private fun CartBottomBar(
     }
 }
 
-// FUNGSI PEMBANTU FORMAT RUPIAH
 fun formatRupiah(number: Long): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return formatter.format(number)

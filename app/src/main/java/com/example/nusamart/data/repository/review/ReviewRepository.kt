@@ -42,15 +42,13 @@ class ReviewRepository @Inject constructor(
         idOrderItem: String,
         rating: Double,
         comment: String?,
-        localImagePath: String? // File path lokal di HP user (bukan URL internet)
+        localImagePath: String?
     ): Result<ReviewDto?> = withContext(Dispatchers.IO) {
         try {
-            // 1. Konversi teks menjadi RequestBody
             val idItemBody = idOrderItem.toRequestBody("text/plain".toMediaTypeOrNull())
             val ratingBody = rating.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val commentBody = comment?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            // 2. Siapkan file gambar (jika user memilih foto)
             var imagePart: MultipartBody.Part? = null
 
             if (!localImagePath.isNullOrEmpty()) {
@@ -62,7 +60,6 @@ class ReviewRepository @Inject constructor(
                 }
             }
 
-            // 3. Tembak API
             val response = apiService.createReview(idItemBody, ratingBody, commentBody, imagePart)
 
             Result.success(response.review)
@@ -71,7 +68,6 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    // (Admin Only) Menyembunyikan ulasan
     suspend fun hideReview(reviewId: String): Boolean = withContext(Dispatchers.IO) {
         try {
             apiService.hideReview(reviewId)

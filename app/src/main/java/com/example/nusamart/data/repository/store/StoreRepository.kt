@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// Hasil Operasi
 sealed class StoreResult {
     data class Success(val storeId: String) : StoreResult()
     data class Error(val message: String) : StoreResult()
@@ -20,10 +19,6 @@ class StoreRepository @Inject constructor(
     private val api: StoreApi, // Inject Store API
     @ApplicationContext private val context: Context
 ) {
-
-    // =========================================================================
-    // MANAJEMEN TOKO (MENGGUNAKAN API RETROFIT)
-    // =========================================================================
 
     suspend fun getStoreById(storeId: String): StoreDto? = withContext(Dispatchers.IO) {
         try {
@@ -84,7 +79,6 @@ class StoreRepository @Inject constructor(
         try {
             val response = api.getAllStores()
             if (response.isSuccessful) {
-                // Jika berhasil, kembalikan list toko. Jika kosong, kembalikan list kosong.
                 return@withContext response.body() ?: emptyList()
             }
             return@withContext emptyList()

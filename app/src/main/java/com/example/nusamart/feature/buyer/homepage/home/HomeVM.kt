@@ -32,7 +32,6 @@ class HomeVM @Inject constructor(
 
         val allStores = storeRepository.getAllStores()
 
-        // 1. Unwrap ProductResult dari getAllProducts()
         val productsResult = productRepository.getAllProducts()
         val allProducts = if (productsResult is ProductResult.Success) {
             productsResult.data
@@ -40,13 +39,10 @@ class HomeVM @Inject constructor(
             emptyList()
         }
 
-        // 2. Mapping data langsung dari ProductDto (Hasil Eager Loading Laravel)
         val uiModels = allProducts.mapNotNull { product ->
-            // Langsung ambil dari properti items bawaan ProductDto
             val items = product.items ?: emptyList()
             if (items.isEmpty()) return@mapNotNull null
 
-            // Langsung ambil dari properti images bawaan ProductDto
             val primaryImageUrl = product.images?.find { it.isPrimary == 1 }?.imageURL
                 ?.let { "${BuildConfig.STORAGE_URL}$it" }
             val store = allStores.find { it.idStore == product.idStore }

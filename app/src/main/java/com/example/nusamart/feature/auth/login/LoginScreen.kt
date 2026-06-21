@@ -142,7 +142,6 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            // --- Aksi Ekstra ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

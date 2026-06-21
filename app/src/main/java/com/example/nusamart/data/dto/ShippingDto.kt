@@ -2,7 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// RESPONSE (Balasan dari Server)
+// RESPONSE
 
 data class CourierOptionDto(
     @SerializedName("idCourier") val idCourier: String,
@@ -21,8 +21,6 @@ data class ShippingDto(
     @SerializedName("shippingStatus") val shippingStatus: String,
     @SerializedName("shippingDate") val shippingDate: String?,
     @SerializedName("deliveredDate") val deliveredDate: String?,
-
-    // Tangkapan Eager Loading dari Laravel (fungsi: with('shippingTrackings'))
     @SerializedName("shipping_trackings") val trackings: List<ShippingTrackingDto>? = null
 )
 

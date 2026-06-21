@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CheckoutSuccessVM @Inject constructor(
-    private val paymentRepository: PaymentRepository,  // ✅ ganti
+    private val paymentRepository: PaymentRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 

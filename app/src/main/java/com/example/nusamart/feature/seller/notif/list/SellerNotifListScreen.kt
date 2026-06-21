@@ -1,6 +1,5 @@
 package com.example.nusamart.feature.seller.notif.list
 
-// IMPORT KOMPONEN NAVIGASI YANG BARU
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,9 +75,9 @@ fun SellerNotifListScreen(vm: SellerNotifListVM = hiltViewModel()) {
                 onMenuSelected = { menu ->
                     when (menu) {
                         SellerBottomMenu.HOME -> backStack.add(Routes.SellerHomeScreenRoute)
-                        SellerBottomMenu.ORDER -> backStack.add(Routes.SellerOrderListRoute) //PERLU DIGANTI NNANTI
+                        SellerBottomMenu.ORDER -> backStack.add(Routes.SellerOrderListRoute)
                         SellerBottomMenu.CHAT -> backStack.add(Routes.SellerChatListRoute)
-                        SellerBottomMenu.NOTIFICATION -> Unit // Sudah di sini
+                        SellerBottomMenu.NOTIFICATION -> Unit
                     }
                 }
             )
@@ -95,7 +94,6 @@ fun SellerNotifListScreen(vm: SellerNotifListVM = hiltViewModel()) {
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                // Notifikasi Sistem
                 if (systemNotifs.isNotEmpty()) {
                     itemsIndexed(systemNotifs) { _, notif ->
                         SellerNotificationItem(
@@ -105,7 +103,6 @@ fun SellerNotifListScreen(vm: SellerNotifListVM = hiltViewModel()) {
                         )
                     }
                 }
-                // Notifikasi Pesanan Masuk / Dibatalkan
                 if (orderNotifs.isNotEmpty()) {
                     item {
                         Row(

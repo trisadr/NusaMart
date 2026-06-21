@@ -64,7 +64,6 @@ fun IncomingOrderDetailScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Detail Pesanan", fontWeight = FontWeight.Bold) },
-                // TOMBOL BACK DI KANAN ATAS
                 actions = {
                     IconButton(onClick = { backStack.removeAt(backStack.lastIndex) }) {
                         Icon(Icons.Default.Close, contentDescription = "Tutup")
@@ -85,7 +84,6 @@ fun IncomingOrderDetailScreen(
                     ) {
                         when (order.orderStatus) {
                             "PENDING" -> {
-                                // Tombol Batalkan (Outlined)
                                 OutlinedButton(
                                     onClick = { vm.cancelOrder(order.idOrder) },
                                     modifier = Modifier.weight(1f).height(50.dp),
@@ -94,10 +92,8 @@ fun IncomingOrderDetailScreen(
                                 ) {
                                     Text("Batalkan", fontWeight = FontWeight.Bold)
                                 }
-                                // Tombol Proses (Filled)
                                 Button(
                                     onClick = {
-                                        // Asumsi order memiliki field idCourier. Ganti dengan "CUR-001" jika tidak ada.
                                         vm.processOrder(order.idOrder, "CUR-001")
                                     },
                                     modifier = Modifier.weight(1f).height(50.dp),
@@ -108,7 +104,6 @@ fun IncomingOrderDetailScreen(
                                 }
                             }
                             "PROCESSED" -> {
-                                // Tombol Kirim Pesanan
                                 Button(
                                     onClick = { vm.shipOrder(order.idOrder) },
                                     modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -118,7 +113,6 @@ fun IncomingOrderDetailScreen(
                                     Text("Kirim Pesanan", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 }
                             }
-                            // Jika SHIPPED, DELIVERED, atau CANCELLED tidak perlu tombol aksi
                         }
                     }
                 }
@@ -137,7 +131,6 @@ fun IncomingOrderDetailScreen(
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Info Status & ID Order
                 Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -157,7 +150,6 @@ fun IncomingOrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Info Pembeli
                 Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text("Informasi Pembeli", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -173,7 +165,6 @@ fun IncomingOrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Daftar Barang
                 Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text("Daftar Produk", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -192,7 +183,6 @@ fun IncomingOrderDetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Rincian Harga
                 Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

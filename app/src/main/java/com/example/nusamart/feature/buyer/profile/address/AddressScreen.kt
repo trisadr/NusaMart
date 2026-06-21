@@ -288,7 +288,7 @@ private fun AddOrEditAddressForm(uiState: AddressUiState, vm: AddressVM) {
             Checkbox(
                 checked = (uiState.formIsDefault == 1),
                 onCheckedChange = { checked ->
-                    vm.updateIsDefault(if (checked) 1 else 0)  // ✅ Boolean → Int saat callback
+                    vm.updateIsDefault(if (checked) 1 else 0)
                 },
                 colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
             )

@@ -65,7 +65,6 @@ private fun LandingContent(uiState: LandingUiState) {
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Tampilkan loading hanya saat isLoading true
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier

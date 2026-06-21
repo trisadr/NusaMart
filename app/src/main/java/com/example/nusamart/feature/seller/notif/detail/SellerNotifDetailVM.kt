@@ -21,7 +21,6 @@ class SellerNotifDetailVM @Inject constructor(
     fun loadAndMarkAsRead(notifId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        // Tandai dibaca agar badge notifikasi berkurang
         notificationRepository.markAsRead(notifId)
 
         val notif = notificationRepository.getNotificationById(notifId)

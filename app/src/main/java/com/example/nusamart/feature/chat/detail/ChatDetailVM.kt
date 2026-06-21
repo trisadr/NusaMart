@@ -33,7 +33,6 @@ class ChatDetailVM @Inject constructor(
         val otherUserId = if (room?.idUser1 == myId) room?.idUser2 else room?.idUser1
         val otherUser = otherUserId?.let { userRepository.getUserById(it) }
 
-        // ← TAMBAH: tandai pesan sebagai terbaca saat chat dibuka
         if (myId.isNotBlank()) {
             chatRepository.markMessagesAsRead(roomId)
         }

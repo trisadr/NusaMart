@@ -2,7 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-//RESPONSE (Balasan dari Server)
+//RESPONSE
 data class NotificationDto(
     @SerializedName("idNotif") val idNotif: String,
     @SerializedName("idUser") val idUser: String,

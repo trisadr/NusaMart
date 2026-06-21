@@ -22,7 +22,7 @@ data class RegisterUiState(
 sealed class RegisterDialogState {
     object None : RegisterDialogState()
     object PasswordMismatch : RegisterDialogState()
-    object PasswordTooShort : RegisterDialogState() // <-- TAMBAHAN STATE BARU
+    object PasswordTooShort : RegisterDialogState()
     data class FormError(val message: String) : RegisterDialogState()
     data class ApiError(val message: String) : RegisterDialogState()
 }

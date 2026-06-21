@@ -1,12 +1,11 @@
 package com.example.nusamart.feature.buyer.profile.address
 
-import com.example.nusamart.data.dto.AddressDto // UBAH IMPORT INI
+import com.example.nusamart.data.dto.AddressDto
 
 data class AddressUiState(
-    val addresses: List<AddressDto> = emptyList(), // UBAH TIPE DATA
+    val addresses: List<AddressDto> = emptyList(),
     val isLoading: Boolean = true,
 
-    // State untuk Form Tambah/Edit Alamat
     val isFormVisible: Boolean = false,
     val editAddressId: String? = null,
 

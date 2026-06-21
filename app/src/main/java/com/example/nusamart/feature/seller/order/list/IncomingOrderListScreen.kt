@@ -98,7 +98,7 @@ fun IncomingOrderListScreen(vm: IncomingOrderListVM = hiltViewModel()) {
                 onMenuSelected = { menu ->
                     when (menu) {
                         SellerBottomMenu.HOME -> backStack.add(Routes.SellerHomeScreenRoute)
-                        SellerBottomMenu.ORDER -> Unit // Sudah di sini
+                        SellerBottomMenu.ORDER -> Unit
                         SellerBottomMenu.CHAT -> backStack.add(Routes.SellerChatListRoute)
                         SellerBottomMenu.NOTIFICATION -> backStack.add(Routes.SellerNotifListRoute)
                     }
@@ -191,7 +191,6 @@ private fun IncomingOrderListItem(model: IncomingOrderListUiModel, onClick: () -
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Info Pembeli & Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -222,7 +221,6 @@ private fun IncomingOrderListItem(model: IncomingOrderListUiModel, onClick: () -
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
-            // Body: Info Produk & Total
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     modifier = Modifier.size(52.dp),

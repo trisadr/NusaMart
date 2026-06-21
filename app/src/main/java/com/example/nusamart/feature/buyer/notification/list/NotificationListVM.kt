@@ -35,7 +35,7 @@ class NotificationListVM @Inject constructor(
         val userId = userRepository.getActiveUserId()
         if (userId != null) {
             notificationRepository.markAllAsRead()
-            loadNotifications() // Reload data
+            loadNotifications()
         }
     }
 }

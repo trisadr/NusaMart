@@ -44,7 +44,6 @@ fun BuyerChatListScreen() {
             )
         }
     ) { padding ->
-        // PERBAIKAN UTAMA: teruskan padding ke ChatListContent
         ChatListContent(
             paddingValues = padding,
             onRoomClick = { roomId -> backStack.add(Routes.ChatDetailRoute(roomId)) }

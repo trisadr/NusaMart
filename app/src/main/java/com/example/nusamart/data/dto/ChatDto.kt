@@ -2,7 +2,7 @@ package com.example.nusamart.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-// RESPONSE (Balasan dari Server)
+// RESPONSE
 data class RoomChatDto(
     @SerializedName("idRoom") val idRoom: String,
     @SerializedName("idUser1") val idUser1: String,
@@ -27,7 +27,7 @@ data class ChatActionResponse(
 )
 
 
-// REQUEST (Data yang dikirim ke Server)
+// REQUEST
 
 data class GetOrCreateRoomRequest(
     @SerializedName("idUser2") val idUser2: String

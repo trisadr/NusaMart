@@ -17,8 +17,8 @@ import javax.inject.Inject
 class OrderDetailVM @Inject constructor(
     private val orderRepository: OrderRepository,
     private val shippingRepository: ShippingRepository,
-    private val chatRepository: ChatRepository,     // <-- INJECT ChatRepository
-    private val storeRepository: StoreRepository    // <-- INJECT StoreRepository
+    private val chatRepository: ChatRepository,
+    private val storeRepository: StoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OrderDetailUiState())
@@ -57,20 +57,16 @@ class OrderDetailVM @Inject constructor(
         }
     }
 
-    // --- FUNGSI BARU UNTUK MULAI CHAT ---
     fun startChatWithSeller(onNavigateToChat: (String) -> Unit) {
         viewModelScope.launch {
             val currentOrder = _uiState.value.order ?: return@launch
 
-            // 1. Ambil detail toko dari order
             val storeId = currentOrder.idStore
             val store = storeRepository.getStoreById(storeId)
 
-            // 2. Ambil ID Seller dari toko tersebut
             val sellerId = store?.idSeller
 
             if (sellerId != null) {
-                // 3. Buat atau dapatkan Room ID dengan Seller, lalu navigasi
                 val room = chatRepository.getOrCreateRoom(sellerId)
                 room?.let { onNavigateToChat(it.idRoom) }
             }

@@ -86,7 +86,6 @@ fun ReviewScreen(
 
     if (uiState.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            // Loading mengikuti warna primary (Teal)
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
         return
@@ -124,7 +123,6 @@ fun ReviewScreen(
                             onClick = vm::submitReviews,
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(10.dp),
-                            // Tombol mengikuti warna primary (Teal)
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary

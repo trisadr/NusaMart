@@ -1,6 +1,5 @@
 package com.example.nusamart.data.repository.report
 
-// HAPUS import android.R.attr.type yang bikin error!
 import android.content.Context
 import com.example.nusamart.data.model.report.Report
 import com.google.gson.Gson
@@ -13,7 +12,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// 1. TAMBAHKAN referenceID di JSON Model agar sinkron dengan model utama
+// Fitur belum diterapka + belum menggunakan API
 data class ReportJson(
     val idReport: String,
     val reporterId: String,
@@ -23,7 +22,7 @@ data class ReportJson(
     val createAt: String,
     val updateAt: String? = null,
     val type: String,
-    val referenceID: String // <-- Tambahan wajib
+    val referenceID: String
 )
 
 @Singleton
@@ -46,7 +45,7 @@ class ReportRepository @Inject constructor(
             }
         }
         val json = file.readText()
-        if (json.isBlank()) return mutableListOf() // Cegah crash jika file kosong
+        if (json.isBlank()) return mutableListOf()
         val type = object : TypeToken<List<T>>() {}.type
         return gson.fromJson(json, type) ?: mutableListOf()
     }
@@ -56,7 +55,6 @@ class ReportRepository @Inject constructor(
         file.writeText(gson.toJson(data))
     }
 
-    // 2. MAPPER JUGA HARUS MENGAMBIL referenceID
     private fun ReportJson.toReport() = Report(
         idReport = idReport,
         reporterId = reporterId,
@@ -66,10 +64,9 @@ class ReportRepository @Inject constructor(
         createAt = LocalDateTime.parse(createAt),
         updateAt = updateAt?.let { LocalDateTime.parse(it) },
         type = Report.ReferenceType.valueOf(type),
-        referenceID = referenceID // <-- Tambahan wajib
+        referenceID = referenceID
     )
 
-    // Operasi
     fun submitReport(
         reporterId: String,
         reason: String,
@@ -83,7 +80,6 @@ class ReportRepository @Inject constructor(
 
         val reports = readJson<ReportJson>(reportFile)
 
-        // 3. LOGIKA PENENTUAN TIPE & ID REFERENSI
         val (determinedType, determinedRefId) = when {
             reportedUserId != null -> Report.ReferenceType.USER.name to reportedUserId
             reportedProductId != null -> Report.ReferenceType.PRODUCT.name to reportedProductId

@@ -64,7 +64,6 @@ fun NotificationDetailScreen(
             )
         },
         bottomBar = {
-            // TAMPILKAN TOMBOL HANYA JIKA TIPE NOTIFIKASI = "ORDER" DAN REFERENCE ID TIDAK KOSONG
             if (notif != null && notif.type == "ORDER" && notif.referenceId != null) {
                 Surface(modifier = Modifier.fillMaxWidth(), shadowElevation = 8.dp) {
                     Button(

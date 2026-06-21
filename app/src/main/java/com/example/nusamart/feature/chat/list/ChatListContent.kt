@@ -1,7 +1,5 @@
 package com.example.nusamart.feature.chat.list
 
-// Tambahkan import AsyncImage dari Coil
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -91,12 +89,11 @@ private fun ChatRoomItem(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // UBAH: Menggunakan AsyncImage dari Coil untuk meload URL gambar
         AsyncImage(
-            model = model.partnerImageUrl, // Menggunakan properti String URL dari Model yang baru
+            model = model.partnerImageUrl,
             contentDescription = "Foto ${model.partnerName}",
-            placeholder = painterResource(id = R.drawable.nm_logo), // Ditampilkan saat loading
-            error = painterResource(id = R.drawable.nm_logo),       // Ditampilkan jika URL kosong atau gagal load
+            placeholder = painterResource(id = R.drawable.nm_logo),
+            error = painterResource(id = R.drawable.nm_logo),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(48.dp)
@@ -105,7 +102,6 @@ private fun ChatRoomItem(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Nama + last message
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = model.partnerName,

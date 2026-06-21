@@ -14,8 +14,6 @@ import javax.inject.Singleton
 class CartRepository @Inject constructor(
     private val apiService: CartApi
 ) {
-
-    // Mengambil ID Cart dan seluruh isinya sekaligus
     suspend fun getCartWithItems(): CartResponse = withContext(Dispatchers.IO) {
         apiService.getCart()
     }

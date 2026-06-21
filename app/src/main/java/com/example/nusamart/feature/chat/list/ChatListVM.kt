@@ -37,7 +37,6 @@ class ChatListVM @Inject constructor(
             ChatRoomUiModel(
                 roomId = room.idRoom,
                 partnerName = partner?.username ?: "Pengguna NusaMart",
-                // UBAH: Hanya kirimkan String URL-nya saja (bisa null)
                 partnerImageUrl = partner?.imageURL,
                 lastMessage = room.lastMessage?.takeIf { it.isNotBlank() }
                     ?: "Mulai percakapan...",

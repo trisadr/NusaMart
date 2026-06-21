@@ -13,8 +13,6 @@ data class CartItemDto(
     @SerializedName("idItem") val idItem: String,
     @SerializedName("quantity") val quantity: Int,
     @SerializedName("isChecked") val isChecked: Int,
-
-    // Hasil Eager Loading dari Laravel (productItem)
     @SerializedName("product_item") val productItem: ProductItemDto? = null
 )
 
@@ -28,7 +26,7 @@ data class GeneralResponse(
 )
 
 
-// REQUEST (Data yang dikirim ke Server)
+// REQUEST
 data class AddCartItemRequest(
     @SerializedName("idItem") val idItem: String,
     @SerializedName("quantity") val quantity: Int

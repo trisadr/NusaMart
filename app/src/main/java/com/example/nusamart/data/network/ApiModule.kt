@@ -11,7 +11,7 @@ import com.example.nusamart.data.interfaceapi.ShippingApi
 import com.example.nusamart.data.interfaceapi.StoreApi
 import com.example.nusamart.data.interfaceapi.WalletApi
 import com.example.nusamart.data.preference.TokenPrefs
-import com.example.nusamart.feature.auth.login.AuthAndUserApi
+import com.example.nusamart.data.interfaceapi.AuthAndUserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -111,7 +111,6 @@ fun ProfileScreen(vm: ProfileVM = hiltViewModel()) {
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
             ) {
-                // --- HEADER PROFIL ---
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -152,7 +151,6 @@ fun ProfileScreen(vm: ProfileVM = hiltViewModel()) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // --- MENU PESANAN & ALAMAT ---
                 Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                     ProfileMenuItem(
                         icon = Icons.Default.ShoppingCart,
@@ -171,7 +169,6 @@ fun ProfileScreen(vm: ProfileVM = hiltViewModel()) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // --- MENU PENGATURAN ---
                 Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                     ProfileMenuItem(icon = Icons.Default.Settings, title = "Pengaturan Akun", onClick = {})
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
@@ -180,7 +177,6 @@ fun ProfileScreen(vm: ProfileVM = hiltViewModel()) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // --- TOMBOL LOGOUT ---
                 OutlinedButton(
                     onClick = {
                         vm.logout()

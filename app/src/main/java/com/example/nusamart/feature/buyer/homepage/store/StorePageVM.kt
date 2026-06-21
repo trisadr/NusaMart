@@ -26,10 +26,8 @@ class StorePageVM @Inject constructor(
     fun initialize(storeId: String) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, storeId = storeId) }
 
-        // 1. Ambil detail toko
         val storeInfo = storeRepository.getStoreById(storeId)
 
-        // 2. Ambil semua produk, lalu filter HANYA produk milik toko ini
         val productsResult = productRepository.getAllProducts()
         val storeProductsRaw = if (productsResult is ProductResult.Success) {
             productsResult.data.filter { it.idStore == storeId }
@@ -37,7 +35,6 @@ class StorePageVM @Inject constructor(
             emptyList()
         }
 
-        // 3. Map produk ke UI Model (mengambil harga dan gambar utama)
         val mappedProducts = storeProductsRaw.mapNotNull { product ->
             val detailResult = productRepository.getProductDetail(product.idProduct)
 
@@ -61,7 +58,6 @@ class StorePageVM @Inject constructor(
             }
         }
 
-        // 4. Update UI State
         _uiState.update {
             it.copy(
                 isLoading = false,

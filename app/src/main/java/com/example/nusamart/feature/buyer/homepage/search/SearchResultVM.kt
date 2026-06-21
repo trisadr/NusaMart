@@ -23,7 +23,6 @@ class SearchResultVM @Inject constructor(
     private val _uiState = MutableStateFlow(SearchResultUiState())
     val uiState = _uiState.asStateFlow()
 
-    // Menyimpan data asli agar tidak perlu fetch ke database setiap kali filter diubah
     private var allProductsCache: List<ProductCardUiModel> = emptyList()
 
     fun initialize(initialKeyword: String) = viewModelScope.launch {
@@ -31,7 +30,6 @@ class SearchResultVM @Inject constructor(
 
         val allStores = storeRepository.getAllStores()
 
-        // 1. Unwrap ProductResult dari getAllProducts()
         val productsResult = productRepository.getAllProducts()
         val allProductsRaw = if (productsResult is ProductResult.Success) {
             productsResult.data
@@ -39,7 +37,6 @@ class SearchResultVM @Inject constructor(
             emptyList()
         }
 
-        // 2. Gunakan getProductDetail untuk memetakan data
         allProductsCache = allProductsRaw.mapNotNull { product ->
 
             val detailResult = productRepository.getProductDetail(product.idProduct)
@@ -48,13 +45,8 @@ class SearchResultVM @Inject constructor(
                 val productDetail = detailResult.data
                 val items = productDetail.items
 
-                // Abaikan produk yang belum punya harga/item
                 if (items.isEmpty()) return@mapNotNull null
-
-                // Ambil URL gambar utama
                 val primaryImageUrl = productDetail.images.find { it.isPrimary == 1 }?.imageURL?.let { "${BuildConfig.STORAGE_URL}$it" }
-
-                // Cari lokasi toko
                 val store = allStores.find { it.idStore == product.idStore }
 
                 ProductCardUiModel(
@@ -67,7 +59,7 @@ class SearchResultVM @Inject constructor(
                     soldCount = product.soldCount ?: 0
                 )
             } else {
-                null // Jika gagal fetch detail, lewati produk ini
+                null
             }
         }
 

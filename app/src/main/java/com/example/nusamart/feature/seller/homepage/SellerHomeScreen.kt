@@ -199,7 +199,6 @@ fun SellerHomeScreen(vm: SellerHomeVM = hiltViewModel()) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Baris Kedua: Pendapatan (Lebar penuh / Full width)
                     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
                     val formattedRevenue = "Rp ${formatter.format(uiState.totalRevenue)}"
 
